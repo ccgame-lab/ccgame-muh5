@@ -39,11 +39,23 @@ if ($server_id === false) {
 // ── Lấy params game theo thứ tự ưu tiên ────────────────────────
 $game_cfg = $_CFG['game'] ?? [];
 
-// Các giá trị user/spverify luôn từ config.ini [game].
-// Patch 3+ sẽ thay bằng token từ GreenJade gateway (server-side call).
-// KHÔNG inject token từ browser / Alpine.js.
-$user     = $game_cfg['default_user'] ?? 'guest';
-$spverify = $game_cfg['spverify']     ?? 'portal-auth';
+// ── user: session-scoped guest uid (Patch 2.1) ─────────────────
+// Mỗi browser session nhận một guest_uid riêng (không share user=guest).
+// Patch 3+ sẽ thay bằng portal_uid thật từ GreenJade gateway sau khi bind.
+// KHÔNG validate token từ browser. KHÔNG inject qua JS/Alpine.
+if (!empty($game_cfg['force_user'])) {
+    // force_user trong config.ini [game] chỉ dùng cho dev/test — KHÔNG đặt trên production.
+    $user = (string) $game_cfg['force_user'];
+} else {
+    // Tạo guest uid mới nếu session chưa có
+    if (empty($_SESSION['guest_uid'])) {
+        $_SESSION['guest_uid'] = 'guest_' . bin2hex(random_bytes(8));
+    }
+    $user = $_SESSION['guest_uid'];
+}
+
+// spverify: placeholder dev — Patch 3+ sẽ lấy launch token từ GreenJade gateway.
+$spverify = $game_cfg['spverify'] ?? 'portal-auth';
 
 // Host/port: cố gắng lấy từ DB, fallback về config.ini
 $srvaddr = null;
