@@ -93,7 +93,11 @@ try {
     
     // 2. Tìm legacy username từ portal_uid
     $pdo = db_pdo();
-    $legacy_user = find_legacy_username_by_portal_uid($pdo, $greenjade_data['ulid']);
+    $legacy_user = find_legacy_username_by_portal_uid($pdo, (string) $greenjade_data['ulid']);
+    
+    if (!$legacy_user && !empty($greenjade_data['id'])) {
+        $legacy_user = find_legacy_username_by_portal_uid($pdo, (string) $greenjade_data['id']);
+    }
     
     if (!$legacy_user) {
         http_response_code(403);
