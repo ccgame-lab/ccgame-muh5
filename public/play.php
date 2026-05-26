@@ -19,6 +19,15 @@ declare(strict_types=1);
 require __DIR__ . '/../app/bootstrap.php';
 require __DIR__ . '/../app/db.php';
 
+// ── Helper: Normalize WebSocket Host ─────────────────────────────
+function normalize_game_srvaddr(string $host): string {
+    $host = trim($host);
+    if ($host !== '' && !str_ends_with($host, '/')) {
+        return $host . '/';
+    }
+    return $host;
+}
+
 // ── Kiểm tra game client ────────────────────────────────────────
 if (!is_dir(__DIR__ . '/game') || !is_file(__DIR__ . '/game/index.html')) {
     http_response_code(503);
@@ -75,7 +84,7 @@ try {
     $row = $stmt->fetch(); // FETCH_ASSOC
 
     if ($row) {
-        $srvaddr  = $row['host'];
+        $srvaddr  = normalize_game_srvaddr((string) $row['host']);
         $srvport  = (string) $row['port'];
         $srv_name = $row['name'];
         $server_id = (int) $row['id'];
@@ -89,7 +98,7 @@ try {
 
 // Fallback về config.ini [game] nếu DB không có hoặc không tìm thấy server
 if ($srvaddr === null) {
-    $srvaddr  = $game_cfg['srvaddr'] ?? 'muh5-ws.ccgame.org/s1/';
+    $srvaddr  = normalize_game_srvaddr((string) ($game_cfg['srvaddr'] ?? 'muh5-ws.ccgame.org/s1/'));
     $srvport  = $game_cfg['srvport'] ?? '443';
     // srvid fallback về giá trị đã validate hoặc từ config
     $server_id = (int) ($game_cfg['srvid'] ?? $server_id);
