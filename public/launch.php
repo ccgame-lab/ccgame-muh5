@@ -132,9 +132,14 @@ try {
     }
 
     // 3. Set session
+    $ttl = (int) ($ccgame_cfg['play_session_ttl_seconds'] ?? 21600);
+    if ($ttl <= 0) $ttl = 21600;
+    
     $_SESSION['legacy_username'] = $legacy_user['username'];
     $_SESSION['legacy_name']     = $legacy_user['name'] ?: $legacy_user['username'];
     $_SESSION['greenjade_ulid']  = $greenjade_data['ulid'];
+    $_SESSION['muh5_launch_at']  = time();
+    $_SESSION['muh5_expires_at'] = time() + $ttl;
     
     // Redirect về game
     header("Location: play.php?server=1");

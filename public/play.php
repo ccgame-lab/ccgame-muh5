@@ -52,6 +52,14 @@ $ccgame_cfg = $_CFG['ccgame'] ?? [];
 // ── Lấy thông tin user từ session (Patch 4 - CCGame Launch) ──────
 // Không dùng force_user dev hay guest_uid cho game iframe nữa.
 $user = $_SESSION['legacy_username'] ?? null;
+$expires_at = $_SESSION['muh5_expires_at'] ?? null;
+$expired = false;
+
+if ($user !== null && $expires_at !== null && time() > $expires_at) {
+    unset($_SESSION['legacy_username'], $_SESSION['legacy_name'], $_SESSION['greenjade_ulid'], $_SESSION['muh5_launch_at'], $_SESSION['muh5_expires_at']);
+    $user = null;
+    $expired = true;
+}
 
 if ($user !== null) {
     $auth_mode    = 'ccgame';
@@ -172,12 +180,13 @@ $page_title = $srv_name ? 'MU H5 — ' . $srv_name : 'MU H5';
             allow="autoplay; fullscreen"
             scrolling="no"
         ></iframe>
+    <?php else: ?>
         <?php
             $return_url = $ccgame_cfg['return_home_url'] ?? 'https://ccgame.org';
         ?>
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0d0d14;font-family:sans-serif;">
             <div style="color:#c9a94e;font-size:18px;text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;">
-                Vui lòng vào game từ ccgame.org
+                <?= isset($expired) && $expired ? 'Phiên chơi đã hết hạn' : 'Vui lòng vào game từ ccgame.org' ?>
             </div>
             <a href="<?= htmlspecialchars($return_url, ENT_QUOTES, 'UTF-8') ?>" 
                style="background:#16161f;color:#4a4a6a;text-decoration:none;padding:10px 24px;border:1px solid #2a2a3d;border-radius:6px;font-size:14px;transition:opacity 0.2s;">
