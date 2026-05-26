@@ -132,7 +132,8 @@ try {
     }
 
     // 3. Set session
-    $ttl = (int) ($ccgame_cfg['play_session_ttl_seconds'] ?? 21600);
+    global $_CFG;
+    $ttl = (int) ($_CFG['ccgame']['play_session_ttl_seconds'] ?? 21600);
     if ($ttl <= 0) $ttl = 21600;
     
     $_SESSION['legacy_username'] = $legacy_user['username'];
