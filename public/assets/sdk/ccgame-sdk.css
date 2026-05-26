@@ -228,3 +228,126 @@
         left: 16px;
     }
 }
+
+/* ── Bổ sung các style hiển thị dynamic cho Hub v1 ── */
+.ccgame-sdk-loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(16, 16, 26, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 100;
+    transition: opacity 0.25s ease;
+}
+.ccgame-sdk-spinner {
+    width: 28px;
+    height: 28px;
+    border: 2px solid rgba(201, 169, 78, 0.1);
+    border-top-color: #c9a94e;
+    border-radius: 50%;
+    animation: ccgame-sdk-spin 0.8s linear infinite;
+}
+@keyframes ccgame-sdk-spin {
+    to { transform: rotate(360deg); }
+}
+
+.ccgame-sdk-error-msg {
+    color: #f44336;
+    font-size: 11px;
+    text-align: center;
+    padding: 20px 10px;
+    line-height: 1.5;
+}
+
+/* List & Cards */
+.ccgame-sdk-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.ccgame-sdk-item-card {
+    background: #161624;
+    border: 1px solid #222235;
+    border-radius: 6px;
+    padding: 10px;
+}
+.ccgame-sdk-item-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #c9a94e;
+    margin-bottom: 4px;
+}
+.ccgame-sdk-item-meta {
+    font-size: 9px;
+    color: #4a4a6a;
+    margin-bottom: 6px;
+}
+.ccgame-sdk-item-body {
+    font-size: 11px;
+    color: #a0a0c0;
+    line-height: 1.4;
+}
+
+/* Table Style */
+.ccgame-sdk-table-wrapper {
+    overflow-x: auto;
+    margin-top: 6px;
+}
+.ccgame-sdk-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+}
+.ccgame-sdk-table th {
+    background: #161624;
+    color: #4a4a6a;
+    font-weight: 600;
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid #222235;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.ccgame-sdk-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #1a1a2a;
+    color: #a0a0c0;
+}
+.ccgame-sdk-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Section Divider */
+.ccgame-sdk-section-title {
+    font-size: 10px;
+    color: #c9a94e;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 14px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.ccgame-sdk-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #202035;
+}
+
+/* Feed style */
+.ccgame-sdk-feed-item {
+    font-size: 10px;
+    color: #a0a0c0;
+    padding: 4px 0;
+    border-bottom: 1px dashed #1a1a2a;
+    line-height: 1.4;
+}
+.ccgame-sdk-feed-item:last-child {
+    border-bottom: none;
+}
+
