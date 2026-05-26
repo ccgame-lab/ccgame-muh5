@@ -37,9 +37,8 @@ try {
 function table_exists(PDO $pdo, string $table): bool
 {
     try {
-        $stmt = $pdo->prepare("SHOW TABLES LIKE :table");
-        $stmt->execute([':table' => $table]);
-        return $stmt->rowCount() > 0;
+        $pdo->query("SELECT 1 FROM `$table` LIMIT 1");
+        return true;
     } catch (PDOException $e) {
         return false;
     }
@@ -62,7 +61,7 @@ function get_safe_columns(PDO $pdo, string $table, array $allowed_cols): array
 
 // Whitelist các bảng và cột được phép truy vấn (Không nhận từ request)
 $whitelist = [
-    'users' => ['id', 'username', 'name', 'vip', 'tier', 'created_at'],
+    'users' => ['id', 'username', 'name', 'vip', 'tier', 'wcoin', 'wpoint', 'created_at'],
     'web_wallets' => ['user_id', 'wcoin', 'wpoint', 'balance'],
     'announcements' => ['id', 'title', 'content', 'active', 'created_at'],
     'giftcodes' => ['id', 'code', 'description', 'used_count', 'limit_usage', 'reward_type'],
@@ -100,7 +99,15 @@ try {
             $u = $stmt->fetch();
             if ($u) {
                 $user_data = $u;
-                // Query kết hợp web_wallets
+                
+                // Khởi tạo ví chuẩn từ bảng users (wcoin, wpoint)
+                $user_data['wallet'] = [
+                    'wcoin' => (int) ($u['wcoin'] ?? 0),
+                    'wpoint' => (int) ($u['wpoint'] ?? 0),
+                    'balance' => 0
+                ];
+                
+                // Query kết hợp web_wallets để lấy balance phụ (nếu có)
                 if (table_exists($pdo, 'web_wallets') && isset($u['id'])) {
                     $wallet_cols = get_safe_columns($pdo, 'web_wallets', $whitelist['web_wallets']);
                     if (in_array('user_id', $wallet_cols, true)) {
@@ -109,10 +116,13 @@ try {
                         $stmt->execute([':user_id' => $u['id']]);
                         $w = $stmt->fetch();
                         if ($w) {
-                            $user_data['wallet'] = $w;
+                            $user_data['wallet']['balance'] = (int) ($w['balance'] ?? 0);
                         }
                     }
                 }
+                
+                // Loại bỏ trường wcoin và wpoint ở cấp độ root để giữ data sạch
+                unset($user_data['wcoin'], $user_data['wpoint']);
             }
         }
     }
