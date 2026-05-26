@@ -55,6 +55,7 @@ $user         = $identity['user'];
 $spverify     = $identity['spverify'];
 $auth_mode    = $identity['auth_mode'];
 $display_name = $identity['display_name'];
+$guest_uid    = $identity['guest_uid'] ?? '';
 
 // Host/port: cố gắng lấy từ DB, fallback về config.ini
 $srvaddr = null;
@@ -94,16 +95,21 @@ if ($srvaddr === null) {
     $server_id = (int) ($game_cfg['srvid'] ?? $server_id);
 }
 
-// Build game URL — srvaddr KHÔNG dùng urlencode:
-// config.js parse param bằng split('='), không decode %2F,
-// nên slash trong host/path phải truyền nguyên xi.
-// Các param khác vẫn encode bình thường.
-$game_url = './game/index.html?'
-    . 'user='      . rawurlencode($user)
-    . '&srvid='    . rawurlencode((string) $server_id)
-    . '&spverify=' . rawurlencode($spverify)
-    . '&srvaddr='  . $srvaddr   // raw — chứa slash, game JS dùng trực tiếp làm WebSocket host
-    . '&srvport='  . rawurlencode($srvport);
+// ── Dựng iframe URL ─────────────────────────────────────────────
+if ($user !== null) {
+    // Build game URL — srvaddr KHÔNG dùng urlencode:
+    // config.js parse param bằng split('='), không decode %2F,
+    // nên slash trong host/path phải truyền nguyên xi.
+    // Các param khác vẫn encode bình thường.
+    $game_url = './game/index.html?'
+        . 'user='      . rawurlencode($user)
+        . '&srvid='    . rawurlencode((string) $server_id)
+        . '&spverify=' . rawurlencode($spverify)
+        . '&srvaddr='  . $srvaddr   // raw — chứa slash, game JS dùng trực tiếp làm WebSocket host
+        . '&srvport='  . rawurlencode($srvport);
+} else {
+    $game_url = null;
+}
 
 $page_title = $srv_name ? 'MU H5 — ' . $srv_name : 'MU H5';
 ?>
@@ -151,17 +157,24 @@ $page_title = $srv_name ? 'MU H5 — ' . $srv_name : 'MU H5';
 </head>
 <body>
     <a id="back-btn" href="index.php">&#8592; Trang chủ</a>
-    <iframe
-        id="game-frame"
-        src="<?= htmlspecialchars($game_url, ENT_QUOTES, 'UTF-8') ?>"
-        allowfullscreen
-        allow="autoplay; fullscreen"
-        scrolling="no"
-    ></iframe>
+    
+    <?php if ($game_url !== null): ?>
+        <iframe
+            id="game-frame"
+            src="<?= htmlspecialchars($game_url, ENT_QUOTES, 'UTF-8') ?>"
+            allowfullscreen
+            allow="autoplay; fullscreen"
+            scrolling="no"
+        ></iframe>
+    <?php else: ?>
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#c9a94e;font-size:18px;font-family:sans-serif;text-transform:uppercase;letter-spacing:1px;background:#0d0d14;">
+            Cần liên kết GreenJade để vào game
+        </div>
+    <?php endif; ?>
 
     <!-- CCGame SDK Root -->
     <div id="ccgame-sdk-root"
-         data-user="<?= htmlspecialchars($user, ENT_QUOTES, 'UTF-8') ?>"
+         data-user="<?= htmlspecialchars((string) ($user ?? $guest_uid), ENT_QUOTES, 'UTF-8') ?>"
          data-server-id="<?= htmlspecialchars((string) $server_id, ENT_QUOTES, 'UTF-8') ?>"
          data-server-name="<?= htmlspecialchars((string) $srv_name, ENT_QUOTES, 'UTF-8') ?>"
          data-auth-mode="<?= htmlspecialchars($auth_mode, ENT_QUOTES, 'UTF-8') ?>"

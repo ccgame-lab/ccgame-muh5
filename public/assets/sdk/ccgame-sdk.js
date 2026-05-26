@@ -48,6 +48,10 @@
         const guestNote = safeAuthMode === 'guest' 
             ? '<div style="font-size: 10px; color: #ff9800; margin-top: 8px;">Guest cần gateway để vào game thật</div>'
             : '';
+            
+        const statusBadge = safeAuthMode === 'dev'
+            ? '<span class="ccgame-sdk-badge ccgame-sdk-badge--online">Đang chơi</span>'
+            : '<span class="ccgame-sdk-badge ccgame-sdk-badge--soon">Chưa bind</span>';
 
         // Panel HTML structure
         panel.innerHTML = `
@@ -71,6 +75,10 @@
                     <div class="ccgame-sdk-row">
                         <span class="ccgame-sdk-label">User ID</span>
                         <span class="ccgame-sdk-value" style="font-size: 10px;">${safeUser}</span>
+                    </div>
+                    <div class="ccgame-sdk-row">
+                        <span class="ccgame-sdk-label">Trạng thái</span>
+                        <span class="ccgame-sdk-value">${statusBadge}</span>
                     </div>
                     <div class="ccgame-sdk-row">
                         <span class="ccgame-sdk-label">Chế độ</span>
