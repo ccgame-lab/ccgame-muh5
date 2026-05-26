@@ -78,7 +78,19 @@
 
                 <!-- 3. Tab: Giftcode -->
                 <div id="ccgame-sdk-pane-giftcodes" class="ccgame-sdk-pane">
-                    <div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Chưa có giftcode.</div>
+                    <!-- Form đổi Giftcode (PATCH 1 - portal_credit Only) -->
+                    <div style="background: #161624; border: 1px solid #222235; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
+                        <div style="font-size: 9px; color: #c9a94e; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.05em;">Đổi mã quà tặng</div>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="ccgame-sdk-giftcode-input" placeholder="Nhập mã Giftcode..." style="flex: 1; background: #0d0d14; border: 1px solid #2a2a3d; border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 11px; outline: none; font-family: monospace;" />
+                            <button id="ccgame-sdk-giftcode-submit" style="background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; border-radius: 6px; padding: 6px 14px; font-size: 11px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; white-space: nowrap;">Nhận</button>
+                        </div>
+                        <div id="ccgame-sdk-giftcode-status" style="font-size: 9px; margin-top: 6px; min-height: 12px; display: none;"></div>
+                    </div>
+                    <!-- Danh sách các Giftcode khả dụng -->
+                    <div id="ccgame-sdk-giftcode-list-container">
+                        <div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Đang tải danh sách giftcode...</div>
+                    </div>
                 </div>
 
                 <!-- 4. Tab: Ví -->
@@ -155,7 +167,7 @@
                     // Điền lỗi vào tất cả các tab cần thiết (trừ tab Hỗ trợ)
                     const errorHtml = `<div class="ccgame-sdk-error-msg">${errorMsg}</div>`;
                     
-                    const panIds = ['ccgame-sdk-pane-overview', 'ccgame-sdk-pane-announcements', 'ccgame-sdk-pane-giftcodes', 'ccgame-sdk-pane-wallet', 'ccgame-sdk-pane-history', 'ccgame-sdk-pane-ranking'];
+                    const panIds = ['ccgame-sdk-pane-overview', 'ccgame-sdk-pane-announcements', 'ccgame-sdk-giftcode-list-container', 'ccgame-sdk-pane-wallet', 'ccgame-sdk-pane-history', 'ccgame-sdk-pane-ranking'];
                     panIds.forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.innerHTML = errorHtml;
@@ -251,9 +263,9 @@
                 }
             }
 
-            // ── Tab 3: Giftcode ──
-            const paneGift = document.getElementById('ccgame-sdk-pane-giftcodes');
-            if (paneGift) {
+            // ── Tab 3: Giftcode (Render danh sách động) ──
+            const listContainer = document.getElementById('ccgame-sdk-giftcode-list-container');
+            if (listContainer) {
                 if (data.giftcodes && data.giftcodes.length > 0) {
                     let html = '<div class="ccgame-sdk-list">';
                     data.giftcodes.forEach(gift => {
@@ -273,9 +285,9 @@
                         `;
                     });
                     html += '</div>';
-                    paneGift.innerHTML = html;
+                    listContainer.innerHTML = html;
                 } else {
-                    paneGift.innerHTML = '<div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Không có giftcode khả dụng</div>';
+                    listContainer.innerHTML = '<div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Không có giftcode khả dụng</div>';
                 }
             }
 
@@ -419,7 +431,71 @@
             }
         }
 
-        // ── 3. Xử lý Sự kiện Toggle & Tabs ──────────────────────────────
+        // ── 3. Logic Đổi Giftcode (PATCH 1 - portal_credit Only) ────────
+        const gcInput = panel.querySelector('#ccgame-sdk-giftcode-input');
+        const gcSubmit = panel.querySelector('#ccgame-sdk-giftcode-submit');
+        const gcStatus = panel.querySelector('#ccgame-sdk-giftcode-status');
+
+        if (gcSubmit && gcInput && gcStatus) {
+            gcSubmit.addEventListener('click', function () {
+                const codeVal = gcInput.value.trim();
+                if (codeVal === '') {
+                    gcStatus.style.display = 'block';
+                    gcStatus.style.color = '#f44336';
+                    gcStatus.textContent = 'Vui lòng nhập mã giftcode.';
+                    return;
+                }
+
+                // Khóa form chống double click
+                gcInput.disabled = true;
+                gcSubmit.disabled = true;
+                gcSubmit.textContent = 'Xử lý...';
+                gcStatus.style.display = 'block';
+                gcStatus.style.color = '#c9a94e';
+                gcStatus.textContent = 'Đang gửi yêu cầu...';
+
+                const formData = new FormData();
+                formData.append('code', codeVal);
+
+                fetch('api/sdk/giftcode/redeem.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => {
+                    return res.json().then(data => {
+                        if (!res.ok) {
+                            throw new Error(data.message || 'Lỗi không xác định.');
+                        }
+                        return data;
+                    });
+                })
+                .then(data => {
+                    gcStatus.style.color = '#4cde80';
+                    gcStatus.textContent = data.message || 'Đổi quà thành công!';
+                    gcInput.value = '';
+                    
+                    // Reload bootstrap để hot update lại Wcoin/Wpoint mới lên SDK
+                    setTimeout(() => {
+                        loadBootstrapData();
+                        // Reset form
+                        gcInput.disabled = false;
+                        gcSubmit.disabled = false;
+                        gcSubmit.textContent = 'Nhận';
+                    }, 1500);
+                })
+                .catch(err => {
+                    gcStatus.style.color = '#f44336';
+                    gcStatus.textContent = err.message;
+                    
+                    // Mở khóa form cho người chơi nhập lại
+                    gcInput.disabled = false;
+                    gcSubmit.disabled = false;
+                    gcSubmit.textContent = 'Nhận';
+                });
+            });
+        }
+
+        // ── 4. Xử lý Sự kiện Toggle & Tabs ──────────────────────────────
         let isOpen = false;
 
         function togglePanel() {
