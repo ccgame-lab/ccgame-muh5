@@ -95,17 +95,16 @@ if ($srvaddr === null) {
     $server_id = (int) ($game_cfg['srvid'] ?? $server_id);
 }
 
-// ── Dựng iframe URL ─────────────────────────────────────────────
-// PHP render thẳng URL — không dùng JS/Alpine để inject params.
-// config.js trong Egret đọc các query param:
-//   user, srvid, spverify, srvaddr, srvport
-$game_url = './game/index.html?' . http_build_query([
-    'user'     => $user,
-    'srvid'    => $server_id,
-    'spverify' => $spverify,
-    'srvaddr'  => $srvaddr,
-    'srvport'  => $srvport,
-]);
+// Build game URL — srvaddr KHÔNG dùng urlencode:
+// config.js parse param bằng split('='), không decode %2F,
+// nên slash trong host/path phải truyền nguyên xi.
+// Các param khác vẫn encode bình thường.
+$game_url = './game/index.html?'
+    . 'user='      . rawurlencode($user)
+    . '&srvid='    . rawurlencode((string) $server_id)
+    . '&spverify=' . rawurlencode($spverify)
+    . '&srvaddr='  . $srvaddr   // raw — chứa slash, game JS dùng trực tiếp làm WebSocket host
+    . '&srvport='  . rawurlencode($srvport);
 
 $page_title = $srv_name ? 'MU H5 — ' . $srv_name : 'MU H5';
 ?>
