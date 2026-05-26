@@ -70,6 +70,7 @@ if ($user !== null) {
 }
 
 $spverify = $game_cfg['spverify'] ?? 'portal-auth';
+$return_url = $ccgame_cfg['return_home_url'] ?? 'https://ccgame.org';
 
 // Host/port: cố gắng lấy từ DB, fallback về config.ini
 $srvaddr = null;
@@ -181,9 +182,6 @@ $page_title = $srv_name ? 'MU H5 — ' . $srv_name : 'MU H5';
             scrolling="no"
         ></iframe>
     <?php else: ?>
-        <?php
-            $return_url = $ccgame_cfg['return_home_url'] ?? 'https://ccgame.org';
-        ?>
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0d0d14;font-family:sans-serif;">
             <div style="color:#c9a94e;font-size:18px;text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;">
                 <?= isset($expired) && $expired ? 'Phiên chơi đã hết hạn' : 'Vui lòng vào game từ ccgame.org' ?>
@@ -201,7 +199,9 @@ $page_title = $srv_name ? 'MU H5 — ' . $srv_name : 'MU H5';
          data-server-id="<?= htmlspecialchars((string) $server_id, ENT_QUOTES, 'UTF-8') ?>"
          data-server-name="<?= htmlspecialchars((string) $srv_name, ENT_QUOTES, 'UTF-8') ?>"
          data-auth-mode="<?= htmlspecialchars($auth_mode, ENT_QUOTES, 'UTF-8') ?>"
-         data-display-name="<?= htmlspecialchars($display_name, ENT_QUOTES, 'UTF-8') ?>">
+         data-display-name="<?= htmlspecialchars($display_name, ENT_QUOTES, 'UTF-8') ?>"
+         data-expires-at="<?= htmlspecialchars((string) $expires_at, ENT_QUOTES, 'UTF-8') ?>"
+         data-return-url="<?= htmlspecialchars($return_url, ENT_QUOTES, 'UTF-8') ?>">
     </div>
     
     <script src="assets/sdk/ccgame-sdk.js"></script>

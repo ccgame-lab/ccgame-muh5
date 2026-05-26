@@ -45,13 +45,12 @@
     color: #0d0d14;
 }
 
-/* ── Panel ── */
 .ccgame-sdk-panel {
     position: fixed;
     bottom: 76px;
     right: 16px;
-    z-index: 9001;
-    width: 270px;
+    z-index: 9010; /* Make sure it stays on top */
+    width: 290px;
     max-height: 70vh;
     background: #10101a;
     border: 1px solid #2a2a3d;
