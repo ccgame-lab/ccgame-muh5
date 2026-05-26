@@ -32,9 +32,14 @@ function verify_ccgame_launch_token(string $token): array
     global $_CFG;
     $ccgame_cfg = $_CFG['ccgame'] ?? [];
     $verify_url = $ccgame_cfg['launch_verify_url'] ?? '';
+    $launch_secret = $ccgame_cfg['launch_secret'] ?? '';
     
     if (empty($verify_url)) {
         throw new RuntimeException("CCGame launch verify endpoint not configured");
+    }
+    
+    if (empty($launch_secret)) {
+        throw new RuntimeException("CCGame launch secret not configured");
     }
 
     $ch = curl_init($verify_url);
@@ -42,6 +47,14 @@ function verify_ccgame_launch_token(string $token): array
     curl_setopt($ch, CURLOPT_POST, true);
     // Gửi token qua form data.
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['token' => $token]));
+    
+    // Thêm Headers
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'X-CCGame-Launch-Secret: ' . $launch_secret,
+        'Accept: application/json',
+        'Content-Type: application/x-www-form-urlencoded'
+    ]);
+    
     curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Timeout 5s
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 
@@ -98,7 +111,8 @@ try {
     exit;
 
 } catch (RuntimeException $e) {
+    error_log("MUH5 Launch Error: " . $e->getMessage());
     http_response_code(500);
-    echo "Lỗi hệ thống: " . htmlspecialchars($e->getMessage());
+    echo "Không thể xác thực phiên chơi. Vui lòng quay lại ccgame.org.";
     exit;
 }
