@@ -1,0 +1,11 @@
+{
+    "serverList": [
+        "主干|1|muh5-ws.ccgame.org/s1/:443"
+    ],
+    "resList": [
+        "主干|https://cdn.ccgame.org/h5/muh5/resource/"
+    ],
+    "clientList": [
+        "主干|https://muh5.ccgame.org/"
+    ]
+}
