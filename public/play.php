@@ -55,6 +55,7 @@ if (!empty($game_cfg['force_user'])) {
 }
 
 // spverify: placeholder dev — Patch 3+ sẽ lấy launch token từ GreenJade gateway.
+$spverify = $game_cfg['spverify'] ?? 'portal-auth';
 
 // Host/port: cố gắng lấy từ DB, fallback về config.ini
 $srvaddr = null;
