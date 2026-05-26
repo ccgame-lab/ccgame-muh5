@@ -52,6 +52,16 @@
         const statusBadge = safeAuthMode === 'ccgame'
             ? '<span class="ccgame-sdk-badge ccgame-sdk-badge--online">Đang chơi</span>'
             : '<span class="ccgame-sdk-badge ccgame-sdk-badge--soon">Chưa có phiên CCGame</span>';
+            
+        const isBound = safeAuthMode === 'ccgame';
+        
+        const greenjadeBindStatus = isBound 
+            ? '<span class="ccgame-sdk-badge ccgame-sdk-badge--online">Đã liên kết</span>'
+            : '<span class="ccgame-sdk-badge ccgame-sdk-badge--soon">Chưa bind</span>';
+            
+        const greenjadeBtn = isBound
+            ? '<button class="ccgame-sdk-btn" style="background:#16161f;color:#4a4a6a;border-color:#2a2a3d;cursor:default;" disabled>Đã bảo vệ bằng GreenJade</button>'
+            : '<button class="ccgame-sdk-btn" disabled>Đăng nhập bằng GreenJade</button>';
 
         // Panel HTML structure
         panel.innerHTML = `
@@ -101,9 +111,9 @@
                 <div id="ccgame-sdk-pane-greenjade" class="ccgame-sdk-pane">
                     <div class="ccgame-sdk-row">
                         <span class="ccgame-sdk-label">Liên kết</span>
-                        <span class="ccgame-sdk-value"><span class="ccgame-sdk-badge ccgame-sdk-badge--soon">Chưa bind</span></span>
+                        <span class="ccgame-sdk-value">${greenjadeBindStatus}</span>
                     </div>
-                    <button class="ccgame-sdk-btn" disabled>Đăng nhập bằng GreenJade</button>
+                    ${greenjadeBtn}
                 </div>
                 <!-- Tab: Hỗ trợ -->
                 <div id="ccgame-sdk-pane-support" class="ccgame-sdk-pane">
