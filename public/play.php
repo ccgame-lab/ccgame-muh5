@@ -101,6 +101,7 @@ $page_title = $srv_name ? 'MU H5 — ' . $srv_name : 'MU H5';
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title><?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?></title>
+    <link rel="stylesheet" href="assets/sdk/ccgame-sdk.css">
     <style>
         html, body {
             margin: 0;
@@ -145,5 +146,14 @@ $page_title = $srv_name ? 'MU H5 — ' . $srv_name : 'MU H5';
         allow="autoplay; fullscreen"
         scrolling="no"
     ></iframe>
+
+    <!-- CCGame SDK Root -->
+    <div id="ccgame-sdk-root"
+         data-user="<?= htmlspecialchars($user, ENT_QUOTES, 'UTF-8') ?>"
+         data-server-id="<?= htmlspecialchars((string) $server_id, ENT_QUOTES, 'UTF-8') ?>"
+         data-server-name="<?= htmlspecialchars((string) $srv_name, ENT_QUOTES, 'UTF-8') ?>">
+    </div>
+    
+    <script src="assets/sdk/ccgame-sdk.js"></script>
 </body>
 </html>
