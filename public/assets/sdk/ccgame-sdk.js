@@ -12,6 +12,20 @@
         const serverId = root.getAttribute('data-server-id') || '?';
         const serverName = root.getAttribute('data-server-name') || 'Unknown Server';
 
+        // Hàm escape HTML để chống XSS
+        function escapeHtml(unsafe) {
+            return (unsafe || '').toString()
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        const safeUser = escapeHtml(user);
+        const safeServerId = escapeHtml(serverId);
+        const safeServerName = escapeHtml(serverName);
+
         // 1. Tạo giao diện (DOM elements)
         // FAB
         const fab = document.createElement('div');
@@ -39,7 +53,7 @@
                 <div id="ccgame-sdk-pane-account" class="ccgame-sdk-pane ccgame-sdk-pane--active">
                     <div class="ccgame-sdk-row">
                         <span class="ccgame-sdk-label">User ID</span>
-                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">${user}</span>
+                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">${safeUser}</span>
                     </div>
                     <div class="ccgame-sdk-row">
                         <span class="ccgame-sdk-label">Trạng thái</span>
@@ -50,11 +64,11 @@
                 <div id="ccgame-sdk-pane-server" class="ccgame-sdk-pane">
                     <div class="ccgame-sdk-row">
                         <span class="ccgame-sdk-label">Server</span>
-                        <span class="ccgame-sdk-value">${serverName}</span>
+                        <span class="ccgame-sdk-value">${safeServerName}</span>
                     </div>
                     <div class="ccgame-sdk-row">
                         <span class="ccgame-sdk-label">Server ID</span>
-                        <span class="ccgame-sdk-value">S${serverId}</span>
+                        <span class="ccgame-sdk-value">S${safeServerId}</span>
                     </div>
                 </div>
                 <!-- Tab: GreenJade -->
