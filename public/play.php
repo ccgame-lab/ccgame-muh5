@@ -18,7 +18,6 @@ declare(strict_types=1);
 
 require __DIR__ . '/../app/bootstrap.php';
 require __DIR__ . '/../app/db.php';
-require __DIR__ . '/../app/launch.php';
 
 // ── Helper: Normalize WebSocket Host ─────────────────────────────
 function normalize_game_srvaddr(string $host): string {
@@ -47,15 +46,22 @@ if ($server_id === false) {
 }
 
 // ── Lấy params game theo thứ tự ưu tiên ────────────────────────
-$game_cfg = $_CFG['game'] ?? [];
+$game_cfg   = $_CFG['game'] ?? [];
+$ccgame_cfg = $_CFG['ccgame'] ?? [];
 
-// Lấy thông tin user (Patch 3.2 - Refactor)
-$identity     = launch_identity($game_cfg);
-$user         = $identity['user'];
-$spverify     = $identity['spverify'];
-$auth_mode    = $identity['auth_mode'];
-$display_name = $identity['display_name'];
-$guest_uid    = $identity['guest_uid'] ?? '';
+// ── Lấy thông tin user từ session (Patch 4 - CCGame Launch) ──────
+// Không dùng force_user dev hay guest_uid cho game iframe nữa.
+$user = $_SESSION['legacy_username'] ?? null;
+
+if ($user !== null) {
+    $auth_mode    = 'ccgame';
+    $display_name = $_SESSION['legacy_name'] ?? $user;
+} else {
+    $auth_mode    = 'none';
+    $display_name = 'Khách';
+}
+
+$spverify = $game_cfg['spverify'] ?? 'portal-auth';
 
 // Host/port: cố gắng lấy từ DB, fallback về config.ini
 $srvaddr = null;
@@ -166,15 +172,23 @@ $page_title = $srv_name ? 'MU H5 — ' . $srv_name : 'MU H5';
             allow="autoplay; fullscreen"
             scrolling="no"
         ></iframe>
-    <?php else: ?>
-        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#c9a94e;font-size:18px;font-family:sans-serif;text-transform:uppercase;letter-spacing:1px;background:#0d0d14;">
-            Cần liên kết GreenJade để vào game
+        <?php
+            $return_url = $ccgame_cfg['return_home_url'] ?? 'https://ccgame.org';
+        ?>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0d0d14;font-family:sans-serif;">
+            <div style="color:#c9a94e;font-size:18px;text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;">
+                Vui lòng vào game từ ccgame.org
+            </div>
+            <a href="<?= htmlspecialchars($return_url, ENT_QUOTES, 'UTF-8') ?>" 
+               style="background:#16161f;color:#4a4a6a;text-decoration:none;padding:10px 24px;border:1px solid #2a2a3d;border-radius:6px;font-size:14px;transition:opacity 0.2s;">
+                Quay lại Trang chủ
+            </a>
         </div>
     <?php endif; ?>
 
     <!-- CCGame SDK Root -->
     <div id="ccgame-sdk-root"
-         data-user="<?= htmlspecialchars((string) ($user ?? $guest_uid), ENT_QUOTES, 'UTF-8') ?>"
+         data-user="<?= htmlspecialchars((string) $user, ENT_QUOTES, 'UTF-8') ?>"
          data-server-id="<?= htmlspecialchars((string) $server_id, ENT_QUOTES, 'UTF-8') ?>"
          data-server-name="<?= htmlspecialchars((string) $srv_name, ENT_QUOTES, 'UTF-8') ?>"
          data-auth-mode="<?= htmlspecialchars($auth_mode, ENT_QUOTES, 'UTF-8') ?>"

@@ -41,17 +41,17 @@
         panel.className = 'ccgame-sdk-panel';
 
         // Badge auth mode
-        const modeBadge = safeAuthMode === 'dev' 
-            ? '<span class="ccgame-sdk-badge ccgame-sdk-badge--online">DEV MODE</span>' 
-            : '<span class="ccgame-sdk-badge ccgame-sdk-badge--soon">GUEST</span>';
+        const modeBadge = safeAuthMode === 'ccgame' 
+            ? '<span class="ccgame-sdk-badge ccgame-sdk-badge--online">CCGAME</span>' 
+            : '<span class="ccgame-sdk-badge ccgame-sdk-badge--soon">NONE</span>';
             
-        const guestNote = safeAuthMode === 'guest' 
-            ? '<div style="font-size: 10px; color: #ff9800; margin-top: 8px;">Guest cần gateway để vào game thật</div>'
+        const guestNote = safeAuthMode === 'none' 
+            ? '<div style="font-size: 10px; color: #ff9800; margin-top: 8px;">Vui lòng vào game từ ccgame.org</div>'
             : '';
             
-        const statusBadge = safeAuthMode === 'dev'
+        const statusBadge = safeAuthMode === 'ccgame'
             ? '<span class="ccgame-sdk-badge ccgame-sdk-badge--online">Đang chơi</span>'
-            : '<span class="ccgame-sdk-badge ccgame-sdk-badge--soon">Chưa bind</span>';
+            : '<span class="ccgame-sdk-badge ccgame-sdk-badge--soon">Chưa có phiên CCGame</span>';
 
         // Panel HTML structure
         panel.innerHTML = `
