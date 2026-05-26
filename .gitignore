@@ -1,2 +1,10 @@
 .env.local
 
+# Storage runtime files (ngoài git, GM tự tạo qua setup wizard)
+storage/config.ini
+storage/setup.lock
+storage/logs/
+
+# Giữ lại placeholder để git track thư mục
+!storage/.gitkeep
+
