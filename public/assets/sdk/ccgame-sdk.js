@@ -89,7 +89,7 @@
                     </div>
                     <!-- Danh sách các Giftcode khả dụng -->
                     <div id="ccgame-sdk-giftcode-list-container">
-                        <div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Đang tải danh sách giftcode...</div>
+                        <div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 10px 0; line-height: 1.4;">Nhập mã Giftcode bạn nhận được từ sự kiện.</div>
                     </div>
                 </div>
 
@@ -266,29 +266,8 @@
             // ── Tab 3: Giftcode (Render danh sách động) ──
             const listContainer = document.getElementById('ccgame-sdk-giftcode-list-container');
             if (listContainer) {
-                if (data.giftcodes && data.giftcodes.length > 0) {
-                    let html = '<div class="ccgame-sdk-list">';
-                    data.giftcodes.forEach(gift => {
-                        const code = gift.code || 'UNKNOWN';
-                        const desc = gift.description || 'Quà tặng máy chủ legacy';
-                        const usage = gift.used_count !== undefined && gift.limit_usage
-                            ? `Dùng: ${gift.used_count}/${gift.limit_usage}`
-                            : 'Mã công khai';
-                        html += `
-                            <div class="ccgame-sdk-item-card">
-                                <div class="ccgame-sdk-item-title" style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span class="ccgame-sdk-value--gold" style="font-family: monospace; font-size: 13px; background: #0d0d14; padding: 2px 6px; border-radius: 4px; border: 1px dashed #c9a94e; user-select: all;">${escapeHtml(code)}</span>
-                                    <span style="font-size: 9px; color: #4a4a6a; font-weight: normal;">${escapeHtml(usage)}</span>
-                                </div>
-                                <div class="ccgame-sdk-item-body" style="margin-top: 6px; color: #a0a0c0; font-size: 10px;">${escapeHtml(desc)}</div>
-                            </div>
-                        `;
-                    });
-                    html += '</div>';
-                    listContainer.innerHTML = html;
-                } else {
-                    listContainer.innerHTML = '<div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Không có giftcode khả dụng</div>';
-                }
+                // Luôn hiển thị dòng thông báo tĩnh trong phase hiện tại (chưa mở game_mail public)
+                listContainer.innerHTML = '<div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 10px 0; line-height: 1.4;">Nhập mã Giftcode bạn nhận được từ sự kiện.</div>';
             }
 
             // ── Tab 4: Ví ──
