@@ -20,35 +20,78 @@ if (empty($token)) {
 }
 
 /**
- * Placeholder cho việc gọi GreenJade API để verify launch token.
- * Sẽ trả về portal_uid nếu hợp lệ.
+ * Gọi CCGame/GreenJade API để verify launch token.
+ * Trả về thông tin user (đặc biệt là greenjade.ulid) nếu hợp lệ.
  * 
  * @param string $token
- * @return array{portal_uid: string, username: string}
+ * @return array
  * @throws RuntimeException
  */
 function verify_ccgame_launch_token(string $token): array
 {
-    throw new RuntimeException("CCGame launch verify endpoint not configured");
+    global $_CFG;
+    $ccgame_cfg = $_CFG['ccgame'] ?? [];
+    $verify_url = $ccgame_cfg['launch_verify_url'] ?? '';
+    
+    if (empty($verify_url)) {
+        throw new RuntimeException("CCGame launch verify endpoint not configured");
+    }
+
+    $ch = curl_init($verify_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    // Gửi token qua form data.
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['token' => $token]));
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Timeout 5s
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curl_error = curl_error($ch);
+    curl_close($ch);
+
+    if ($response === false) {
+        throw new RuntimeException("Verify curl error: $curl_error");
+    }
+
+    if ($http_code !== 200) {
+        throw new RuntimeException("Verify failed with HTTP code $http_code");
+    }
+
+    $data = json_decode((string) $response, true);
+    if (!is_array($data)) {
+        throw new RuntimeException("Invalid JSON response from CCGame verify");
+    }
+
+    if (empty($data['ok']) || $data['ok'] !== true) {
+        throw new RuntimeException("CCGame verify returned not ok");
+    }
+
+    if (empty($data['greenjade']['ulid'])) {
+        throw new RuntimeException("Missing greenjade ulid in verify response");
+    }
+
+    return $data['greenjade'];
 }
 
 try {
     // 1. Verify token với Gateway
-    $ccgame_data = verify_ccgame_launch_token($token);
+    $greenjade_data = verify_ccgame_launch_token($token);
     
     // 2. Tìm legacy username từ portal_uid
     $pdo = db_pdo();
-    $legacy_user = find_legacy_username_by_portal_uid($pdo, $ccgame_data['portal_uid']);
+    $legacy_user = find_legacy_username_by_portal_uid($pdo, $greenjade_data['ulid']);
     
     if (!$legacy_user) {
         http_response_code(403);
-        echo "Tài khoản chưa được đồng bộ với MU H5.";
+        echo "Tài khoản GreenJade chưa có nhân vật MU H5";
         exit;
     }
 
     // 3. Set session
     $_SESSION['legacy_username'] = $legacy_user['username'];
     $_SESSION['legacy_name']     = $legacy_user['name'] ?: $legacy_user['username'];
+    $_SESSION['greenjade_ulid']  = $greenjade_data['ulid'];
     
     // Redirect về game
     header("Location: play.php?server=1");
