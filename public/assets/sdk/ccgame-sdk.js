@@ -29,6 +29,81 @@
                  .replace(/'/g, "&#039;");
         }
 
+        // Hệ thống Toast thông báo gọn nhẹ
+        function showToast(message, type = 'info') {
+            const body = panel.querySelector('.ccgame-sdk-body');
+            if (!body) return;
+
+            let container = panel.querySelector('.ccgame-sdk-toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'ccgame-sdk-toast-container';
+                container.style.cssText = `
+                    position: absolute;
+                    top: 10px;
+                    left: 10px;
+                    right: 10px;
+                    z-index: 9999;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    pointer-events: none;
+                `;
+                body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                background: #161624;
+                border: 1px solid #222235;
+                border-radius: 6px;
+                padding: 8px 12px;
+                font-size: 10px;
+                color: #fff;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+                opacity: 0;
+                transform: translateY(-8px);
+                transition: all 0.25s ease;
+                pointer-events: auto;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            `;
+
+            if (type === 'success') {
+                toast.style.borderColor = '#1a5c33';
+                toast.style.background = '#0e2a1a';
+                toast.style.color = '#4cde80';
+            } else if (type === 'error') {
+                toast.style.borderColor = '#5c1a1a';
+                toast.style.background = '#2a0e0e';
+                toast.style.color = '#f44336';
+            } else {
+                toast.style.borderColor = '#c9a94e';
+                toast.style.background = '#1a1810';
+                toast.style.color = '#c9a94e';
+            }
+
+            toast.innerHTML = `<span style="flex: 1; line-height: 1.3;">${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            }, 10);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-8px)';
+                setTimeout(() => {
+                    toast.remove();
+                    if (container.children.length === 0) {
+                        container.remove();
+                    }
+                }, 250);
+            }, 3000);
+        }
+
         const safeUser = escapeHtml(user);
         const safeServerId = escapeHtml(serverId);
         const safeServerName = escapeHtml(serverName);
@@ -50,7 +125,12 @@
         // Khung sườn HTML của Panel gồm Header, Tabs, Body
         panel.innerHTML = `
             <div class="ccgame-sdk-header">
-                <div class="ccgame-sdk-header-title">CCGame SDK</div>
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <div class="ccgame-sdk-header-title">CCGame SDK</div>
+                    <div id="ccgame-sdk-header-user-info" style="font-size: 8px; color: #8a8aaa; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
+                        <span>Đang tải thông tin...</span>
+                    </div>
+                </div>
                 <button class="ccgame-sdk-close">&times;</button>
             </div>
             <div class="ccgame-sdk-tabs">
@@ -58,6 +138,9 @@
                 <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-announcements">Thông báo</button>
                 <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-giftcodes">Giftcode</button>
                 <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-wallet">Ví</button>
+                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-pshop">Cửa hàng</button>
+                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-luckyspin">Vòng quay</button>
+                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-monument">Đào KC</button>
                 <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-history">Lịch sử</button>
                 <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-ranking">Ranking</button>
                 <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-support">Hỗ trợ</button>
@@ -96,6 +179,33 @@
                 <!-- 4. Tab: Ví -->
                 <div id="ccgame-sdk-pane-wallet" class="ccgame-sdk-pane">
                     <div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Chưa có thông tin số dư.</div>
+                </div>
+
+                <!-- Pane: Cửa hàng (PShop) -->
+                <div id="ccgame-sdk-pane-pshop" class="ccgame-sdk-pane">
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 10px; text-align: center; background: #161624; border: 1px solid #222235; border-radius: 8px;">
+                        <span style="font-size: 24px; margin-bottom: 10px;">🛍️</span>
+                        <div style="font-size: 11px; font-weight: bold; color: #c9a94e; text-transform: uppercase; margin-bottom: 4px;">Cửa hàng vật phẩm</div>
+                        <div style="font-size: 10px; color: #8a8aaa; line-height: 1.4;">Cửa hàng vật phẩm đang chuẩn bị mở.<br>Hãy tích lũy Wpoint để mua sắm vật phẩm S1.</div>
+                    </div>
+                </div>
+
+                <!-- Pane: Vòng quay (Lucky Spin) -->
+                <div id="ccgame-sdk-pane-luckyspin" class="ccgame-sdk-pane">
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 10px; text-align: center; background: #161624; border: 1px solid #222235; border-radius: 8px;">
+                        <span style="font-size: 24px; margin-bottom: 10px;">🎡</span>
+                        <div style="font-size: 11px; font-weight: bold; color: #c9a94e; text-transform: uppercase; margin-bottom: 4px;">Vòng quay may mắn</div>
+                        <div style="font-size: 10px; color: #8a8aaa; line-height: 1.4;">Vòng quay may mắn đang chuẩn bị mở.<br>Cơ hội trúng trang bị cực phẩm MUH5 S1.</div>
+                    </div>
+                </div>
+
+                <!-- Pane: Đào KC (Monument) -->
+                <div id="ccgame-sdk-pane-monument" class="ccgame-sdk-pane">
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 10px; text-align: center; background: #161624; border: 1px solid #222235; border-radius: 8px;">
+                        <span style="font-size: 24px; margin-bottom: 10px;">💎</span>
+                        <div style="font-size: 11px; font-weight: bold; color: #c9a94e; text-transform: uppercase; margin-bottom: 4px;">Máy đào Kim Cương</div>
+                        <div style="font-size: 10px; color: #8a8aaa; line-height: 1.4;">Máy đào Kim Cương đang bảo trì chuẩn bị S1.<br>Hệ thống tự động khai thác và quy đổi sẽ sớm ra mắt.</div>
+                    </div>
                 </div>
 
                 <!-- 5. Tab: Lịch sử -->
@@ -167,7 +277,17 @@
                     // Điền lỗi vào tất cả các tab cần thiết (trừ tab Hỗ trợ)
                     const errorHtml = `<div class="ccgame-sdk-error-msg">${errorMsg}</div>`;
                     
-                    const panIds = ['ccgame-sdk-pane-overview', 'ccgame-sdk-pane-announcements', 'ccgame-sdk-giftcode-list-container', 'ccgame-sdk-pane-wallet', 'ccgame-sdk-pane-history', 'ccgame-sdk-pane-ranking'];
+                    const panIds = [
+                        'ccgame-sdk-pane-overview', 
+                        'ccgame-sdk-pane-announcements', 
+                        'ccgame-sdk-giftcode-list-container', 
+                        'ccgame-sdk-pane-wallet', 
+                        'ccgame-sdk-pane-history', 
+                        'ccgame-sdk-pane-ranking',
+                        'ccgame-sdk-pane-pshop',
+                        'ccgame-sdk-pane-luckyspin',
+                        'ccgame-sdk-pane-monument'
+                    ];
                     panIds.forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.innerHTML = errorHtml;
@@ -177,27 +297,31 @@
 
         // Render dữ liệu nhận được từ DB vào các Pane tương ứng
         function renderBootstrapData(data) {
+            // Cập nhật Header User Info
+            const headerUserInfo = document.getElementById('ccgame-sdk-header-user-info');
+            if (headerUserInfo) {
+                const name = data.user && data.user.name ? data.user.name : safeDisplayName;
+                const sId = safeServerId ? 'S' + safeServerId : 'S1';
+                const modeText = safeAuthMode === 'ccgame' ? 'GreenJade' : 'Guest';
+                const wcoin = data.user && data.user.wallet && data.user.wallet.wcoin !== undefined ? data.user.wallet.wcoin : 0;
+                const wpoint = data.user && data.user.wallet && data.user.wallet.wpoint !== undefined ? data.user.wallet.wpoint : 0;
+                headerUserInfo.innerHTML = `
+                    <span style="color: #c9a94e; font-weight: bold;">${escapeHtml(name)}</span>
+                    <span style="color: #4a4a6a;">|</span>
+                    <span>${sId}</span>
+                    <span style="color: #4a4a6a;">|</span>
+                    <span style="background: rgba(201, 169, 78, 0.1); color: #c9a94e; padding: 1px 3px; border-radius: 3px; font-size: 7px; text-transform: uppercase;">${modeText}</span>
+                    <span style="color: #4a4a6a;">|</span>
+                    <span>🪙 ${wcoin.toLocaleString()}</span>
+                    <span>🔮 ${wpoint.toLocaleString()}</span>
+                `;
+            }
+
             // ── Tab 1: Tổng quan ──
             const paneOverview = document.getElementById('ccgame-sdk-pane-overview');
             if (paneOverview) {
                 const name = data.user && data.user.name ? data.user.name : safeDisplayName;
                 const username = data.user && data.user.username ? data.user.username : safeUser;
-                const machineCount = data.diamond && data.diamond.machines ? data.diamond.machines.length : 0;
-                const diamondBalance = data.diamond && data.diamond.balance ? data.diamond.balance.toLocaleString() : '0';
-
-                // Hoạt động gần đây (Social feed)
-                let feedHtml = '';
-                if (data.social && data.social.length > 0) {
-                    data.social.slice(0, 5).forEach(ev => {
-                        feedHtml += `
-                            <div class="ccgame-sdk-feed-item">
-                                <strong>${escapeHtml(ev.username)}</strong>: ${escapeHtml(ev.description)}
-                            </div>
-                        `;
-                    });
-                } else {
-                    feedHtml = '<div style="font-size: 10px; color: #4a4a6a; text-align: center; padding: 10px 0;">Không có hoạt động gần đây</div>';
-                }
 
                 paneOverview.innerHTML = `
                     <div style="margin-bottom: 12px; text-align: center;">
@@ -218,24 +342,23 @@
                         </span>
                     </div>
                     
-                    <div class="ccgame-sdk-section-title">Máy đào Diamond</div>
+                    <div class="ccgame-sdk-section-title">Trạng thái máy chủ</div>
                     <div class="ccgame-sdk-row">
-                        <span class="ccgame-sdk-label">Số lượng máy</span>
-                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">${machineCount}</span>
+                        <span class="ccgame-sdk-label">Kết nối game</span>
+                        <span class="ccgame-sdk-value"><span class="ccgame-sdk-badge ccgame-sdk-badge--online">Hoạt động</span></span>
                     </div>
                     <div class="ccgame-sdk-row">
-                        <span class="ccgame-sdk-label">Kim Cương tích lũy</span>
-                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">💎 ${diamondBalance}</span>
+                        <span class="ccgame-sdk-label">Phiên chơi</span>
+                        <span class="ccgame-sdk-value" style="color: #4cde80;">Hợp lệ</span>
                     </div>
                     
-                    <div class="ccgame-sdk-section-title">Hoạt động máy chủ</div>
-                    <div class="ccgame-sdk-list" style="max-height: 100px; overflow-y: auto; margin-top: 4px; padding-right: 4px;">
-                        ${feedHtml}
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
+                        <button class="ccgame-sdk-btn" id="ccgame-sdk-btn-play" style="margin-top: 0; background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; font-weight: bold;">VÀO GAME</button>
+                        <div style="display: flex; gap: 8px; width: 100%;">
+                            <button class="ccgame-sdk-btn" id="ccgame-sdk-btn-go-wallet" style="flex: 1; margin-top: 0; background: #161624; border-color: #2a2a3d; color: #c9a94e;">NẠP / VÍ</button>
+                            <button class="ccgame-sdk-btn" id="ccgame-sdk-btn-go-giftcode" style="flex: 1; margin-top: 0; background: #161624; border-color: #2a2a3d; color: #c9a94e;">GIFTCODE</button>
+                        </div>
                     </div>
-                    
-                    <a class="ccgame-sdk-btn" href="${safeReturnUrl}" target="_top" style="margin-top: 14px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; font-weight: bold; box-shadow: 0 4px 12px rgba(201, 169, 78, 0.25);">
-                        VỀ CCGAME
-                    </a>
                 `;
             }
 
@@ -299,6 +422,10 @@
                         Wcoin dùng để chơi Vòng quay may mắn.<br>
                         Wpoint dùng mua vật phẩm tại Cửa hàng điểm (PShop).
                     </div>
+                    
+                    <a class="ccgame-sdk-btn" href="${safeReturnUrl}" target="_top" style="margin-top: 14px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; font-weight: bold;">
+                        NẠP TIỀN / VÍ CHÍNH
+                    </a>
                 `;
             }
 
@@ -422,6 +549,7 @@
                     gcStatus.style.display = 'block';
                     gcStatus.style.color = '#f44336';
                     gcStatus.textContent = 'Vui lòng nhập mã giftcode.';
+                    showToast('Vui lòng nhập mã giftcode.', 'error');
                     return;
                 }
 
@@ -451,6 +579,7 @@
                 .then(data => {
                     gcStatus.style.color = '#4cde80';
                     gcStatus.textContent = data.message || 'Đổi quà thành công!';
+                    showToast(data.message || 'Đổi quà thành công!', 'success');
                     gcInput.value = '';
                     
                     // Reload bootstrap để hot update lại Wcoin/Wpoint mới lên SDK
@@ -465,6 +594,7 @@
                 .catch(err => {
                     gcStatus.style.color = '#f44336';
                     gcStatus.textContent = err.message;
+                    showToast(err.message, 'error');
                     
                     // Mở khóa form cho người chơi nhập lại
                     gcInput.disabled = false;
@@ -523,6 +653,22 @@
                     targetPane.classList.add('ccgame-sdk-pane--active');
                 }
             });
+        });
+
+        // Xử lý sự kiện click CTA trên tab Tổng quan (chuyển tab nhanh)
+        document.addEventListener('click', function (e) {
+            if (!e.target) return;
+            if (e.target.id === 'ccgame-sdk-btn-play') {
+                togglePanel();
+            }
+            if (e.target.id === 'ccgame-sdk-btn-go-wallet') {
+                const wTab = panel.querySelector('.ccgame-sdk-tab[data-target="ccgame-sdk-pane-wallet"]');
+                if (wTab) wTab.click();
+            }
+            if (e.target.id === 'ccgame-sdk-btn-go-giftcode') {
+                const gTab = panel.querySelector('.ccgame-sdk-tab[data-target="ccgame-sdk-pane-giftcodes"]');
+                if (gTab) gTab.click();
+            }
         });
     });
 })();
