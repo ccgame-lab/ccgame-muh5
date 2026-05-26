@@ -87,16 +87,16 @@
                 <!-- Tab: Hôm nay -->
                 <div id="ccgame-sdk-pane-today" class="ccgame-sdk-pane ccgame-sdk-pane--active">
                     <div style="margin-bottom: 12px; text-align: center;">
-                        <div style="font-size: 13px; font-weight: 700; color: #c9a94e; text-transform: uppercase; margin-bottom: 2px;">Alpha Test MU H5</div>
+                        <div id="ccgame-sdk-event-title" style="font-size: 13px; font-weight: 700; color: #c9a94e; text-transform: uppercase; margin-bottom: 2px;">Alpha Test MU H5</div>
                         <div style="font-size: 9px; color: #4a4a6a; letter-spacing: 0.05em;">SỰ KIỆN TRẢI NGHIỆM</div>
                     </div>
                     <div class="ccgame-sdk-row">
                         <span class="ccgame-sdk-label">Giftcode</span>
-                        <span class="ccgame-sdk-value ccgame-sdk-value--gold select-all" style="font-weight: 700;">MUH5ALPHA</span>
+                        <span id="ccgame-sdk-giftcode" class="ccgame-sdk-value ccgame-sdk-value--gold select-all" style="font-weight: 700;">MUH5ALPHA</span>
                     </div>
                     <div class="ccgame-sdk-row" style="flex-direction: column; align-items: flex-start; gap: 4px; border-bottom: none;">
                         <span class="ccgame-sdk-label">Mục tiêu hôm nay</span>
-                        <span class="ccgame-sdk-value" style="text-align: left; color: #4cde80; font-size: 11px;">Vào game nhận quà tân thủ</span>
+                        <span id="ccgame-sdk-daily-objective" class="ccgame-sdk-value" style="text-align: left; color: #4cde80; font-size: 11px;">Vào game nhận quà tân thủ</span>
                     </div>
                     <a class="ccgame-sdk-btn" href="${safeReturnUrl}" target="_top" style="margin-top: 14px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; font-weight: bold; box-shadow: 0 4px 12px rgba(201, 169, 78, 0.25);">
                         VỀ CCGAME
@@ -157,6 +157,30 @@
         // Gắn vào DOM
         root.appendChild(fab);
         root.appendChild(panel);
+
+        // ── Fetch Centralized Content asynchronously from CCGame Portal ──────
+        fetch('https://ccgame.org/api/surfaces/muh5/content')
+            .then(res => res.json())
+            .then(data => {
+                if (data) {
+                    const eventTitleEl = panel.querySelector('#ccgame-sdk-event-title');
+                    const giftcodeEl = panel.querySelector('#ccgame-sdk-giftcode');
+                    const objectiveEl = panel.querySelector('#ccgame-sdk-daily-objective');
+
+                    if (eventTitleEl && data.eventTitle) {
+                        eventTitleEl.textContent = escapeHtml(data.eventTitle);
+                    }
+                    if (giftcodeEl && data.giftcode) {
+                        giftcodeEl.textContent = escapeHtml(data.giftcode);
+                    }
+                    if (objectiveEl && data.dailyObjective) {
+                        objectiveEl.textContent = escapeHtml(data.dailyObjective);
+                    }
+                }
+            })
+            .catch(err => {
+                console.warn('CCGame SDK: could not load centralized content, using hardcoded fallbacks.', err);
+            });
 
         // ── Session Countdown Timer ──────────────────────────────────────────
         if (expiresAt > 0) {
