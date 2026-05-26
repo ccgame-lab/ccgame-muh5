@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../app/bootstrap.php';
 require __DIR__ . '/../app/db.php';
+require __DIR__ . '/../app/launch.php';
 
 // ── Helper: Normalize WebSocket Host ─────────────────────────────
 function normalize_game_srvaddr(string $host): string {
@@ -48,23 +49,12 @@ if ($server_id === false) {
 // ── Lấy params game theo thứ tự ưu tiên ────────────────────────
 $game_cfg = $_CFG['game'] ?? [];
 
-// ── user: session-scoped guest uid (Patch 3.1) ─────────────────
-// Mỗi browser session nhận một guest_uid riêng (không share user=guest).
-// Patch 3+ sẽ thay bằng portal_uid thật từ GreenJade gateway sau khi bind.
-// KHÔNG validate token từ browser. KHÔNG inject qua JS/Alpine.
-if (!empty($game_cfg['force_user'])) {
-    // force_user trong config.ini [game] chỉ dùng cho dev/test — KHÔNG đặt trên production.
-    $user = (string) $game_cfg['force_user'];
-} else {
-    // Tạo guest uid mới nếu session chưa có
-    if (empty($_SESSION['guest_uid'])) {
-        $_SESSION['guest_uid'] = 'guest_' . bin2hex(random_bytes(8));
-    }
-    $user = $_SESSION['guest_uid'];
-}
-
-// spverify: placeholder dev — Patch 3+ sẽ lấy launch token từ GreenJade gateway.
-$spverify = $game_cfg['spverify'] ?? 'portal-auth';
+// Lấy thông tin user (Patch 3.2 - Refactor)
+$identity     = launch_identity($game_cfg);
+$user         = $identity['user'];
+$spverify     = $identity['spverify'];
+$auth_mode    = $identity['auth_mode'];
+$display_name = $identity['display_name'];
 
 // Host/port: cố gắng lấy từ DB, fallback về config.ini
 $srvaddr = null;
@@ -173,7 +163,9 @@ $page_title = $srv_name ? 'MU H5 — ' . $srv_name : 'MU H5';
     <div id="ccgame-sdk-root"
          data-user="<?= htmlspecialchars($user, ENT_QUOTES, 'UTF-8') ?>"
          data-server-id="<?= htmlspecialchars((string) $server_id, ENT_QUOTES, 'UTF-8') ?>"
-         data-server-name="<?= htmlspecialchars((string) $srv_name, ENT_QUOTES, 'UTF-8') ?>">
+         data-server-name="<?= htmlspecialchars((string) $srv_name, ENT_QUOTES, 'UTF-8') ?>"
+         data-auth-mode="<?= htmlspecialchars($auth_mode, ENT_QUOTES, 'UTF-8') ?>"
+         data-display-name="<?= htmlspecialchars($display_name, ENT_QUOTES, 'UTF-8') ?>">
     </div>
     
     <script src="assets/sdk/ccgame-sdk.js"></script>

@@ -11,6 +11,8 @@
         const user = root.getAttribute('data-user') || 'Unknown';
         const serverId = root.getAttribute('data-server-id') || '?';
         const serverName = root.getAttribute('data-server-name') || 'Unknown Server';
+        const authMode = root.getAttribute('data-auth-mode') || 'guest';
+        const displayName = root.getAttribute('data-display-name') || 'Khách';
 
         // Hàm escape HTML để chống XSS
         function escapeHtml(unsafe) {
@@ -25,6 +27,8 @@
         const safeUser = escapeHtml(user);
         const safeServerId = escapeHtml(serverId);
         const safeServerName = escapeHtml(serverName);
+        const safeAuthMode = escapeHtml(authMode);
+        const safeDisplayName = escapeHtml(displayName);
 
         // 1. Tạo giao diện (DOM elements)
         // FAB
@@ -35,6 +39,15 @@
         // Panel
         const panel = document.createElement('div');
         panel.className = 'ccgame-sdk-panel';
+
+        // Badge auth mode
+        const modeBadge = safeAuthMode === 'dev' 
+            ? '<span class="ccgame-sdk-badge ccgame-sdk-badge--online">DEV MODE</span>' 
+            : '<span class="ccgame-sdk-badge ccgame-sdk-badge--soon">GUEST</span>';
+            
+        const guestNote = safeAuthMode === 'guest' 
+            ? '<div style="font-size: 10px; color: #ff9800; margin-top: 8px;">Guest cần gateway để vào game thật</div>'
+            : '';
 
         // Panel HTML structure
         panel.innerHTML = `
@@ -52,13 +65,18 @@
                 <!-- Tab: Tài khoản -->
                 <div id="ccgame-sdk-pane-account" class="ccgame-sdk-pane ccgame-sdk-pane--active">
                     <div class="ccgame-sdk-row">
-                        <span class="ccgame-sdk-label">User ID</span>
-                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">${safeUser}</span>
+                        <span class="ccgame-sdk-label">Tên hiển thị</span>
+                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">${safeDisplayName}</span>
                     </div>
                     <div class="ccgame-sdk-row">
-                        <span class="ccgame-sdk-label">Trạng thái</span>
-                        <span class="ccgame-sdk-value"><span class="ccgame-sdk-badge ccgame-sdk-badge--online">Online</span></span>
+                        <span class="ccgame-sdk-label">User ID</span>
+                        <span class="ccgame-sdk-value" style="font-size: 10px;">${safeUser}</span>
                     </div>
+                    <div class="ccgame-sdk-row">
+                        <span class="ccgame-sdk-label">Chế độ</span>
+                        <span class="ccgame-sdk-value">${modeBadge}</span>
+                    </div>
+                    ${guestNote}
                 </div>
                 <!-- Tab: Máy chủ -->
                 <div id="ccgame-sdk-pane-server" class="ccgame-sdk-pane">
