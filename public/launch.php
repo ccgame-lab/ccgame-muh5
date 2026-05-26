@@ -13,10 +13,38 @@ require __DIR__ . '/../app/legacy_user.php';
 // Chỉ định dạng return JSON hoặc redirect. Ở đây cơ bản xử lý token.
 $token = $_GET['token'] ?? $_GET['code'] ?? null;
 
-if (empty($token)) {
-    http_response_code(400);
-    echo "Bad Request: Missing token";
+function render_error_page(string $message, int $code = 500) {
+    global $_CFG;
+    $return_url = $_CFG['ccgame']['return_home_url'] ?? 'https://ccgame.org';
+    http_response_code($code);
+    echo '<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lỗi Xác Thực</title>
+    <style>
+        body { font-family: sans-serif; background: #0d0d14; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .box { background: #16161f; border: 1px solid #2a2a3d; padding: 2rem; border-radius: 8px; text-align: center; max-width: 400px; width: 90%; }
+        h1 { color: #c9a94e; font-size: 1.25rem; margin-top: 0; }
+        p { color: #a0a0b0; font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5; }
+        a.btn { background: #059669; color: #fff; text-decoration: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: bold; font-size: 0.9rem; display: inline-block; transition: background 0.2s; }
+        a.btn:hover { background: #047857; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>Lỗi Xác Thực</h1>
+        <p>' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</p>
+        <a href="' . htmlspecialchars($return_url, ENT_QUOTES, 'UTF-8') . '" class="btn">Về CCGame</a>
+    </div>
+</body>
+</html>';
     exit;
+}
+
+if (empty($token)) {
+    render_error_page("Missing launch token", 400);
 }
 
 /**
@@ -100,9 +128,7 @@ try {
     }
     
     if (!$legacy_user) {
-        http_response_code(403);
-        echo "Tài khoản GreenJade chưa có nhân vật MU H5";
-        exit;
+        render_error_page("Tài khoản GreenJade chưa có nhân vật MU H5", 403);
     }
 
     // 3. Set session
@@ -116,7 +142,5 @@ try {
 
 } catch (RuntimeException $e) {
     error_log("MUH5 Launch Error: " . $e->getMessage());
-    http_response_code(500);
-    echo "Không thể xác thực phiên chơi. Vui lòng quay lại ccgame.org.";
-    exit;
+    render_error_page("Không thể xác thực phiên chơi. Vui lòng quay lại ccgame.org.", 500);
 }
