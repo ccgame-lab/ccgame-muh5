@@ -1,0 +1,15 @@
+{
+	"initial": [
+		"h5/egret.min.js",
+		"h5/egret.web.min.js",
+		"h5/eui.min.js",
+		"h5/res.min.js",
+		"h5/tween.min.js",
+		"h5/game.min.js",
+		"h5/socket.min.js",
+		"h5/promise.min.js"
+	],
+	"game": [
+		"https://cdn.ccgame.org/h5/muh5/resource/main.min.js"
+	]
+}

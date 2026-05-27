@@ -1,11 +1,24 @@
-.env.local
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
 
-# Storage runtime files (ngoài git, GM tự tạo qua setup wizard)
-storage/config.ini
-storage/setup.lock
-storage/logs/
+# Node dependencies
+node_modules
 
-# Giữ lại placeholder để git track thư mục
-!storage/.gitkeep
+# Logs
+logs
+*.log
 
-reference/
+# Misc
+.DS_Store
+.fleet
+.idea
+
+# Local env files
+.env
+.env.*
+!.env.example
