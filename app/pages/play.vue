@@ -76,6 +76,12 @@ const normalizeSrvAddr = (addr: string): string => {
   return host.trim()
 }
 
+/** Mirror ccgame-web deriveGuestSuggestedCharacterName (max 6 UTF-8). */
+const deriveGuestCharacterNick = (playerId: string): string => {
+  const hex = playerId.replace(/[^a-f0-9]/gi, '').slice(-5)
+  return `g${(hex || '00000').padStart(5, '0').slice(0, 5)}`
+}
+
 const gameUrl = computed(() => {
   if (!playAllowed.value || !bootstrap.value?.data) {
     return ''
@@ -104,13 +110,12 @@ const gameUrl = computed(() => {
     srvport,
   })
 
-  // Guest: preload creatrole assets; prefilled short nick avoids random-name race on create click.
+  // Guest: unique short nick only. Do NOT set roleCount=0 — it skips preload/initGame and
+  // crashes doEnterGame when the account already has a character (server role list > 0).
   if (bootstrap.value?.data?.session?.authMode === 'guest') {
-    params.set('roleCount', '0')
     const nick = player?.suggestedCharacterName?.trim()
-    if (nick) {
-      params.set('nickName', nick)
-    }
+      || deriveGuestCharacterNick(player?.id || username)
+    params.set('nickName', nick)
   }
 
   return `/muh5-client/index.html?${params.toString()}`

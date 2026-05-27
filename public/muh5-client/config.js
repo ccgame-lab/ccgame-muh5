@@ -8,7 +8,13 @@
         var strArr;
         for (var i = 0; i < param.length; i++) {
             strArr = param[i].split("=");
-            urlParam[strArr[0]] = strArr[1];
+            var key = strArr[0];
+            var val = strArr.slice(1).join("=");
+            try {
+                urlParam[key] = decodeURIComponent(val.replace(/\+/g, " "));
+            } catch (e) {
+                urlParam[key] = val;
+            }
         }
     }
 
