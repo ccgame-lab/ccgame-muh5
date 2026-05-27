@@ -54,3 +54,28 @@ Browser smoke:
 curl -sI "https://muh5.ccgame.org/_nuxt/entry.DYe-K-kI.css" | head -5
 # Expect: HTTP 200, content-type text/css
 ```
+
+## Static client cache (muh5-client)
+
+Egret bundles under `/muh5-client/h5/*.js` are **not content-hashed**. Do not use `immutable` or multi-day cache without a deploy/version bump plan.
+
+Loopback check on VPS (dev HMR or production):
+
+```bash
+H='-H Host: muh5.ccgame.org'
+curl -sI $H http://127.0.0.1:4100/muh5-client/index.html | grep -i cache-control
+curl -sI $H http://127.0.0.1:4100/muh5-client/config.js | grep -i cache-control
+curl -sI $H http://127.0.0.1:4100/muh5-client/h5/ccgame-entrance.js | grep -i cache-control
+curl -sI $H http://127.0.0.1:4100/muh5-client/h5/egret.min.js | grep -i cache-control
+```
+
+Expected intent:
+
+| Path | Cache-Control |
+|------|----------------|
+| `/play` | `no-store` |
+| `index.html`, `config.js`, `ccgame-entrance.js`, `manifest.json` | `no-cache` (index: `no-store`) |
+| `h5/*.min.js` (non-hashed) | `public, max-age=86400, must-revalidate` |
+| Cloudflare `cdn.ccgame.org` | Separate CDN policy; purge after client deploy |
+
+After changing `h5/*.js`, assume browsers may keep old copies up to 24h unless CDN/HTML entry is purged or cache-busted.

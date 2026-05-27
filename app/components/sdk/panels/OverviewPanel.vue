@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const route = useRoute()
-const runtimeConfig = useRuntimeConfig()
 
 const { data: bootstrap, pending } = useFetch<{
   data: {
@@ -33,10 +32,7 @@ const authLabel = computed(() => {
   return 'Khách'
 })
 
-const greenJadeLoginUrl = computed(() => {
-  const base = String(runtimeConfig.public.ccgamePortalUrl || 'https://ccgame.org').replace(/\/+$/, '')
-  return `${base}/api/auth/greenjade/start?returnTo=${encodeURIComponent('/play/muh5')}`
-})
+const greenJadeLoginUrl = useGreenJadeLoginUrl()
 
 const serverLabel = computed(() => {
   if (!bootstrap.value?.data?.session?.playAllowed) {

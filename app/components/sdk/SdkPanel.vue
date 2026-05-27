@@ -20,7 +20,7 @@ const closePanel = () => {
 <template>
   <div
     v-if="isOpen"
-    class="fixed z-90 flex flex-col bg-gray-950 shadow-2xl pointer-events-auto overflow-hidden"
+    class="fixed z-90 flex flex-col bg-gray-950 shadow-lg pointer-events-auto overflow-hidden contain-layout"
     :class="[
       'max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-full max-sm:max-h-[80vh] max-sm:border-t max-sm:border-gray-800 max-sm:rounded-t-[20px]',
       'sm:top-1/2 sm:-translate-y-1/2 sm:right-6 sm:w-[380px] sm:max-h-[72vh] sm:border sm:border-gray-800 sm:rounded-[20px]',

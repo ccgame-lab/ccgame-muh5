@@ -30,14 +30,25 @@ export default defineNuxtConfig({
         'Content-Security-Policy': 'frame-ancestors \'self\' https://ccgame.org https://www.ccgame.org',
       },
     },
+    '/play': {
+      headers: {
+        'Cache-Control': 'no-store, must-revalidate',
+      },
+    },
+    '/play/**': {
+      headers: {
+        'Cache-Control': 'no-store, must-revalidate',
+      },
+    },
     '/muh5-client/h5/ccgame-entrance.js': {
       headers: {
         'Cache-Control': 'no-cache, must-revalidate',
       },
     },
+    // Egret bundles are not content-hashed; avoid long immutable cache (stale JS trap).
     '/muh5-client/h5/**': {
       headers: {
-        'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
+        'Cache-Control': 'public, max-age=86400, must-revalidate',
       },
     },
     '/muh5-client/config.js': {
@@ -46,6 +57,11 @@ export default defineNuxtConfig({
       },
     },
     '/muh5-client/manifest.json': {
+      headers: {
+        'Cache-Control': 'no-cache, must-revalidate',
+      },
+    },
+    '/muh5-client/*.json': {
       headers: {
         'Cache-Control': 'no-cache, must-revalidate',
       },
