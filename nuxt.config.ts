@@ -19,6 +19,9 @@ export default defineNuxtConfig({
     muh5GameDbName: 'actor_s1',
     muh5GameDbUser: '',
     muh5GameDbPassword: '',
+    public: {
+      ccgamePortalUrl: process.env.NUXT_PUBLIC_CCGAME_PORTAL_URL || 'https://ccgame.org',
+    },
   },
 
   routeRules: {
