@@ -54,6 +54,13 @@ Forbidden:
 - legacy PHP write-path porting
 - reusable SDK package extraction
 
+## Static Client Boundaries
+
+- Nuxt SSR shell serves the legacy Egret H5 static client under `public/muh5-client/`.
+- Legacy PHP files, backend folders, `.env` files, server APIs, or `storage` cache logs MUST NOT be copied or loaded under `public/`.
+- S1 business panels stay mock/read-only/locked. The Giftcode, PShop, LuckySpin, top-up/payment, game_mail, and Monument/Mining write paths are strictly sealed.
+- Static assets are sourced from `reference/legacy/game` or remote CDNs. Any new asset copy must only import clean client-side static resources (images, audio, css, js).
+
 ## Boundaries
 
 Vue components must not decide:
