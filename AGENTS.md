@@ -60,6 +60,7 @@ Forbidden:
 - Legacy PHP files, backend folders, `.env` files, server APIs, or `storage` cache logs MUST NOT be copied or loaded under `public/`.
 - S1 business panels stay mock/read-only/locked. The Giftcode, PShop, LuckySpin, top-up/payment, game_mail, and Monument/Mining write paths are strictly sealed.
 - Static assets are sourced from `reference/legacy/game` or remote CDNs. Any new asset copy must only import clean client-side static resources (images, audio, css, js).
+- **Identity & Authentication**: Player identity must come from a verified, cryptographically signed CCGame `launch` token (HMAC-SHA256). Raw, unsigned query parameters (`user`, `userId`) are considered untrusted legacy/compatibility options and must not be used for authenticated operations.
 
 ## Boundaries
 

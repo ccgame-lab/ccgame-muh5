@@ -3,10 +3,16 @@ import { getSessionUser } from '../services/session.server'
 import { sdkConfig } from '~~/config/sdk.config'
 
 export default defineEventHandler((event) => {
-  const user = getSessionUser(event)
+  const sessionData = getSessionUser(event)
 
   return apiSuccess({
-    user,
+    session: {
+      authMode: sessionData.authMode,
+      source: sessionData.source,
+      trusted: sessionData.trusted,
+    },
+    player: sessionData.player,
+    server: sessionData.server,
     config: sdkConfig,
   })
 })

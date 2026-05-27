@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { UserProfile } from '~~/types/sdk'
 
 definePageMeta({
   layout: false,
@@ -9,15 +8,41 @@ definePageMeta({
 const isSdkOpen = ref(false)
 const isDev = import.meta.dev
 
-const { data: bootstrap } = useFetch<{ data: { user: UserProfile } }>('/api/bootstrap', {
+const route = useRoute()
+
+// Query bootstrap with the active launch token or fallback parameters
+const { data: bootstrap } = useFetch<{
+  data: {
+    session: { authMode: string, source: string, trusted: boolean }
+    player: { id: string, username?: string, displayName: string } | null
+    server: { id: number, key: string, name: string, srvaddr: string, srvport: string } | null
+  }
+}>('/api/bootstrap', {
   key: 'bootstrap-data',
+  query: computed(() => ({
+    launch: route.query.launch,
+    user: route.query.user,
+    userId: route.query.userId,
+  })),
   lazy: true,
 })
 
 const gameUrl = computed(() => {
-  const username = bootstrap.value?.data.user.username || 'gamer_mock'
-  const userId = bootstrap.value?.data.user.id || '10001'
-  return `/muh5-client/index.html?user=${encodeURIComponent(username)}&userId=${encodeURIComponent(userId)}&srvid=1&srvaddr=muh5-ws.ccgame.org/s1/&srvport=443`
+  if (!bootstrap.value?.data) {
+    return '/muh5-client/index.html?user=guest&userId=guest&srvid=1&srvaddr=muh5-ws.ccgame.org/s1/&srvport=443'
+  }
+
+  const player = bootstrap.value.data.player
+  const server = bootstrap.value.data.server
+
+  const username = player?.username || player?.id || 'guest'
+  const userId = player?.id || 'guest'
+
+  const srvid = server?.id || 1
+  const srvaddr = server?.srvaddr || 'muh5-ws.ccgame.org/s1/'
+  const srvport = server?.srvport || '443'
+
+  return `/muh5-client/index.html?user=${encodeURIComponent(username)}&userId=${encodeURIComponent(userId)}&srvid=${encodeURIComponent(srvid)}&srvaddr=${encodeURIComponent(srvaddr)}&srvport=${encodeURIComponent(srvport)}`
 })
 </script>
 
