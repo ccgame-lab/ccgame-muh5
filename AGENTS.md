@@ -61,6 +61,8 @@ Forbidden:
 - S1 business panels stay mock/read-only/locked. The Giftcode, PShop, LuckySpin, top-up/payment, game_mail, and Monument/Mining write paths are strictly sealed.
 - Static assets are sourced from `reference/legacy/game` or remote CDNs. Any new asset copy must only import clean client-side static resources (images, audio, css, js).
 - **Identity & Authentication**: Player identity must come from a verified, cryptographically signed CCGame `launch` token (HMAC-SHA256). Raw, unsigned query parameters (`user`, `userId`) are considered untrusted legacy/compatibility options and must not be used for authenticated operations.
+- **WebSocket Server Address Normalization**: The legacy Egret H5 client expects `srvaddr` to be a pure host only (no protocols like `wss://` or `https://`, no slashes `/`, and no trailing path like `/s1/`). Any input `srvaddr` from verified CCGame launch tokens must be normalized (stripping protocols and paths) before passing it to the static iframe via query parameters.
+- **Iframe & Framing Security Policy**: MUH5 is designed to be embedded in an iframe on the parent CCGame portal. The `/play` route must run under Server-Side Rendering (SSR) without crashing (ensuring no `500` errors on player metadata lookups). To allow framing while maintaining top-level security, `X-Frame-Options` must not be set to `DENY` or `SAMEORIGIN` on the main playable routes. Instead, a strict `Content-Security-Policy: frame-ancestors 'self' https://ccgame.org https://www.ccgame.org` must be used to restrict framing permissions exclusively to CCGame portal domains.
 
 ## Boundaries
 

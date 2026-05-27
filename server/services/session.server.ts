@@ -17,7 +17,56 @@ export type Muh5Session = {
     name: string
     srvaddr: string
     srvport: string
+    srvpath?: string
   }
+}
+
+export const normalizeSrvAddr = (addr: string): string => {
+  if (!addr) return ''
+
+  let host = addr
+  try {
+    host = decodeURIComponent(addr)
+  }
+  catch {
+    // Fallback if decoding fails
+  }
+
+  // Strip protocols (e.g. wss://, https://)
+  host = host.replace(/^(wss?|https?):\/\//i, '')
+
+  // Strip trailing slashes and paths
+  const slashIdx = host.indexOf('/')
+  if (slashIdx !== -1) {
+    host = host.substring(0, slashIdx)
+  }
+
+  // Strip port if appended (e.g. host:port)
+  const colonIdx = host.indexOf(':')
+  if (colonIdx !== -1) {
+    host = host.substring(0, colonIdx)
+  }
+
+  return host.trim()
+}
+
+export const extractSrvPath = (addr: string): string => {
+  if (!addr) return ''
+
+  let host = addr
+  try {
+    host = decodeURIComponent(addr)
+  }
+  catch {
+    // Fallback if decoding fails
+  }
+
+  host = host.replace(/^(wss?|https?):\/\//i, '')
+  const slashIdx = host.indexOf('/')
+  if (slashIdx !== -1) {
+    return host.substring(slashIdx)
+  }
+  return ''
 }
 
 export const getSessionUser = (event?: H3Event): Muh5Session => {
@@ -34,9 +83,10 @@ export const getSessionUser = (event?: H3Event): Muh5Session => {
     server: {
       id: 1,
       key: 's1',
-      name: 'Server S1',
-      srvaddr: 'muh5-ws.ccgame.org/s1/',
+      name: 'S1',
+      srvaddr: 'muh5-ws.ccgame.org',
       srvport: '443',
+      srvpath: '/s1/',
     },
   }
 
@@ -61,8 +111,9 @@ export const getSessionUser = (event?: H3Event): Muh5Session => {
           id: verifiedPayload.server.id,
           key: verifiedPayload.server.key,
           name: verifiedPayload.server.name,
-          srvaddr: verifiedPayload.server.srvaddr,
+          srvaddr: normalizeSrvAddr(verifiedPayload.server.srvaddr),
           srvport: verifiedPayload.server.srvport,
+          srvpath: extractSrvPath(verifiedPayload.server.srvaddr) || '/s1/',
         },
       }
     }
@@ -95,9 +146,10 @@ export const getSessionUser = (event?: H3Event): Muh5Session => {
       server: {
         id: 1,
         key: 's1',
-        name: 'Server S1',
-        srvaddr: 'muh5-ws.ccgame.org/s1/',
+        name: 'S1',
+        srvaddr: 'muh5-ws.ccgame.org',
         srvport: '443',
+        srvpath: '/s1/',
       },
     }
   }
@@ -125,9 +177,10 @@ export const getSessionUser = (event?: H3Event): Muh5Session => {
       server: {
         id: 1,
         key: 's1',
-        name: 'Server S1',
-        srvaddr: 'muh5-ws.ccgame.org/s1/',
+        name: 'S1',
+        srvaddr: 'muh5-ws.ccgame.org',
         srvport: '443',
+        srvpath: '/s1/',
       },
     }
   }

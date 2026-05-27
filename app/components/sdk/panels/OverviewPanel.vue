@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import type { UserProfile } from '~~/types/sdk'
-
-const { data: bootstrap, pending } = useFetch<{ data: { user: UserProfile } }>('/api/bootstrap', {
+const { data: bootstrap, pending } = useFetch<{
+  data: {
+    player: { id: string, username?: string, displayName: string } | null
+    server: { id: number, key: string, name: string, srvaddr: string, srvport: string } | null
+  }
+}>('/api/bootstrap', {
   key: 'bootstrap-data',
   lazy: true,
 })
@@ -23,15 +26,15 @@ const { data: bootstrap, pending } = useFetch<{ data: { user: UserProfile } }>('
   >
     <div class="flex flex-col items-center justify-center p-6 bg-gray-900 rounded-lg border border-gray-800">
       <UAvatar
-        :src="bootstrap?.data.user.avatar"
+        src="https://avatars.githubusercontent.com/u/739984?v=4"
         size="xl"
         class="mb-3 border-2 border-primary-500"
       />
       <h3 class="text-lg font-bold text-white">
-        {{ bootstrap?.data.user.username }}
+        {{ bootstrap?.data?.player?.displayName || bootstrap?.data?.player?.username || 'Khách' }}
       </h3>
       <p class="text-xs text-gray-400">
-        ID: {{ bootstrap?.data.user.id }}
+        ID: {{ bootstrap?.data?.player?.id || 'guest' }}
       </p>
     </div>
 
