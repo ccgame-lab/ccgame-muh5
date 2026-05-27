@@ -36,7 +36,18 @@ const { data: walletData, pending } = useFetch<{ data: { balance: WalletBalance,
 
     <div class="space-y-2">
       <div
+        v-if="!walletData?.data.history || walletData.data.history.length === 0"
+        class="text-center py-8 text-sm text-gray-500 bg-gray-900 rounded-lg border border-gray-800"
+      >
+        <UIcon
+          name="i-heroicons-lock-closed"
+          class="w-8 h-8 text-gray-600 mb-2 mx-auto"
+        />
+        <p>Lịch sử giao dịch trống hoặc đang đồng bộ</p>
+      </div>
+      <div
         v-for="tx in walletData?.data.history"
+        v-else
         :key="tx.id"
         class="flex items-center justify-between p-3 bg-gray-900 rounded-lg border border-gray-800"
       >

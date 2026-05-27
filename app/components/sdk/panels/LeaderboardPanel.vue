@@ -35,7 +35,19 @@ const { data: boardData, pending } = useFetch<{ data: LeaderboardEntry[] }>('/ap
     </div>
 
     <div
+      v-if="!boardData?.data || boardData.data.length === 0"
+      class="text-center py-8 text-sm text-gray-500 bg-gray-900 rounded-lg border border-gray-800"
+    >
+      <UIcon
+        name="i-heroicons-trophy"
+        class="w-8 h-8 text-gray-600 mb-2 mx-auto"
+      />
+      <p>Bảng xếp hạng đang niêm phong chuẩn bị S1</p>
+    </div>
+
+    <div
       v-for="entry in boardData?.data"
+      v-else
       :key="entry.rank"
       class="p-2 bg-gray-900 border border-gray-800 rounded-lg flex items-center gap-3"
     >

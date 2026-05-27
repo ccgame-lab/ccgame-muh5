@@ -52,5 +52,12 @@ const { data: walletData, pending } = useFetch<{ data: { balance: WalletBalance,
         </p>
       </UCard>
     </div>
+
+    <!-- Sealed / Locked Wording -->
+    <FeatureLocked
+      title="Ví tài khoản đang niêm phong"
+      description="Dữ liệu ví tài khoản thực tế đang được đồng bộ chuẩn bị cho S1. Chức năng nạp và thanh toán đang tạm đóng."
+      icon="i-heroicons-wallet"
+    />
   </div>
 </template>
