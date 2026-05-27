@@ -74,9 +74,9 @@ const handlePointerUp = (e: PointerEvent) => {
 <template>
   <div
     ref="buttonRef"
-    class="fixed z-100 w-12 h-12 bg-gray-900 border border-gray-700 rounded-full shadow-xl flex items-center justify-center cursor-pointer touch-none pointer-events-auto transition-transform hover:scale-105 active:scale-95 select-none"
+    class="fixed left-0 top-0 z-100 w-12 h-12 bg-gray-900 border border-gray-700 rounded-full shadow-xl flex items-center justify-center cursor-pointer touch-none pointer-events-auto transition-transform hover:scale-105 active:scale-95 select-none will-change-transform"
     :class="isMounted ? 'opacity-100' : 'opacity-0 pointer-events-none'"
-    :style="{ left: `${position.x}px`, top: `${position.y}px` }"
+    :style="{ transform: `translate3d(${position.x}px, ${position.y}px, 0)` }"
     @pointerdown="handlePointerDown"
     @pointermove="handlePointerMove"
     @pointerup="handlePointerUp"

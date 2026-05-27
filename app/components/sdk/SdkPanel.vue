@@ -19,9 +19,9 @@ const closePanel = () => {
 
 <template>
   <div
-    class="fixed z-90 flex flex-col bg-gray-950 shadow-2xl transition-all duration-300 pointer-events-auto overflow-hidden"
+    v-if="isOpen"
+    class="fixed z-90 flex flex-col bg-gray-950 shadow-2xl pointer-events-auto overflow-hidden"
     :class="[
-      isOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95 pointer-events-none translate-y-8 sm:translate-y-0 sm:translate-x-8',
       'max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-full max-sm:max-h-[80vh] max-sm:border-t max-sm:border-gray-800 max-sm:rounded-t-[20px]',
       'sm:top-1/2 sm:-translate-y-1/2 sm:right-6 sm:w-[380px] sm:max-h-[72vh] sm:border sm:border-gray-800 sm:rounded-[20px]',
     ]"

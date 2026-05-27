@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount, watch } from 'vue'
 
 definePageMeta({
   layout: false,
@@ -8,14 +8,20 @@ definePageMeta({
 useHead({
   link: [
     { rel: 'preconnect', href: 'https://cdn.ccgame.org' },
+    { rel: 'dns-prefetch', href: 'https://cdn.ccgame.org' },
     { rel: 'preconnect', href: 'https://muh5-ws.ccgame.org' },
+    { rel: 'dns-prefetch', href: 'https://muh5-ws.ccgame.org' },
   ],
 })
 
 const isSdkOpen = ref(false)
-const isDev = import.meta.dev
 
 const route = useRoute()
+const frameLoaded = ref(false)
+const frameFailed = ref(false)
+const frameSlow = ref(false)
+const frameKey = ref(0)
+let frameSlowTimer: number | undefined
 
 const { data: bootstrap, pending } = useFetch<{
   data: {
@@ -47,6 +53,10 @@ const { data: bootstrap, pending } = useFetch<{
 const playAllowed = computed(() => bootstrap.value?.data?.session?.playAllowed === true)
 
 const launchBlockedMessage = computed(() => {
+  if (frameFailed.value) {
+    return 'Khung game không tải được. Kiểm tra mạng rồi thử tải lại.'
+  }
+
   const source = bootstrap.value?.data?.session?.source
   if (source === 'invalid_launch') {
     return 'Phiên launch không hợp lệ hoặc đã hết hạn. Vào lại từ CCGame để tiếp tục.'
@@ -56,6 +66,52 @@ const launchBlockedMessage = computed(() => {
   }
   return 'Thiếu launch token hợp lệ từ CCGame. Vào game qua ccgame.org/play/muh5.'
 })
+
+const frameStatus = computed(() => {
+  if (frameSlow.value) {
+    return 'Đang tải tài nguyên game. Lần đầu có thể chậm hơn, lần sau sẽ nhanh hơn.'
+  }
+  if (gameUrl.value && !frameLoaded.value) {
+    return 'Đang tải game...'
+  }
+  return ''
+})
+
+const clearFrameSlowTimer = () => {
+  if (frameSlowTimer !== undefined) {
+    window.clearTimeout(frameSlowTimer)
+    frameSlowTimer = undefined
+  }
+}
+
+const startFrameSlowTimer = () => {
+  if (!import.meta.client || !gameUrl.value) return
+  clearFrameSlowTimer()
+  frameSlowTimer = window.setTimeout(() => {
+    if (!frameLoaded.value && !frameFailed.value) {
+      frameSlow.value = true
+    }
+  }, 12000)
+}
+
+const handleFrameLoad = () => {
+  frameLoaded.value = true
+  frameSlow.value = false
+  clearFrameSlowTimer()
+}
+
+const handleFrameError = () => {
+  frameFailed.value = true
+  clearFrameSlowTimer()
+}
+
+const retryFrame = () => {
+  frameLoaded.value = false
+  frameFailed.value = false
+  frameSlow.value = false
+  frameKey.value++
+  startFrameSlowTimer()
+}
 
 const normalizeSrvAddr = (addr: string): string => {
   if (!addr) return ''
@@ -127,25 +183,34 @@ const gameUrl = computed(() => {
 
   return `/muh5-client/index.html?${params.toString()}`
 })
+
+watch(gameUrl, () => {
+  frameLoaded.value = false
+  frameFailed.value = false
+  frameSlow.value = false
+  startFrameSlowTimer()
+}, { immediate: true })
+
+onBeforeUnmount(clearFrameSlowTimer)
 </script>
 
 <template>
   <div class="relative w-full h-screen overflow-hidden bg-black text-white">
     <div
       v-if="pending"
-      class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black"
+      class="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-black px-6 text-center"
     >
       <UIcon
         name="i-heroicons-arrow-path"
-        class="w-8 h-8 animate-spin text-gray-500"
+        class="w-8 h-8 animate-spin text-primary-400"
       />
-      <p class="text-sm text-gray-400">
-        Đang xác thực phiên launch...
+      <p class="max-w-xs text-sm text-gray-300 leading-relaxed">
+        Đang mở phiên chơi...
       </p>
     </div>
 
     <div
-      v-else-if="!playAllowed"
+      v-else-if="!playAllowed || frameFailed"
       class="absolute inset-0 z-20 flex items-center justify-center p-6 bg-black"
     >
       <div class="w-full max-w-md space-y-4 text-center">
@@ -166,6 +231,13 @@ const gameUrl = computed(() => {
         >
           {{ bootstrap?.data?.session?.source || 'sealed' }} · trusted: {{ bootstrap?.data?.session?.trusted ? 'yes' : 'no' }}
         </UBadge>
+        <UButton
+          v-if="frameFailed"
+          color="primary"
+          @click="retryFrame"
+        >
+          Thử tải lại
+        </UButton>
       </div>
     </div>
 
@@ -189,23 +261,32 @@ const gameUrl = computed(() => {
 
     <GameFrame
       v-else
+      :key="frameKey"
       :src="gameUrl"
+      @load="handleFrameLoad"
+      @error="handleFrameError"
     />
 
     <div
-      v-if="isDev"
-      class="absolute top-2 left-2 z-10 pointer-events-auto"
+      v-if="playAllowed && gameUrl && frameStatus && !frameFailed"
+      class="pointer-events-none absolute left-3 right-3 bottom-4 z-40 flex justify-center"
     >
-      <UButton
-        to="/"
-        variant="ghost"
-        color="neutral"
-        icon="i-heroicons-arrow-left"
-        size="xs"
-        class="opacity-30 hover:opacity-100 transition-opacity bg-black/30 backdrop-blur-sm"
-      >
-        Dev: Home
-      </UButton>
+      <div class="pointer-events-auto flex max-w-sm items-center gap-2 rounded-lg border border-gray-800 bg-black/75 px-3 py-2 text-xs text-gray-300 shadow-lg">
+        <UIcon
+          name="i-heroicons-arrow-path"
+          class="h-4 w-4 shrink-0 animate-spin text-primary-400"
+        />
+        <span class="min-w-0 flex-1 leading-relaxed">{{ frameStatus }}</span>
+        <UButton
+          v-if="frameSlow"
+          size="xs"
+          color="neutral"
+          variant="soft"
+          @click="retryFrame"
+        >
+          Tải lại
+        </UButton>
+      </div>
     </div>
 
     <div

@@ -30,6 +30,26 @@ export default defineNuxtConfig({
         'Content-Security-Policy': 'frame-ancestors \'self\' https://ccgame.org https://www.ccgame.org',
       },
     },
+    '/muh5-client/h5/ccgame-entrance.js': {
+      headers: {
+        'Cache-Control': 'no-cache, must-revalidate',
+      },
+    },
+    '/muh5-client/h5/**': {
+      headers: {
+        'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
+      },
+    },
+    '/muh5-client/config.js': {
+      headers: {
+        'Cache-Control': 'no-cache, must-revalidate',
+      },
+    },
+    '/muh5-client/manifest.json': {
+      headers: {
+        'Cache-Control': 'no-cache, must-revalidate',
+      },
+    },
     '/muh5-client/index.html': {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -39,6 +59,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   nitro: {
     preset: 'bun',
+  },
+  vite: {
+    server: {
+      allowedHosts: ['muh5.ccgame.org', 'ccgame.org', 'www.ccgame.org'],
+    },
   },
 
   typescript: {

@@ -34,10 +34,10 @@
       </UCard>
     </div>
 
-    <!-- Feature Locked Message -->
+    <!-- Sealed feature message -->
     <FeatureLocked
-      title="Máy đào Kim Cương đang niêm phong chuẩn bị S1"
-      description="Hệ thống Máy Đào Kim Cương (Diamond Monument) hiện đang ở trạng thái niêm phong thử nghiệm (Read-Only) và chưa kết nối cơ sở dữ liệu thực tế."
+      title="Máy đào Kim Cương sắp mở"
+      description="Tính năng đang khóa để bảo toàn dữ liệu S1. Theo dõi thông báo trong game."
       icon="i-heroicons-cpu-chip"
     />
   </div>
