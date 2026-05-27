@@ -32,15 +32,25 @@ Do not move MUH5 business panels into CCGame.
 
 ## Current phase
 
-Task 01 is shell only.
+Production shell with signed launch live.
+
+Live:
+- Signed CCGame launch token (HMAC-SHA256) on `/play`
+- Guest playable via CCGame portal iframe
+- Legacy Egret client under `public/muh5-client/`
+- Account rows provisioned by **ccgame-web** only:
+  - `muh5_ccgame.users`
+  - `globaldata_bt.global_user`
+  - `actor_s1.globaluser`
+- Do **not** insert `actor_s1.actors` from the bridge
 
 Allowed:
 - SSR pages
 - route map
-- mock/read-only data
+- read-only / locked SDK panels
 - local MUH5 SDK launcher
 - local MUH5 SDK panel
-- health/bootstrap mock APIs
+- health/bootstrap APIs
 
 Forbidden:
 - DB mutation
@@ -58,7 +68,7 @@ Forbidden:
 
 - Nuxt SSR shell serves the legacy Egret H5 static client under `public/muh5-client/`.
 - Legacy PHP files, backend folders, `.env` files, server APIs, or `storage` cache logs MUST NOT be copied or loaded under `public/`.
-- S1 business panels stay mock/read-only/locked. The Giftcode, PShop, LuckySpin, top-up/payment, game_mail, and Monument/Mining write paths are strictly sealed.
+- S1 business panels stay read-only/locked in production UI (no mock/dev copy). Giftcode, PShop, LuckySpin, top-up/payment, game_mail, and Monument/Mining write paths are strictly sealed.
 - Static assets are sourced from `reference/legacy/game` or remote CDNs. Any new asset copy must only import clean client-side static resources (images, audio, css, js).
 - **Identity & Authentication**: Player identity must come from a verified, cryptographically signed CCGame `launch` token (HMAC-SHA256). Raw, unsigned query parameters (`user`, `userId`) are considered untrusted legacy/compatibility options and must not be used for authenticated operations.
 - **WebSocket Server Address Normalization**: The legacy Egret H5 client expects `srvaddr` to be a pure host only (no protocols like `wss://` or `https://`, no slashes `/`, and no trailing path like `/s1/`). Any input `srvaddr` from verified CCGame launch tokens must be normalized (stripping protocols and paths) before passing it to the static iframe via query parameters.

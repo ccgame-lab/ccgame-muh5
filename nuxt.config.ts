@@ -11,6 +11,11 @@ export default defineNuxtConfig({
         'Content-Security-Policy': 'frame-ancestors \'self\' https://ccgame.org https://www.ccgame.org',
       },
     },
+    '/muh5-client/index.html': {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
+    },
   },
   compatibilityDate: '2025-07-15',
   nitro: {

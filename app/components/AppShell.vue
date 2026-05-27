@@ -10,7 +10,7 @@
         <span class="font-bold text-lg">MUH5 Shell</span>
       </div>
       <div class="flex items-center gap-2">
-        <!-- Mock Avatar -->
+        <!-- Avatar placeholder -->
         <UAvatar
           src="https://avatars.githubusercontent.com/u/739984?v=4"
           alt="Player"

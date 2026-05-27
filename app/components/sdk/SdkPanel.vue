@@ -33,7 +33,7 @@ const closePanel = () => {
           {{ sdkConfig.app.name }} SDK
         </h2>
         <p class="text-xs text-gray-500">
-          Player Info (Mock)
+          Thông tin nhân vật
         </p>
       </div>
       <UButton

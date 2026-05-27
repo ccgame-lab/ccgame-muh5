@@ -5,6 +5,13 @@ definePageMeta({
   layout: false,
 })
 
+useHead({
+  link: [
+    { rel: 'preconnect', href: 'https://cdn.ccgame.org' },
+    { rel: 'preconnect', href: 'https://muh5-ws.ccgame.org' },
+  ],
+})
+
 const isSdkOpen = ref(false)
 const isDev = import.meta.dev
 

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // Using hardcoded mock data for notices to save time since it's just static
 const notices = [
-  { id: 1, title: '[Mock] Welcome to MUH5', date: '2026-05-27', isNew: true },
-  { id: 2, title: '[Mock] Server Maintenance Scheduled', date: '2026-05-26', isNew: false },
-  { id: 3, title: '[Mock] Patch Notes v1.0.1', date: '2026-05-25', isNew: false },
+  { id: 1, title: 'Chào mừng đến MUH5', date: '2026-05-27', isNew: true },
+  { id: 2, title: 'Bảo trì máy chủ dự kiến', date: '2026-05-26', isNew: false },
+  { id: 3, title: 'Ghi chú bản cập nhật v1.0.1', date: '2026-05-25', isNew: false },
 ]
 </script>
 

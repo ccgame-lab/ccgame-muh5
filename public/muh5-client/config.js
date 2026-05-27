@@ -22,7 +22,7 @@
     window["__muh5UrlParams"] = urlParam;
 
     // Assign global variables required by Egret engine
-    window["uid"] = urlParam.user || "quocquoc";
+    window["uid"] = urlParam.user || "";
     window["sid"] = urlParam.srvid || "1";
     window["spverify"] = urlParam.spverify || "portal-auth";
     window["svrip"] = urlParam.srvaddr || "muh5-ws.ccgame.org/s1/";

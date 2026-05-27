@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-6">
     <FeatureLocked
-      title="Giftcode Redemption"
-      description="Giftcode redemption is currently locked in this mock environment. No API is called."
+      title="Nhận Giftcode"
+      description="Tính năng nhận giftcode chưa mở trên bản production. Không có mã công khai trên giao diện."
       icon="i-heroicons-gift"
     />
 
