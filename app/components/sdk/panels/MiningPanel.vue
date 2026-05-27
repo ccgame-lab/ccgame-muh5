@@ -36,7 +36,7 @@
 
     <!-- Feature Locked Message -->
     <FeatureLocked
-      title="Diamond Generator Locked"
+      title="Máy đào Kim Cương đang niêm phong chuẩn bị S1"
       description="Hệ thống Máy Đào Kim Cương (Diamond Monument) hiện đang ở trạng thái niêm phong thử nghiệm (Read-Only) và chưa kết nối cơ sở dữ liệu thực tế."
       icon="i-heroicons-cpu-chip"
     />

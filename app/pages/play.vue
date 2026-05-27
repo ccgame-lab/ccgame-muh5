@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import type { UserProfile } from '~~/types/sdk'
 
 definePageMeta({
   layout: false,
@@ -7,12 +8,23 @@ definePageMeta({
 
 const isSdkOpen = ref(false)
 const isDev = import.meta.dev
+
+const { data: bootstrap } = useFetch<{ data: { user: UserProfile } }>('/api/bootstrap', {
+  key: 'bootstrap-data',
+  lazy: true,
+})
+
+const gameUrl = computed(() => {
+  const username = bootstrap.value?.data.user.username || 'gamer_mock'
+  const userId = bootstrap.value?.data.user.id || '10001'
+  return `/muh5-client/index.html?user=${encodeURIComponent(username)}&userId=${encodeURIComponent(userId)}&srvid=1&srvaddr=muh5-ws.ccgame.org/s1/&srvport=443`
+})
 </script>
 
 <template>
   <div class="relative w-full h-screen overflow-hidden bg-black text-white">
     <!-- Game Frame (z-0) -->
-    <GameFrame src="about:blank" />
+    <GameFrame :src="gameUrl" />
 
     <!-- Top Bar (Minimal Back button) (z-10) -->
     <div
