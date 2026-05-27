@@ -1,10 +1,33 @@
 <script setup lang="ts">
-// Using hardcoded mock data for notices to save time since it's just static
-const notices = [
-  { id: 1, title: 'Chào mừng đến MUH5', date: '2026-05-27', isNew: true },
-  { id: 2, title: 'Bảo trì máy chủ dự kiến', date: '2026-05-26', isNew: false },
-  { id: 3, title: 'Ghi chú bản cập nhật v1.0.1', date: '2026-05-25', isNew: false },
-]
+import { computed } from 'vue'
+import type { Notice } from '~~/types/sdk'
+
+const { data, pending, error } = useFetch<{ data: Notice[] }>('/api/notices', {
+  key: 'sdk-notices',
+  lazy: true,
+})
+
+const notices = computed<Notice[]>(() => data.value?.data ?? [])
+
+const formatDate = (iso?: string): string => {
+  if (!iso) return ''
+  try {
+    return new Date(iso).toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+  }
+  catch {
+    return iso.slice(0, 10)
+  }
+}
+
+const typeBadgeColor = (type: Notice['type']): 'info' | 'success' | 'warning' => {
+  if (type === 'success') return 'success'
+  if (type === 'warning') return 'warning'
+  return 'info'
+}
 </script>
 
 <template>
@@ -23,28 +46,76 @@ const notices = [
     </div>
 
     <div
-      v-for="notice in notices"
-      :key="notice.id"
-      class="p-3 bg-gray-900 border border-gray-800 rounded-lg flex items-center justify-between cursor-pointer hover:bg-gray-800 transition-colors"
+      v-if="pending"
+      class="flex justify-center py-8"
     >
-      <div class="flex flex-col">
-        <div class="flex items-center gap-2">
-          <h4 class="text-sm font-bold text-white">
+      <UIcon
+        name="i-heroicons-arrow-path"
+        class="w-6 h-6 animate-spin text-gray-500"
+      />
+    </div>
+
+    <div
+      v-else-if="error || notices.length === 0"
+      class="text-center py-8 text-sm text-gray-500 bg-gray-900 rounded-lg border border-gray-800"
+    >
+      <UIcon
+        name="i-heroicons-megaphone"
+        class="w-8 h-8 text-gray-600 mb-2 mx-auto"
+      />
+      <p>Chưa có thông báo</p>
+    </div>
+
+    <div
+      v-for="notice in notices"
+      v-else
+      :key="notice.id"
+      class="p-3 bg-gray-900 border border-gray-800 rounded-lg flex flex-col gap-2"
+    >
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <UIcon
+            v-if="notice.icon"
+            :name="notice.icon"
+            class="w-4 h-4 text-primary-400 shrink-0"
+          />
+          <h4 class="text-sm font-bold text-white truncate">
             {{ notice.title }}
           </h4>
-          <span
-            v-if="notice.isNew"
-            class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-500"
-          >NEW</span>
         </div>
-        <p class="text-[11px] text-gray-500 mt-1">
-          {{ notice.date }}
-        </p>
+        <UBadge
+          :color="typeBadgeColor(notice.type)"
+          variant="subtle"
+          size="xs"
+          class="shrink-0"
+        >
+          {{ notice.type }}
+        </UBadge>
       </div>
-      <UIcon
-        name="i-heroicons-chevron-right"
-        class="w-4 h-4 text-gray-600"
-      />
+
+      <p class="text-xs text-gray-400 leading-relaxed">
+        {{ notice.body }}
+      </p>
+
+      <div
+        v-if="notice.publishedAt || notice.link"
+        class="flex items-center justify-between text-[11px] text-gray-500"
+      >
+        <span>{{ formatDate(notice.publishedAt) }}</span>
+        <a
+          v-if="notice.link"
+          :href="notice.link"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-primary-400 hover:underline inline-flex items-center gap-1"
+        >
+          Xem thêm
+          <UIcon
+            name="i-heroicons-arrow-top-right-on-square"
+            class="w-3 h-3"
+          />
+        </a>
+      </div>
     </div>
   </div>
 </template>

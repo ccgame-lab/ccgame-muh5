@@ -1,4 +1,3 @@
-// @ts-expect-error: crypto is a built-in node module
 import { createHmac, timingSafeEqual } from 'crypto'
 import type { Muh5LaunchPayload } from '~~/types/launch'
 
@@ -7,7 +6,6 @@ export const DEV_MUH5_LAUNCH_SECRET = 'ccgame-dev-muh5-launch-secret-local-only'
 
 export const base64UrlEncode = (strOrObj: string | object): string => {
   const str = typeof strOrObj === 'string' ? strOrObj : JSON.stringify(strOrObj)
-  // @ts-expect-error: Buffer is global in node environment
   return Buffer.from(str)
     .toString('base64')
     .replace(/=/g, '')
@@ -20,9 +18,7 @@ export const hmacSha256Base64url = (payloadBase64: string, secret: string): stri
 }
 
 export const safeEqual = (a: string, b: string): boolean => {
-  // @ts-expect-error: Buffer is global in node environment
   const bufA = Buffer.from(a)
-  // @ts-expect-error: Buffer is global in node environment
   const bufB = Buffer.from(b)
   if (bufA.length !== bufB.length) {
     return false
@@ -31,7 +27,6 @@ export const safeEqual = (a: string, b: string): boolean => {
 }
 
 export const getLaunchSecret = (): string | null => {
-  // @ts-expect-error: process is global in node/nitro server environment
   const secret = process.env.MUH5_LAUNCH_SECRET
   if (secret) {
     return secret
@@ -74,7 +69,6 @@ export const verifyLaunchToken = (token: string): Muh5LaunchPayload | null => {
   }
 
   try {
-    // @ts-expect-error: Buffer is global in node environment
     const jsonStr = Buffer.from(payloadBase64, 'base64url').toString('utf8')
     const payload = JSON.parse(jsonStr) as Muh5LaunchPayload
 

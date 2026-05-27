@@ -5,6 +5,22 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   css: ['~/assets/css/main.css'],
 
+  // Server-only runtime config. Never inline DB creds into client bundle.
+  // Values come from environment (NUXT_MUH5_PORTAL_DB_*, NUXT_MUH5_GAME_DB_*).
+  // Empty defaults => endpoints fall back to sealed/empty state safely.
+  runtimeConfig: {
+    muh5PortalDbHost: '',
+    muh5PortalDbPort: '3306',
+    muh5PortalDbName: 'muh5_ccgame',
+    muh5PortalDbUser: '',
+    muh5PortalDbPassword: '',
+    muh5GameDbHost: '',
+    muh5GameDbPort: '3306',
+    muh5GameDbName: 'actor_s1',
+    muh5GameDbUser: '',
+    muh5GameDbPassword: '',
+  },
+
   routeRules: {
     '/**': {
       headers: {

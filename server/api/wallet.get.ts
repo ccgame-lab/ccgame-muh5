@@ -1,9 +1,7 @@
 import { apiSuccess } from '../utils/api-response'
-import { getWalletBalance, getTransactionHistory } from '../services/mock-data.server'
+import { readWalletForSession } from '../services/wallet.server'
 
-export default defineEventHandler(() => {
-  return apiSuccess({
-    balance: getWalletBalance(),
-    history: getTransactionHistory(),
-  })
+export default defineEventHandler(async (event) => {
+  const result = await readWalletForSession(event)
+  return apiSuccess(result)
 })

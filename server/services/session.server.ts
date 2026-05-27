@@ -93,7 +93,6 @@ export const extractSrvPath = (addr: string): string => {
 
 const allowUnsignedLaunch = (): boolean => {
   try {
-    // @ts-expect-error: process is global in node/nitro environment
     return process.env.NUXT_ALLOW_UNSIGNED_LAUNCH === 'true'
   }
   catch {
@@ -171,7 +170,6 @@ export const getSessionUser = (event?: H3Event): Muh5Session => {
   if (import.meta.dev) {
     let envOverride = ''
     try {
-      // @ts-expect-error: process is global in node/nitro environment
       envOverride = process.env.TEST_USER || process.env.NUXT_TEST_USER || ''
     }
     catch {
