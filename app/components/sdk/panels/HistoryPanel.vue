@@ -8,64 +8,73 @@ const { data: walletData, pending } = useFetch<{ data: { balance: WalletBalance,
 </script>
 
 <template>
-  <div
-    v-if="pending"
-    class="flex justify-center py-8"
-  >
-    <UIcon
-      name="i-heroicons-arrow-path"
-      class="w-8 h-8 animate-spin text-gray-500"
-    />
-  </div>
-  <div
-    v-else
-    class="space-y-2"
-  >
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-sm font-semibold text-gray-200">
+  <div class="space-y-3">
+    <div class="flex items-center justify-between gap-2">
+      <h3 class="text-sm font-semibold text-highlighted">
         Lịch sử giao dịch ví
       </h3>
       <UBadge
         color="neutral"
-        variant="solid"
+        variant="subtle"
         size="xs"
       >
         Ví tài khoản
       </UBadge>
     </div>
 
-    <div class="space-y-2">
-      <div
-        v-if="!walletData?.data.history || walletData.data.history.length === 0"
-        class="text-center py-8 text-sm text-gray-500 bg-gray-900 rounded-lg border border-gray-800"
-      >
+    <div
+      v-if="pending"
+      class="flex justify-center py-8"
+    >
+      <UIcon
+        name="i-heroicons-arrow-path"
+        class="size-6 animate-spin text-dimmed"
+      />
+    </div>
+
+    <UCard
+      v-else-if="!walletData?.data.history || walletData.data.history.length === 0"
+      variant="subtle"
+      class="border border-muted bg-muted/30"
+    >
+      <div class="flex flex-col items-center gap-2 py-8 text-center">
         <UIcon
           name="i-heroicons-lock-closed"
-          class="w-8 h-8 text-gray-600 mb-2 mx-auto"
+          class="size-8 text-dimmed"
         />
-        <p>Lịch sử giao dịch trống hoặc đang đồng bộ</p>
+        <p class="text-sm text-muted">
+          Lịch sử giao dịch trống hoặc đang đồng bộ
+        </p>
       </div>
-      <div
-        v-for="tx in walletData?.data.history"
-        v-else
+    </UCard>
+
+    <div
+      v-else
+      class="space-y-2"
+    >
+      <UCard
+        v-for="tx in walletData.data.history"
         :key="tx.id"
-        class="flex items-center justify-between p-3 bg-gray-900 rounded-lg border border-gray-800"
+        variant="subtle"
+        class="border border-muted bg-elevated"
+        :ui="{ body: 'flex items-center justify-between gap-3 p-3' }"
       >
-        <div>
-          <p class="text-sm text-gray-200">
+        <div class="min-w-0">
+          <p class="text-sm text-default truncate">
             {{ tx.description }}
           </p>
-          <p class="text-xs text-gray-500">
+          <p class="text-xs text-dimmed">
             {{ new Date(tx.createdAt).toLocaleDateString() }}
           </p>
         </div>
-        <div
-          :class="tx.type === 'deposit' ? 'text-green-500' : 'text-gray-300'"
-          class="font-semibold text-sm"
+        <UBadge
+          :color="tx.type === 'deposit' ? 'success' : 'neutral'"
+          variant="subtle"
+          class="shrink-0 font-semibold tabular-nums"
         >
           {{ tx.type === 'deposit' ? '+' : '-' }}{{ tx.amount }}
-        </div>
-      </div>
+        </UBadge>
+      </UCard>
     </div>
   </div>
 </template>
