@@ -34,6 +34,8 @@ Dùng `ecosystem.config.json` (PM2 trên host này parse JSON đúng; file `.cjs
 
 **Dev HMR (local only):** `bun run dev -- --host 0.0.0.0 --port 4100` — không dùng PM2 production config.
 
+**SDK UI preview (dev only):** `http://127.0.0.1:4100/sdk-preview` — tái dùng `SdkButton` / `SdkPanel`, không iframe game. Route bị `404` trên production build (`import.meta.dev`).
+
 ## Validation
 
 ```bash
