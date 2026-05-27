@@ -21,6 +21,19 @@ const { data: boardData, pending } = useFetch<{ data: LeaderboardEntry[] }>('/ap
     v-else
     class="space-y-2"
   >
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-sm font-semibold text-gray-200">
+        [Mock] Leaderboard
+      </h3>
+      <UBadge
+        color="neutral"
+        variant="solid"
+        size="xs"
+      >
+        [Dữ liệu mẫu] Read-Only
+      </UBadge>
+    </div>
+
     <div
       v-for="entry in boardData?.data"
       :key="entry.rank"

@@ -1,14 +1,27 @@
 <script setup lang="ts">
 // Using hardcoded mock data for notices to save time since it's just static
 const notices = [
-  { id: 1, title: 'Welcome to MUH5', date: '2026-05-27', isNew: true },
-  { id: 2, title: 'Server Maintenance Scheduled', date: '2026-05-26', isNew: false },
-  { id: 3, title: 'Patch Notes v1.0.1', date: '2026-05-25', isNew: false },
+  { id: 1, title: '[Mock] Welcome to MUH5', date: '2026-05-27', isNew: true },
+  { id: 2, title: '[Mock] Server Maintenance Scheduled', date: '2026-05-26', isNew: false },
+  { id: 3, title: '[Mock] Patch Notes v1.0.1', date: '2026-05-25', isNew: false },
 ]
 </script>
 
 <template>
   <div class="space-y-3">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-sm font-semibold text-gray-200">
+        [Mock] Notices
+      </h3>
+      <UBadge
+        color="neutral"
+        variant="solid"
+        size="xs"
+      >
+        [Dữ liệu mẫu] Read-Only
+      </UBadge>
+    </div>
+
     <div
       v-for="notice in notices"
       :key="notice.id"

@@ -7,6 +7,7 @@ import GiftcodePanel from './panels/GiftcodePanel.vue'
 import WalletPanel from './panels/WalletPanel.vue'
 import HistoryPanel from './panels/HistoryPanel.vue'
 import LeaderboardPanel from './panels/LeaderboardPanel.vue'
+import MiningPanel from './panels/MiningPanel.vue'
 
 const isOpen = defineModel<boolean>('isOpen')
 const activeTab = ref(sdkConfig.defaultTab)
@@ -18,7 +19,7 @@ const closePanel = () => {
 
 <template>
   <div
-    class="fixed z-[90] flex flex-col bg-gray-950 shadow-2xl transition-all duration-300 pointer-events-auto overflow-hidden"
+    class="fixed z-90 flex flex-col bg-gray-950 shadow-2xl transition-all duration-300 pointer-events-auto overflow-hidden"
     :class="[
       isOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95 pointer-events-none translate-y-8 sm:translate-y-0 sm:translate-x-8',
       'max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-full max-sm:max-h-[80vh] max-sm:border-t max-sm:border-gray-800 max-sm:rounded-t-[20px]',
@@ -57,6 +58,7 @@ const closePanel = () => {
       <WalletPanel v-if="activeTab === 'wallet'" />
       <HistoryPanel v-if="activeTab === 'history'" />
       <LeaderboardPanel v-if="activeTab === 'leaderboard'" />
+      <MiningPanel v-if="activeTab === 'mining'" />
     </div>
   </div>
 </template>

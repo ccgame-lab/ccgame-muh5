@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const isSdkOpen = ref(false)
+const isDev = import.meta.dev
 </script>
 
 <template>
@@ -14,7 +15,10 @@ const isSdkOpen = ref(false)
     <GameFrame src="about:blank" />
 
     <!-- Top Bar (Minimal Back button) (z-10) -->
-    <div class="absolute top-2 left-2 z-10 pointer-events-auto">
+    <div
+      v-if="isDev"
+      class="absolute top-2 left-2 z-10 pointer-events-auto"
+    >
       <UButton
         to="/"
         variant="ghost"

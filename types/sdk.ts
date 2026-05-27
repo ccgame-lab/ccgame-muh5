@@ -5,8 +5,8 @@ export interface UserProfile {
 }
 
 export interface WalletBalance {
-  coin: number
-  diamond: number
+  wcoin: number
+  wpoint: number
 }
 
 export interface Transaction {
@@ -22,7 +22,7 @@ export interface ShopItem {
   name: string
   description: string
   price: number
-  currency: 'coin' | 'diamond'
+  currency: 'wcoin' | 'wpoint'
   image?: string
 }
 

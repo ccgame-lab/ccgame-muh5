@@ -5,6 +5,7 @@ const isOpen = defineModel<boolean>('isOpen')
 
 const buttonRef = ref<HTMLElement | null>(null)
 const position = ref({ x: 0, y: 0 })
+const isMounted = ref(false)
 let isDragging = false
 let startPos = { x: 0, y: 0 }
 let startMousePos = { x: 0, y: 0 }
@@ -17,6 +18,7 @@ onMounted(() => {
       x: window.innerWidth - 72, // 48px width + 24px margin
       y: window.innerHeight - 72,
     }
+    isMounted.value = true
   }
 })
 
@@ -72,7 +74,8 @@ const handlePointerUp = (e: PointerEvent) => {
 <template>
   <div
     ref="buttonRef"
-    class="fixed z-[100] w-12 h-12 bg-gray-900 border border-gray-700 rounded-full shadow-xl flex items-center justify-center cursor-pointer touch-none pointer-events-auto transition-transform hover:scale-105 active:scale-95 select-none"
+    class="fixed z-100 w-12 h-12 bg-gray-900 border border-gray-700 rounded-full shadow-xl flex items-center justify-center cursor-pointer touch-none pointer-events-auto transition-transform hover:scale-105 active:scale-95 select-none"
+    :class="isMounted ? 'opacity-100' : 'opacity-0 pointer-events-none'"
     :style="{ left: `${position.x}px`, top: `${position.y}px` }"
     @pointerdown="handlePointerDown"
     @pointermove="handlePointerMove"

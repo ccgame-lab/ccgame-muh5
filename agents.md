@@ -96,6 +96,8 @@ Allowed public routes in Task 01:
 Allowed API routes in Task 01:
 - /api/health
 - /api/bootstrap
+- /api/wallet (mock/read-only)
+- /api/leaderboard (mock/read-only)
 
 The home page should only provide a minimal launch entry into /play.
 

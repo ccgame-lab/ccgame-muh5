@@ -23,32 +23,32 @@ const { data: walletData, pending } = useFetch<{ data: { balance: WalletBalance,
   >
     <div class="flex items-center justify-between">
       <h3 class="text-sm font-semibold text-gray-200">
-        Balance overview
+        [Mock] Balance overview
       </h3>
       <UBadge
         color="neutral"
         variant="solid"
         size="xs"
       >
-        Read-Only
+        [Dữ liệu mẫu] Read-Only
       </UBadge>
     </div>
 
     <div class="grid grid-cols-2 gap-4">
       <UCard class="bg-gray-900 border-gray-800 p-0 text-center py-4">
         <p class="text-xs text-gray-400 mb-1">
-          Coin
+          WCoin
         </p>
         <p class="text-xl font-bold text-yellow-500">
-          {{ walletData?.data.balance.coin.toLocaleString() }}
+          {{ walletData?.data.balance.wcoin?.toLocaleString() ?? 0 }}
         </p>
       </UCard>
       <UCard class="bg-gray-900 border-gray-800 p-0 text-center py-4">
         <p class="text-xs text-gray-400 mb-1">
-          Diamond
+          WPoint
         </p>
         <p class="text-xl font-bold text-blue-500">
-          {{ walletData?.data.balance.diamond.toLocaleString() }}
+          {{ walletData?.data.balance.wpoint?.toLocaleString() ?? 0 }}
         </p>
       </UCard>
     </div>

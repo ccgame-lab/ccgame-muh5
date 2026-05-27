@@ -23,14 +23,14 @@ const { data: walletData, pending } = useFetch<{ data: { balance: WalletBalance,
   >
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-sm font-semibold text-gray-200">
-        Recent History
+        [Mock] Recent History
       </h3>
       <UBadge
         color="neutral"
         variant="solid"
         size="xs"
       >
-        Read-Only
+        [Dữ liệu mẫu] Read-Only
       </UBadge>
     </div>
 
