@@ -1,0 +1,24 @@
+{
+  "apps": [
+    {
+      "name": "ccgame-muh5",
+      "cwd": "/www/wwwroot/ccgame/ccgame-muh5",
+      "script": ".output/server/index.mjs",
+      "interpreter": "bun",
+      "exec_mode": "fork",
+      "instances": 1,
+      "autorestart": true,
+      "max_memory_restart": "768M",
+      "env": {
+        "NODE_ENV": "production",
+        "HOST": "0.0.0.0",
+        "PORT": "4100"
+      },
+      "env_production": {
+        "NODE_ENV": "production",
+        "HOST": "0.0.0.0",
+        "PORT": "4100"
+      }
+    }
+  ]
+}

@@ -3,6 +3,17 @@ export default defineNuxtConfig({
 
   modules: ['@nuxt/eslint', '@nuxt/ui'],
   devtools: { enabled: false },
+
+  app: {
+    head: {
+      link: [
+        { rel: 'preconnect', href: 'https://cdn.ccgame.org' },
+        { rel: 'dns-prefetch', href: 'https://cdn.ccgame.org' },
+        { rel: 'preconnect', href: 'https://muh5-ws.ccgame.org' },
+        { rel: 'dns-prefetch', href: 'https://muh5-ws.ccgame.org' },
+      ],
+    },
+  },
   css: ['~/assets/css/main.css'],
 
   // Server-only runtime config. Never inline DB creds into client bundle.
