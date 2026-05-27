@@ -20,11 +20,10 @@ function toggleSdk() {
         variant="solid"
         size="lg"
         class="size-12 rounded-full p-0 shadow-lg ring-1 ring-muted"
-        :ui="{ base: 'justify-center' }"
+        :ui="{ base: 'justify-center font-black text-lg italic' }"
+        label="CC"
         @click="toggleSdk"
-      >
-        <span class="font-black text-lg italic text-primary">CC</span>
-      </UButton>
+      />
     </UChip>
   </div>
 </template>

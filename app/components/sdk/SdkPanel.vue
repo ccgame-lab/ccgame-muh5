@@ -51,7 +51,7 @@ function closePanel() {
       :tabs="sdkConfig.tabs"
     />
 
-    <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+    <div class="flex-1 overflow-y-auto p-4">
       <OverviewPanel v-if="activeTab === 'overview'" />
       <NoticesPanel v-else-if="activeTab === 'notices'" />
       <GiftcodePanel v-else-if="activeTab === 'giftcode'" />
@@ -62,16 +62,3 @@ function closePanel() {
     </div>
   </div>
 </template>
-
-<style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #374151;
-  border-radius: 10px;
-}
-</style>

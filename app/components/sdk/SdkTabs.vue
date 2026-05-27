@@ -1,38 +1,27 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue'
+
+const props = defineProps<{
   tabs: Array<{ id: string, label: string, icon: string }>
-  activeTab: string
 }>()
 
-const emit = defineEmits<{
-  (e: 'update:activeTab', id: string): void
-}>()
+const activeTab = defineModel<string>('activeTab', { required: true })
+
+const items = computed(() =>
+  props.tabs.map(tab => ({
+    label: tab.label,
+    icon: tab.icon,
+    value: tab.id,
+  })),
+)
 </script>
 
 <template>
-  <div class="flex overflow-x-auto no-scrollbar border-b border-gray-800 shrink-0 px-2 pt-2">
-    <button
-      v-for="tab in tabs"
-      :key="tab.id"
-      class="flex items-center gap-1 px-4 py-2 text-sm font-medium transition-colors border-b-2 whitespace-nowrap"
-      :class="activeTab === tab.id ? 'border-primary-500 text-primary-400' : 'border-transparent text-gray-400 hover:text-gray-200'"
-      @click="emit('update:activeTab', tab.id)"
-    >
-      <UIcon
-        :name="tab.icon"
-        class="w-4 h-4"
-      />
-      <span>{{ tab.label }}</span>
-    </button>
-  </div>
+  <UTabs
+    v-model="activeTab"
+    :items="items"
+    variant="link"
+    :content="false"
+    class="w-full shrink-0 border-b border-muted"
+  />
 </template>
-
-<style scoped>
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-</style>
