@@ -34,7 +34,22 @@ Dùng `ecosystem.config.json` (PM2 trên host này parse JSON đúng; file `.cjs
 
 **Dev HMR (local only):** `bun run dev -- --host 0.0.0.0 --port 4100` — không dùng PM2 production config.
 
-**SDK UI preview (dev only):** `http://127.0.0.1:4100/sdk-preview` — tái dùng `SdkButton` / `SdkPanel`, không iframe game. Route bị `404` trên production build (`import.meta.dev`).
+**SDK UI preview (dev only):** tái dùng `SdkButton` / `SdkPanel`, không iframe Egret / `muh5-client`. Route `404` trên production build (`import.meta.dev`).
+
+Workflow SDK/UI (mặc định — **không** bật HMR trên `muh5.ccgame.org`):
+
+```bash
+cd /www/wwwroot/ccgame/ccgame-muh5
+bun run dev -- --host 0.0.0.0 --port 4101
+# open http://127.0.0.1:4101/sdk-preview
+```
+
+Dùng port `4101` để tránh đụng production PM2 trên `4100`.
+
+Smoke mobile qua domain/proxy (tạm thời, không phải default):
+
+- Có thể chạy dev/HMR qua domain khi cần, nhưng **không `pm2 save`**, không đánh giá performance bằng dev runtime.
+- Xong phải `bun run build` + restart production (`ecosystem.config.json`) ngay.
 
 ## Validation
 
