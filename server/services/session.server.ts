@@ -12,7 +12,9 @@ export type Muh5Session = {
   player: {
     id: string
     username?: string
+    spverify?: string
     displayName: string
+    suggestedCharacterName?: string
   }
   server: {
     id: number
@@ -109,6 +111,12 @@ export const getSessionUser = (event?: H3Event): Muh5Session => {
   if (query.launch) {
     const verifiedPayload = verifyLaunchToken(String(query.launch))
     if (verifiedPayload) {
+      const gameUsername = verifiedPayload.player.username?.trim()
+      const spverify = verifiedPayload.player.spverify?.trim()
+      if (!gameUsername || !spverify) {
+        return sealedSession('invalid_launch')
+      }
+
       return {
         authMode: verifiedPayload.authMode,
         source: 'signed_launch',
@@ -116,8 +124,10 @@ export const getSessionUser = (event?: H3Event): Muh5Session => {
         playAllowed: true,
         player: {
           id: verifiedPayload.player.id,
-          username: verifiedPayload.player.username,
+          username: gameUsername,
+          spverify,
           displayName: verifiedPayload.player.displayName,
+          suggestedCharacterName: verifiedPayload.player.suggestedCharacterName,
         },
         server: {
           id: verifiedPayload.server.id,

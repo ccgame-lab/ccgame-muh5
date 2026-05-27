@@ -10,6 +10,7 @@
 		"h5/promise.min.js"
 	],
 	"game": [
-		"https://cdn.ccgame.org/h5/muh5/resource/main.min.js"
+		"https://cdn.ccgame.org/h5/muh5/resource/main.min.js",
+		"h5/ccgame-entrance.js"
 	]
 }

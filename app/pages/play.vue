@@ -18,7 +18,13 @@ const { data: bootstrap, pending } = useFetch<{
       trusted: boolean
       playAllowed: boolean
     }
-    player: { id: string, username?: string, displayName: string } | null
+    player: {
+      id: string
+      username?: string
+      spverify?: string
+      displayName: string
+      suggestedCharacterName?: string
+    } | null
     server: { id: number, key: string, name: string, srvaddr: string, srvport: string } | null
   }
 }>('/api/bootstrap', {
@@ -78,14 +84,36 @@ const gameUrl = computed(() => {
   const player = bootstrap.value.data.player
   const server = bootstrap.value.data.server
 
-  const username = player?.username || player?.id || 'guest'
-  const userId = player?.id || 'guest'
+  const username = player?.username
+  const spverify = player?.spverify
+  if (!username || !spverify) {
+    return ''
+  }
+  const userId = player?.id || username
 
   const srvid = server?.id || 1
   const srvaddr = normalizeSrvAddr(server?.srvaddr || 'muh5-ws.ccgame.org')
   const srvport = server?.srvport || '443'
 
-  return `/muh5-client/index.html?user=${encodeURIComponent(username)}&userId=${encodeURIComponent(userId)}&srvid=${encodeURIComponent(srvid)}&srvaddr=${encodeURIComponent(srvaddr)}&srvport=${encodeURIComponent(srvport)}`
+  const params = new URLSearchParams({
+    user: username,
+    userId,
+    spverify,
+    srvid: String(srvid),
+    srvaddr,
+    srvport,
+  })
+
+  // Guest: preload creatrole assets; prefilled short nick avoids random-name race on create click.
+  if (bootstrap.value?.data?.session?.authMode === 'guest') {
+    params.set('roleCount', '0')
+    const nick = player?.suggestedCharacterName?.trim()
+    if (nick) {
+      params.set('nickName', nick)
+    }
+  }
+
+  return `/muh5-client/index.html?${params.toString()}`
 })
 </script>
 
@@ -126,6 +154,24 @@ const gameUrl = computed(() => {
         >
           {{ bootstrap?.data?.session?.source || 'sealed' }} · trusted: {{ bootstrap?.data?.session?.trusted ? 'yes' : 'no' }}
         </UBadge>
+      </div>
+    </div>
+
+    <div
+      v-else-if="!gameUrl"
+      class="absolute inset-0 z-20 flex items-center justify-center p-6 bg-black"
+    >
+      <div class="w-full max-w-md space-y-4 text-center">
+        <UIcon
+          name="i-heroicons-exclamation-triangle"
+          class="w-12 h-12 text-amber-500 mx-auto"
+        />
+        <h1 class="text-lg font-bold text-white">
+          Thiếu tên nhân vật game
+        </h1>
+        <p class="text-sm text-gray-400 leading-relaxed">
+          Launch token hợp lệ nhưng không có username game. Vào lại từ CCGame để tiếp tục.
+        </p>
       </div>
     </div>
 

@@ -3,8 +3,13 @@ export type Muh5LaunchPayload = {
   authMode: 'guest' | 'greenjade'
   player: {
     id: string
-    username?: string
+    /** Legacy game account name (users.username); required for trusted /play launch */
+    username: string
+    /** Legacy WS verify string (globaluser.passwd / users.password) */
+    spverify: string
     displayName: string
+    /** Optional ≤6-char create-role hint (legacy client nickName query). */
+    suggestedCharacterName?: string
   }
   server: {
     id: number

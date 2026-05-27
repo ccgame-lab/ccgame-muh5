@@ -12,6 +12,9 @@
         }
     }
 
+    // Full query map for ccgame-entrance.js (nickName, roleCount, …)
+    window["__muh5UrlParams"] = urlParam;
+
     // Assign global variables required by Egret engine
     window["uid"] = urlParam.user || "quocquoc";
     window["sid"] = urlParam.srvid || "1";
