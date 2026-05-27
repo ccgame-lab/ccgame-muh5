@@ -23,14 +23,14 @@ const { data: boardData, pending } = useFetch<{ data: LeaderboardEntry[] }>('/ap
   >
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-sm font-semibold text-gray-200">
-        [Mock] Leaderboard
+        Bảng xếp hạng
       </h3>
       <UBadge
         color="neutral"
         variant="solid"
         size="xs"
       >
-        [Dữ liệu mẫu] Read-Only
+        Cao thủ S1
       </UBadge>
     </div>
 
