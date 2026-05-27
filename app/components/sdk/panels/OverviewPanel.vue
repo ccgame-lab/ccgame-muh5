@@ -1,12 +1,27 @@
 <script setup lang="ts">
+const route = useRoute()
+
 const { data: bootstrap, pending } = useFetch<{
   data: {
+    session: { source: string, trusted: boolean, playAllowed: boolean }
     player: { id: string, username?: string, displayName: string } | null
     server: { id: number, key: string, name: string, srvaddr: string, srvport: string } | null
   }
 }>('/api/bootstrap', {
   key: 'bootstrap-data',
+  query: computed(() => ({
+    launch: route.query.launch,
+    user: route.query.user,
+    userId: route.query.userId,
+  })),
   lazy: true,
+})
+
+const serverLabel = computed(() => {
+  if (!bootstrap.value?.data?.session?.playAllowed) {
+    return 'Launch niêm phong'
+  }
+  return bootstrap.value?.data?.server?.name || 'S1'
 })
 </script>
 
@@ -49,7 +64,7 @@ const { data: bootstrap, pending } = useFetch<{
             Server
           </p>
           <p class="text-sm font-semibold text-gray-200">
-            S1 - Dev Mock
+            {{ serverLabel }}
           </p>
         </div>
       </div>

@@ -10,10 +10,14 @@ const isDev = import.meta.dev
 
 const route = useRoute()
 
-// Query bootstrap with the active launch token or fallback parameters
-const { data: bootstrap } = useFetch<{
+const { data: bootstrap, pending } = useFetch<{
   data: {
-    session: { authMode: string, source: string, trusted: boolean }
+    session: {
+      authMode: string
+      source: string
+      trusted: boolean
+      playAllowed: boolean
+    }
     player: { id: string, username?: string, displayName: string } | null
     server: { id: number, key: string, name: string, srvaddr: string, srvport: string } | null
   }
@@ -27,6 +31,19 @@ const { data: bootstrap } = useFetch<{
   lazy: true,
 })
 
+const playAllowed = computed(() => bootstrap.value?.data?.session?.playAllowed === true)
+
+const launchBlockedMessage = computed(() => {
+  const source = bootstrap.value?.data?.session?.source
+  if (source === 'invalid_launch') {
+    return 'Phiên launch không hợp lệ hoặc đã hết hạn. Vào lại từ CCGame để tiếp tục.'
+  }
+  if (source === 'unsigned_legacy') {
+    return 'Chế độ tương thích unsigned (không tin cậy). Chỉ dùng cho thử nghiệm.'
+  }
+  return 'Thiếu launch token hợp lệ từ CCGame. Vào game qua ccgame.org/play/muh5.'
+})
+
 const normalizeSrvAddr = (addr: string): string => {
   if (!addr) return ''
 
@@ -38,16 +55,13 @@ const normalizeSrvAddr = (addr: string): string => {
     // Fallback
   }
 
-  // Strip protocols (e.g. wss://, https://)
   host = host.replace(/^(wss?|https?):\/\//i, '')
 
-  // Strip trailing slashes and paths
   const slashIdx = host.indexOf('/')
   if (slashIdx !== -1) {
     host = host.substring(0, slashIdx)
   }
 
-  // Strip port if appended (e.g. host:port)
   const colonIdx = host.indexOf(':')
   if (colonIdx !== -1) {
     host = host.substring(0, colonIdx)
@@ -57,8 +71,8 @@ const normalizeSrvAddr = (addr: string): string => {
 }
 
 const gameUrl = computed(() => {
-  if (!bootstrap.value?.data) {
-    return '/muh5-client/index.html?user=guest&userId=guest&srvid=1&srvaddr=muh5-ws.ccgame.org&srvport=443'
+  if (!playAllowed.value || !bootstrap.value?.data) {
+    return ''
   }
 
   const player = bootstrap.value.data.player
@@ -77,10 +91,49 @@ const gameUrl = computed(() => {
 
 <template>
   <div class="relative w-full h-screen overflow-hidden bg-black text-white">
-    <!-- Game Frame (z-0) -->
-    <GameFrame :src="gameUrl" />
+    <div
+      v-if="pending"
+      class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black"
+    >
+      <UIcon
+        name="i-heroicons-arrow-path"
+        class="w-8 h-8 animate-spin text-gray-500"
+      />
+      <p class="text-sm text-gray-400">
+        Đang xác thực phiên launch...
+      </p>
+    </div>
 
-    <!-- Top Bar (Minimal Back button) (z-10) -->
+    <div
+      v-else-if="!playAllowed"
+      class="absolute inset-0 z-20 flex items-center justify-center p-6 bg-black"
+    >
+      <div class="w-full max-w-md space-y-4 text-center">
+        <UIcon
+          name="i-heroicons-lock-closed"
+          class="w-12 h-12 text-amber-500 mx-auto"
+        />
+        <h1 class="text-lg font-bold text-white">
+          Launch bị niêm phong
+        </h1>
+        <p class="text-sm text-gray-400 leading-relaxed">
+          {{ launchBlockedMessage }}
+        </p>
+        <UBadge
+          color="warning"
+          variant="subtle"
+          class="mx-auto"
+        >
+          {{ bootstrap?.data?.session?.source || 'sealed' }} · trusted: {{ bootstrap?.data?.session?.trusted ? 'yes' : 'no' }}
+        </UBadge>
+      </div>
+    </div>
+
+    <GameFrame
+      v-else
+      :src="gameUrl"
+    />
+
     <div
       v-if="isDev"
       class="absolute top-2 left-2 z-10 pointer-events-auto"
@@ -97,8 +150,10 @@ const gameUrl = computed(() => {
       </UButton>
     </div>
 
-    <!-- SDK Elements -->
-    <div class="pointer-events-none absolute inset-0 z-50 overflow-hidden">
+    <div
+      v-if="playAllowed"
+      class="pointer-events-none absolute inset-0 z-50 overflow-hidden"
+    >
       <SdkButton v-model:is-open="isSdkOpen" />
       <SdkPanel v-model:is-open="isSdkOpen" />
     </div>

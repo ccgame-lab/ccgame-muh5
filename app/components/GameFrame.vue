@@ -22,6 +22,7 @@ defineProps<{
       </div>
     </div>
     <iframe
+      v-if="src"
       :src="src"
       class="w-full h-full border-none"
       allowfullscreen

@@ -10,6 +10,7 @@ export default defineEventHandler((event) => {
       authMode: sessionData.authMode,
       source: sessionData.source,
       trusted: sessionData.trusted,
+      playAllowed: sessionData.playAllowed,
     },
     player: sessionData.player,
     server: sessionData.server,

@@ -2,10 +2,13 @@ import { getQuery } from 'h3'
 import type { H3Event } from 'h3'
 import { verifyLaunchToken } from './launch-token.server'
 
+export type Muh5LaunchSource = 'signed_launch' | 'unsigned_legacy' | 'invalid_launch' | 'sealed'
+
 export type Muh5Session = {
   authMode: 'guest' | 'greenjade'
-  source: 'signed_launch' | 'guest' | 'unsigned_legacy'
+  source: Muh5LaunchSource
   trusted: boolean
+  playAllowed: boolean
   player: {
     id: string
     username?: string
@@ -21,6 +24,26 @@ export type Muh5Session = {
   }
 }
 
+const sealedSession = (source: Muh5LaunchSource): Muh5Session => ({
+  authMode: 'guest',
+  source,
+  trusted: false,
+  playAllowed: false,
+  player: {
+    id: 'guest',
+    username: 'Guest',
+    displayName: 'Gamer Khách',
+  },
+  server: {
+    id: 1,
+    key: 's1',
+    name: 'S1',
+    srvaddr: 'muh5-ws.ccgame.org',
+    srvport: '443',
+    srvpath: '/s1/',
+  },
+})
+
 export const normalizeSrvAddr = (addr: string): string => {
   if (!addr) return ''
 
@@ -32,16 +55,13 @@ export const normalizeSrvAddr = (addr: string): string => {
     // Fallback if decoding fails
   }
 
-  // Strip protocols (e.g. wss://, https://)
   host = host.replace(/^(wss?|https?):\/\//i, '')
 
-  // Strip trailing slashes and paths
   const slashIdx = host.indexOf('/')
   if (slashIdx !== -1) {
     host = host.substring(0, slashIdx)
   }
 
-  // Strip port if appended (e.g. host:port)
   const colonIdx = host.indexOf(':')
   if (colonIdx !== -1) {
     host = host.substring(0, colonIdx)
@@ -69,32 +89,23 @@ export const extractSrvPath = (addr: string): string => {
   return ''
 }
 
-export const getSessionUser = (event?: H3Event): Muh5Session => {
-  // Default fallback (Guest / Sealed)
-  const defaultSession: Muh5Session = {
-    authMode: 'guest',
-    source: 'guest',
-    trusted: false,
-    player: {
-      id: 'guest',
-      username: 'Guest',
-      displayName: 'Gamer Khách',
-    },
-    server: {
-      id: 1,
-      key: 's1',
-      name: 'S1',
-      srvaddr: 'muh5-ws.ccgame.org',
-      srvport: '443',
-      srvpath: '/s1/',
-    },
+const allowUnsignedLaunch = (): boolean => {
+  try {
+    // @ts-expect-error: process is global in node/nitro environment
+    return process.env.NUXT_ALLOW_UNSIGNED_LAUNCH === 'true'
   }
+  catch {
+    return false
+  }
+}
 
-  if (!event) return defaultSession
+export const getSessionUser = (event?: H3Event): Muh5Session => {
+  if (!event) {
+    return sealedSession('sealed')
+  }
 
   const query = getQuery(event)
 
-  // 1. Try parsing signed launch token
   if (query.launch) {
     const verifiedPayload = verifyLaunchToken(String(query.launch))
     if (verifiedPayload) {
@@ -102,6 +113,7 @@ export const getSessionUser = (event?: H3Event): Muh5Session => {
         authMode: verifiedPayload.authMode,
         source: 'signed_launch',
         trusted: true,
+        playAllowed: true,
         player: {
           id: verifiedPayload.player.id,
           username: verifiedPayload.player.username,
@@ -117,30 +129,22 @@ export const getSessionUser = (event?: H3Event): Muh5Session => {
         },
       }
     }
+
+    return sealedSession('invalid_launch')
   }
 
-  // 2. Try parsing unsigned legacy params if NUXT_ALLOW_UNSIGNED_LAUNCH is enabled
-  let allowUnsigned = false
-  try {
-    // @ts-expect-error: process is global in node/nitro environment
-    allowUnsigned = process.env.NUXT_ALLOW_UNSIGNED_LAUNCH === 'true'
-  }
-  catch {
-    // ignore
-  }
-
-  if (allowUnsigned && query.user) {
+  if (allowUnsignedLaunch() && query.user) {
     const username = String(query.user)
     const userId = query.userId ? String(query.userId) : username
-    const authMode = username === 'quocquoc' ? 'greenjade' : 'guest'
 
     return {
-      authMode,
+      authMode: 'guest',
       source: 'unsigned_legacy',
       trusted: false,
+      playAllowed: true,
       player: {
         id: userId,
-        username: username,
+        username,
         displayName: username,
       },
       server: {
@@ -154,36 +158,38 @@ export const getSessionUser = (event?: H3Event): Muh5Session => {
     }
   }
 
-  // 3. Environment/dev overrides (strictly override only when configured by env)
-  let envOverride = ''
-  try {
-    // @ts-expect-error: process is global in node/nitro environment
-    envOverride = process.env.TEST_USER || process.env.NUXT_TEST_USER || ''
-  }
-  catch {
-    // ignore
-  }
+  if (import.meta.dev) {
+    let envOverride = ''
+    try {
+      // @ts-expect-error: process is global in node/nitro environment
+      envOverride = process.env.TEST_USER || process.env.NUXT_TEST_USER || ''
+    }
+    catch {
+      // ignore
+    }
 
-  if (envOverride === 'quocquoc') {
-    return {
-      authMode: 'greenjade',
-      source: 'unsigned_legacy',
-      trusted: false,
-      player: {
-        id: 'greenjade',
-        username: 'quocquoc',
-        displayName: 'quocquoc (Dev Override)',
-      },
-      server: {
-        id: 1,
-        key: 's1',
-        name: 'S1',
-        srvaddr: 'muh5-ws.ccgame.org',
-        srvport: '443',
-        srvpath: '/s1/',
-      },
+    if (envOverride === 'quocquoc') {
+      return {
+        authMode: 'greenjade',
+        source: 'unsigned_legacy',
+        trusted: false,
+        playAllowed: true,
+        player: {
+          id: 'greenjade',
+          username: 'quocquoc',
+          displayName: 'quocquoc (Dev Override)',
+        },
+        server: {
+          id: 1,
+          key: 's1',
+          name: 'S1',
+          srvaddr: 'muh5-ws.ccgame.org',
+          srvport: '443',
+          srvpath: '/s1/',
+        },
+      }
     }
   }
 
-  return defaultSession
+  return sealedSession('sealed')
 }
