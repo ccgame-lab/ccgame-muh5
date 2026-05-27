@@ -25,11 +25,18 @@ const { data: bootstrap, pending } = useFetch<{
 const authMode = computed(() => bootstrap.value?.data?.session?.authMode || 'guest')
 const isGreenJade = computed(() => authMode.value === 'greenjade')
 
-const authLabel = computed(() => {
-  if (isGreenJade.value) {
-    return bootstrap.value?.data?.player?.displayName || 'GreenJade'
+const displayName = computed(() =>
+  bootstrap.value?.data?.player?.displayName
+  || bootstrap.value?.data?.player?.username
+  || 'Khách',
+)
+
+const shortPlayerId = computed(() => {
+  const id = bootstrap.value?.data?.player?.id || 'guest'
+  if (id.length <= 18) {
+    return id
   }
-  return 'Khách'
+  return `${id.slice(0, 10)}...${id.slice(-5)}`
 })
 
 const greenJadeLoginUrl = useGreenJadeLoginUrl()
@@ -49,80 +56,101 @@ const serverLabel = computed(() => {
   >
     <UIcon
       name="i-heroicons-arrow-path"
-      class="w-8 h-8 animate-spin text-gray-500"
+      class="size-8 animate-spin text-dimmed"
     />
   </div>
+
   <div
     v-else
-    class="space-y-4"
+    class="space-y-3"
   >
-    <div class="flex flex-col items-center justify-center p-6 bg-gray-900 rounded-lg border border-gray-800">
-      <UAvatar
-        src="https://avatars.githubusercontent.com/u/739984?v=4"
-        size="xl"
-        class="mb-3 border-2 border-primary-500"
-      />
-      <h3 class="text-lg font-bold text-white">
-        {{ bootstrap?.data?.player?.displayName || bootstrap?.data?.player?.username || 'Khách' }}
-      </h3>
-      <p class="text-xs text-gray-400">
-        ID: {{ bootstrap?.data?.player?.id || 'guest' }}
-      </p>
-      <UBadge
-        class="mt-2"
-        :color="isGreenJade ? 'success' : 'warning'"
-        variant="subtle"
-      >
-        {{ authLabel }}
-      </UBadge>
-    </div>
-
-    <div
-      v-if="!isGreenJade"
-      class="rounded-lg border border-amber-900/40 bg-amber-950/20 p-3 space-y-2"
+    <UCard
+      variant="subtle"
+      class="border border-muted bg-elevated"
     >
-      <p class="text-xs text-amber-200/90 leading-relaxed">
-        Đang chơi bằng Khách. Đăng nhập GreenJade để giữ tiến trình tốt hơn.
-      </p>
-      <a
-        :href="greenJadeLoginUrl"
-        target="_parent"
-        rel="noopener noreferrer"
-        class="inline-flex items-center justify-center w-full rounded-md bg-emerald-700/80 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-600 transition-colors"
-      >
-        Đăng nhập GreenJade
-      </a>
-    </div>
+      <div class="flex flex-col items-center gap-2 px-2 py-4 text-center">
+        <UAvatar
+          src="https://avatars.githubusercontent.com/u/739984?v=4"
+          size="lg"
+          class="ring-2 ring-primary"
+        />
+        <div class="min-w-0 space-y-0.5">
+          <h3 class="text-base font-semibold text-highlighted truncate max-w-full">
+            {{ displayName }}
+          </h3>
+          <p class="font-mono text-[11px] text-dimmed truncate max-w-full">
+            {{ shortPlayerId }}
+          </p>
+        </div>
+        <UBadge
+          :color="isGreenJade ? 'success' : 'warning'"
+          variant="subtle"
+          size="sm"
+        >
+          {{ isGreenJade ? 'GreenJade' : 'Khách' }}
+        </UBadge>
+      </div>
+    </UCard>
 
-    <div class="grid grid-cols-2 gap-3">
-      <div class="p-3 bg-gray-900 rounded-lg border border-gray-800 flex items-center gap-3">
+    <UAlert
+      v-if="!isGreenJade"
+      color="warning"
+      variant="subtle"
+      icon="i-heroicons-user-circle"
+      title="Đang chơi bằng Khách"
+      description="Đăng nhập GreenJade để giữ tiến trình tốt hơn."
+    >
+      <template #actions>
+        <UButton
+          :href="greenJadeLoginUrl"
+          target="_parent"
+          rel="noopener noreferrer"
+          color="primary"
+          size="sm"
+          block
+          label="Đăng nhập GreenJade"
+        />
+      </template>
+    </UAlert>
+
+    <div class="grid grid-cols-2 gap-2">
+      <UCard
+        variant="subtle"
+        class="border border-muted bg-elevated"
+        :ui="{ body: 'flex items-center gap-2.5 p-3' }"
+      >
         <UIcon
           name="i-heroicons-server"
-          class="w-5 h-5 text-gray-400"
+          class="size-5 shrink-0 text-dimmed"
         />
-        <div>
-          <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
-            Server
+        <div class="min-w-0">
+          <p class="text-[10px] font-medium uppercase tracking-wide text-dimmed">
+            Máy chủ
           </p>
-          <p class="text-sm font-semibold text-gray-200">
+          <p class="text-sm font-semibold text-default truncate">
             {{ serverLabel }}
           </p>
         </div>
-      </div>
-      <div class="p-3 bg-gray-900 rounded-lg border border-gray-800 flex items-center gap-3">
+      </UCard>
+
+      <UCard
+        variant="subtle"
+        class="border border-muted bg-elevated"
+        :ui="{ body: 'flex items-center gap-2.5 p-3' }"
+      >
         <UIcon
           name="i-heroicons-star"
-          class="w-5 h-5 text-yellow-500"
+          class="size-5 shrink-0 text-warning"
         />
-        <div>
-          <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
-            VIP Level
+        <div class="min-w-0">
+          <p class="text-[10px] font-medium uppercase tracking-wide text-dimmed">
+            VIP
           </p>
-          <p class="text-sm font-semibold text-gray-200">
+          <p class="text-sm font-semibold text-default">
             VIP 0
           </p>
         </div>
-      </div>
+      </UCard>
     </div>
   </div>
 </template>

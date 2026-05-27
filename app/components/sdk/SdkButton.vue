@@ -19,7 +19,7 @@ function toggleSdk() {
         color="neutral"
         variant="solid"
         size="lg"
-        class="size-12 rounded-full p-0 shadow-lg ring-1 ring-muted"
+        class="size-12 rounded-full p-0 shadow-sm ring-1 ring-muted"
         :ui="{ base: 'justify-center font-black text-lg italic' }"
         label="CC"
         @click="toggleSdk"

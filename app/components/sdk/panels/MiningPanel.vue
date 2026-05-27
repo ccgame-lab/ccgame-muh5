@@ -1,43 +1,21 @@
 <template>
-  <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <h3 class="text-sm font-semibold text-gray-200">
-        Máy Đào / Monument
+  <div class="space-y-3">
+    <div class="flex items-center justify-between gap-2">
+      <h3 class="text-sm font-semibold text-highlighted">
+        Máy đào / Monument
       </h3>
       <UBadge
         color="neutral"
-        variant="solid"
+        variant="subtle"
         size="xs"
       >
         Niêm phong
       </UBadge>
     </div>
 
-    <!-- Monument Info Cards -->
-    <div class="grid grid-cols-2 gap-4 opacity-50">
-      <UCard class="bg-gray-900 border-gray-800 p-0 text-center py-3">
-        <p class="text-xs text-gray-400 mb-1">
-          Tốc độ đào
-        </p>
-        <p class="text-lg font-bold text-cyan-400">
-          0 KC/h
-        </p>
-      </UCard>
-      <UCard class="bg-gray-900 border-gray-800 p-0 text-center py-3">
-        <p class="text-xs text-gray-400 mb-1">
-          Máy hoạt động
-        </p>
-        <p class="text-lg font-bold text-gray-400">
-          0 / 3
-        </p>
-      </UCard>
-    </div>
-
-    <!-- Sealed feature message -->
     <FeatureLocked
-      title="Máy đào Kim Cương sắp mở"
-      description="Tính năng đang khóa để bảo toàn dữ liệu S1. Theo dõi thông báo trong game."
+      title="Sắp mở"
+      description="Đang khóa để bảo toàn dữ liệu S1. Theo dõi thông báo trong game."
       icon="i-heroicons-cpu-chip"
     />
   </div>

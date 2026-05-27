@@ -10,6 +10,11 @@ const JOB_LABEL: Record<number, string> = {
 
 const tab = ref<LeaderboardTab>('power')
 
+const tabItems = [
+  { label: 'Lực chiến', value: 'power' as const },
+  { label: 'Cấp độ', value: 'level' as const },
+]
+
 const { data, pending, error, refresh } = useFetch<{ data: { tab: LeaderboardTab, entries: LeaderboardEntry[] } }>(
   '/api/leaderboard',
   {
@@ -31,41 +36,39 @@ const formatScore = (value: number): string => {
   if (!Number.isFinite(value)) return '—'
   return value.toLocaleString('vi-VN')
 }
+
+const rankBadgeColor = (rank: number): 'warning' | 'neutral' | 'primary' => {
+  if (rank === 1) return 'warning'
+  if (rank <= 3) return 'primary'
+  return 'neutral'
+}
 </script>
 
 <template>
   <div class="space-y-3">
-    <div class="flex items-center justify-between mb-2">
-      <h3 class="text-sm font-semibold text-gray-200">
+    <div class="flex items-center justify-between gap-2">
+      <h3 class="text-sm font-semibold text-highlighted">
         Bảng xếp hạng
       </h3>
       <UBadge
         color="neutral"
-        variant="solid"
+        variant="subtle"
         size="xs"
       >
         Cao thủ S1
       </UBadge>
     </div>
 
-    <div class="flex gap-1 p-1 bg-gray-900 rounded-lg border border-gray-800">
-      <button
-        type="button"
-        class="flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors"
-        :class="tab === 'power' ? 'bg-primary-500/20 text-primary-300' : 'text-gray-400 hover:text-gray-200'"
-        @click="tab = 'power'"
-      >
-        Lực chiến
-      </button>
-      <button
-        type="button"
-        class="flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors"
-        :class="tab === 'level' ? 'bg-primary-500/20 text-primary-300' : 'text-gray-400 hover:text-gray-200'"
-        @click="tab = 'level'"
-      >
-        Cấp độ
-      </button>
-    </div>
+    <UTabs
+      v-model="tab"
+      :items="tabItems"
+      color="primary"
+      variant="pill"
+      size="xs"
+      :content="false"
+      class="w-full"
+      :ui="{ list: 'w-full bg-muted/60 p-1' }"
+    />
 
     <div
       v-if="pending"
@@ -73,49 +76,52 @@ const formatScore = (value: number): string => {
     >
       <UIcon
         name="i-heroicons-arrow-path"
-        class="w-6 h-6 animate-spin text-gray-500"
+        class="size-6 animate-spin text-dimmed"
       />
     </div>
 
-    <div
+    <UCard
       v-else-if="error || entries.length === 0"
-      class="text-center py-8 text-sm text-gray-500 bg-gray-900 rounded-lg border border-gray-800"
+      variant="subtle"
+      class="border border-muted bg-muted/30"
     >
-      <UIcon
-        name="i-heroicons-trophy"
-        class="w-8 h-8 text-gray-600 mb-2 mx-auto"
-      />
-      <p>Bảng xếp hạng {{ tabLabel.toLowerCase() }} đang niêm phong</p>
-      <p class="text-[11px] text-gray-600 mt-1">
-        Dữ liệu sẽ hiện khi máy chủ S1 mở hoặc khi cấu hình DB sẵn sàng.
-      </p>
-    </div>
+      <div class="flex flex-col items-center gap-2 py-8 text-center">
+        <UIcon
+          name="i-heroicons-trophy"
+          class="size-8 text-dimmed"
+        />
+        <p class="text-sm text-muted">
+          Bảng xếp hạng {{ tabLabel.toLowerCase() }} đang niêm phong
+        </p>
+        <p class="text-[11px] text-dimmed">
+          Dữ liệu sẽ hiện khi máy chủ S1 mở hoặc khi cấu hình DB sẵn sàng.
+        </p>
+      </div>
+    </UCard>
 
     <div
       v-else
       class="space-y-2"
     >
-      <div
+      <UCard
         v-for="entry in entries"
         :key="`${entry.rank}-${entry.accountname || entry.username}`"
-        class="p-2 bg-gray-900 border border-gray-800 rounded-lg flex items-center gap-3"
+        variant="subtle"
+        class="border border-muted bg-elevated"
+        :ui="{ body: 'flex items-center gap-3 p-2.5' }"
       >
-        <div
-          class="w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm shrink-0"
-          :class="{
-            'bg-yellow-500/20 text-yellow-500': entry.rank === 1,
-            'bg-gray-400/20 text-gray-400': entry.rank === 2,
-            'bg-amber-700/20 text-amber-600': entry.rank === 3,
-            'text-gray-500': entry.rank > 3,
-          }"
+        <UBadge
+          :color="rankBadgeColor(entry.rank)"
+          variant="subtle"
+          class="size-8 shrink-0 justify-center font-bold"
         >
           {{ entry.rank }}
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-bold text-white truncate">
+        </UBadge>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-semibold text-highlighted truncate">
             {{ entry.username }}
           </p>
-          <p class="text-[11px] text-gray-500 truncate">
+          <p class="text-[11px] text-dimmed truncate">
             <template v-if="entry.level">
               Lv {{ entry.level }}
             </template>
@@ -124,15 +130,15 @@ const formatScore = (value: number): string => {
             </template>
           </p>
         </div>
-        <div class="text-right shrink-0">
-          <p class="text-xs text-primary-400 font-bold">
+        <div class="shrink-0 text-right">
+          <p class="text-xs font-bold text-primary">
             {{ formatScore(entry.score) }}
           </p>
-          <p class="text-[10px] text-gray-500 uppercase tracking-wide">
+          <p class="text-[10px] uppercase tracking-wide text-dimmed">
             {{ tabLabel }}
           </p>
         </div>
-      </div>
+      </UCard>
     </div>
   </div>
 </template>

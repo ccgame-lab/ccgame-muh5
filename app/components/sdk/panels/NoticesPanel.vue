@@ -32,13 +32,13 @@ const typeBadgeColor = (type: Notice['type']): 'info' | 'success' | 'warning' =>
 
 <template>
   <div class="space-y-3">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-sm font-semibold text-gray-200">
+    <div class="flex items-center justify-between gap-2">
+      <h3 class="text-sm font-semibold text-highlighted">
         Thông báo hệ thống
       </h3>
       <UBadge
         color="neutral"
-        variant="solid"
+        variant="subtle"
         size="xs"
       >
         Tin tức S1
@@ -51,35 +51,42 @@ const typeBadgeColor = (type: Notice['type']): 'info' | 'success' | 'warning' =>
     >
       <UIcon
         name="i-heroicons-arrow-path"
-        class="w-6 h-6 animate-spin text-gray-500"
+        class="size-6 animate-spin text-dimmed"
       />
     </div>
 
-    <div
+    <UCard
       v-else-if="error || notices.length === 0"
-      class="text-center py-8 text-sm text-gray-500 bg-gray-900 rounded-lg border border-gray-800"
+      variant="subtle"
+      class="border border-muted bg-muted/30"
     >
-      <UIcon
-        name="i-heroicons-megaphone"
-        class="w-8 h-8 text-gray-600 mb-2 mx-auto"
-      />
-      <p>Chưa có thông báo</p>
-    </div>
+      <div class="flex flex-col items-center gap-2 py-8 text-center">
+        <UIcon
+          name="i-heroicons-megaphone"
+          class="size-8 text-dimmed"
+        />
+        <p class="text-sm text-muted">
+          Chưa có thông báo
+        </p>
+      </div>
+    </UCard>
 
-    <div
+    <UCard
       v-for="notice in notices"
       v-else
       :key="notice.id"
-      class="p-3 bg-gray-900 border border-gray-800 rounded-lg flex flex-col gap-2"
+      variant="subtle"
+      class="border border-muted bg-elevated"
+      :ui="{ body: 'flex flex-col gap-2 p-3' }"
     >
       <div class="flex items-start justify-between gap-2">
-        <div class="flex items-center gap-2 min-w-0">
+        <div class="flex min-w-0 items-center gap-2">
           <UIcon
             v-if="notice.icon"
             :name="notice.icon"
-            class="w-4 h-4 text-primary-400 shrink-0"
+            class="size-4 shrink-0 text-primary"
           />
-          <h4 class="text-sm font-bold text-white truncate">
+          <h4 class="text-sm font-semibold text-highlighted truncate">
             {{ notice.title }}
           </h4>
         </div>
@@ -93,29 +100,26 @@ const typeBadgeColor = (type: Notice['type']): 'info' | 'success' | 'warning' =>
         </UBadge>
       </div>
 
-      <p class="text-xs text-gray-400 leading-relaxed">
+      <p class="text-xs text-muted leading-relaxed">
         {{ notice.body }}
       </p>
 
       <div
         v-if="notice.publishedAt || notice.link"
-        class="flex items-center justify-between text-[11px] text-gray-500"
+        class="flex items-center justify-between gap-2 text-[11px] text-dimmed"
       >
         <span>{{ formatDate(notice.publishedAt) }}</span>
-        <a
+        <UButton
           v-if="notice.link"
-          :href="notice.link"
+          :to="notice.link"
           target="_blank"
-          rel="noopener noreferrer"
-          class="text-primary-400 hover:underline inline-flex items-center gap-1"
-        >
-          Xem thêm
-          <UIcon
-            name="i-heroicons-arrow-top-right-on-square"
-            class="w-3 h-3"
-          />
-        </a>
+          color="primary"
+          variant="link"
+          size="xs"
+          trailing-icon="i-heroicons-arrow-top-right-on-square"
+          label="Xem thêm"
+        />
       </div>
-    </div>
+    </UCard>
   </div>
 </template>

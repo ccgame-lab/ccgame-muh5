@@ -22,18 +22,18 @@ function closePanel() {
 <template>
   <div
     v-if="isOpen"
-    class="fixed z-[100] flex flex-col bg-elevated shadow-2xl pointer-events-auto overflow-hidden contain-layout"
+    class="dark fixed z-[100] flex flex-col bg-default ring-1 ring-muted pointer-events-auto overflow-hidden contain-layout"
     :class="[
-      'max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-full max-sm:max-h-[80vh] max-sm:border-t max-sm:border-muted max-sm:rounded-t-[20px]',
-      'sm:top-1/2 sm:-translate-y-1/2 sm:right-6 sm:w-[380px] sm:max-h-[72vh] sm:border sm:border-muted sm:rounded-[20px]',
+      'max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-full max-sm:max-h-[80vh] max-sm:border-t max-sm:border-muted max-sm:rounded-t-2xl',
+      'sm:top-1/2 sm:-translate-y-1/2 sm:right-4 sm:w-[min(380px,calc(100vw-2rem))] sm:max-h-[72vh] sm:border sm:border-muted sm:rounded-2xl',
     ]"
   >
-    <div class="flex items-center justify-between px-4 py-3 border-b border-muted shrink-0">
-      <div class="flex flex-col">
-        <h2 class="text-lg font-bold text-highlighted">
-          {{ sdkConfig.app.name }} SDK
+    <div class="flex items-center gap-2 border-b border-muted bg-elevated px-3 py-2.5 shrink-0">
+      <div class="min-w-0 flex-1">
+        <h2 class="text-sm font-semibold text-highlighted leading-tight">
+          MUH5 SDK
         </h2>
-        <p class="text-xs text-muted">
+        <p class="text-[11px] text-muted leading-snug">
           Thông tin nhân vật
         </p>
       </div>
@@ -41,6 +41,7 @@ function closePanel() {
         icon="i-heroicons-x-mark"
         color="neutral"
         variant="ghost"
+        size="sm"
         aria-label="Đóng SDK"
         @click="closePanel"
       />
@@ -51,7 +52,7 @@ function closePanel() {
       :tabs="sdkConfig.tabs"
     />
 
-    <div class="flex-1 overflow-y-auto p-4">
+    <div class="flex-1 min-h-0 overflow-y-auto bg-default p-3 sm:p-4">
       <OverviewPanel v-if="activeTab === 'overview'" />
       <NoticesPanel v-else-if="activeTab === 'notices'" />
       <GiftcodePanel v-else-if="activeTab === 'giftcode'" />

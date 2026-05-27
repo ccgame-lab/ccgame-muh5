@@ -37,14 +37,14 @@ const sealedMessage = computed<string>(() => {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <h3 class="text-sm font-semibold text-gray-200">
+  <div class="space-y-3">
+    <div class="flex items-center justify-between gap-2">
+      <h3 class="text-sm font-semibold text-highlighted">
         Tổng quan số dư
       </h3>
       <UBadge
         color="neutral"
-        variant="solid"
+        variant="subtle"
         size="xs"
       >
         Ví tài khoản
@@ -57,32 +57,40 @@ const sealedMessage = computed<string>(() => {
     >
       <UIcon
         name="i-heroicons-arrow-path"
-        class="w-6 h-6 animate-spin text-gray-500"
+        class="size-6 animate-spin text-dimmed"
       />
     </div>
 
     <div
       v-else
-      class="grid grid-cols-2 gap-4"
+      class="grid grid-cols-2 gap-2"
     >
-      <UCard class="bg-gray-900 border-gray-800 p-0 text-center py-4">
-        <p class="text-xs text-gray-400 mb-1">
+      <UCard
+        variant="subtle"
+        class="border border-muted bg-elevated text-center"
+        :ui="{ body: 'py-4 px-2' }"
+      >
+        <p class="text-xs text-muted mb-1">
           WCoin
         </p>
         <p
           class="text-xl font-bold"
-          :class="wallet?.sealed ? 'text-gray-500' : 'text-yellow-500'"
+          :class="wallet?.sealed ? 'text-dimmed' : 'text-highlighted'"
         >
           {{ formatBalance(wallet?.balance.wcoin) }}
         </p>
       </UCard>
-      <UCard class="bg-gray-900 border-gray-800 p-0 text-center py-4">
-        <p class="text-xs text-gray-400 mb-1">
+      <UCard
+        variant="subtle"
+        class="border border-muted bg-elevated text-center"
+        :ui="{ body: 'py-4 px-2' }"
+      >
+        <p class="text-xs text-muted mb-1">
           WPoint
         </p>
         <p
           class="text-xl font-bold"
-          :class="wallet?.sealed ? 'text-gray-500' : 'text-blue-500'"
+          :class="wallet?.sealed ? 'text-dimmed' : 'text-highlighted'"
         >
           {{ formatBalance(wallet?.balance.wpoint) }}
         </p>
@@ -91,16 +99,18 @@ const sealedMessage = computed<string>(() => {
 
     <FeatureLocked
       v-if="!wallet || wallet.sealed"
-      title="Ví đang niêm phong"
+      title="Sắp mở"
       :description="sealedMessage"
       icon="i-heroicons-wallet"
     />
 
-    <FeatureLocked
+    <UAlert
       v-else
+      color="info"
+      variant="subtle"
+      icon="i-heroicons-lock-closed"
       title="Chỉ hiển thị số dư"
       description="Tính năng nạp, đổi, lịch sử giao dịch tạm đóng cho đợt cộng đồng. Mọi thay đổi số dư do hệ thống xử lý."
-      icon="i-heroicons-lock-closed"
     />
   </div>
 </template>
