@@ -3,7 +3,8 @@ import type { ComponentPublicInstance } from 'vue'
 
 const isOpen = defineModel<boolean>('isOpen', { default: false })
 
-const sdkPos = ref({ x: 0, y: 0 })
+// Store position in a plain object to avoid reactivity overhead
+const sdkPos = { x: 0, y: 0 }
 const isSdkDragging = ref(false)
 
 function initInteract(el: HTMLElement | ComponentPublicInstance | Element | null) {
@@ -11,7 +12,7 @@ function initInteract(el: HTMLElement | ComponentPublicInstance | Element | null
   import('interactjs').then((m) => {
     const interact = m.default || m
     const node = (el && '$el' in el) ? (el as ComponentPublicInstance).$el : el
-    if (node) {
+    if (node instanceof HTMLElement) {
       interact(node).unset()
       interact(node).draggable({
         inertia: true,
@@ -27,8 +28,10 @@ function initInteract(el: HTMLElement | ComponentPublicInstance | Element | null
           },
           move(event: { dx: number, dy: number }) {
             isSdkDragging.value = true
-            sdkPos.value.x += event.dx
-            sdkPos.value.y += event.dy
+            sdkPos.x += event.dx
+            sdkPos.y += event.dy
+            // Direct DOM update for buttery smooth 60fps dragging
+            node.style.transform = `translate(${sdkPos.x}px, ${sdkPos.y}px)`
           },
         },
       })
@@ -53,7 +56,6 @@ function onSdkClick(e: Event) {
   <div
     :ref="initInteract"
     class="pointer-events-auto fixed bottom-4 right-4 z-[110] touch-none select-none"
-    :style="{ transform: `translate(${sdkPos.x}px, ${sdkPos.y}px)` }"
   >
     <UChip
       color="error"
