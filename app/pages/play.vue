@@ -1,30 +1,16 @@
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 definePageMeta({
   layout: false,
 })
 
-useHead({
-  link: [
-    { rel: 'preconnect', href: 'https://cdn.ccgame.org' },
-    { rel: 'dns-prefetch', href: 'https://cdn.ccgame.org' },
-    { rel: 'preconnect', href: 'https://muh5-ws.ccgame.org' },
-    { rel: 'dns-prefetch', href: 'https://muh5-ws.ccgame.org' },
-  ],
-})
-
 const isSdkOpen = ref(false)
-const guestChipDismissed = ref(false)
 
 const route = useRoute()
-const greenJadeLoginUrl = useGreenJadeLoginUrl()
 
-const frameLoaded = ref(false)
 const frameFailed = ref(false)
-const frameSlow = ref(false)
 const frameKey = ref(0)
-let frameSlowTimer: number | undefined
 
 const { data: bootstrap, pending } = useFetch<{
   data: {
@@ -55,33 +41,6 @@ const { data: bootstrap, pending } = useFetch<{
 
 const playAllowed = computed(() => bootstrap.value?.data?.session?.playAllowed === true)
 
-const isGuestSession = computed(() => bootstrap.value?.data?.session?.authMode === 'guest')
-const isEmbeddedInPortal = computed(() => {
-  if (!import.meta.client) {
-    return true
-  }
-  try {
-    return window.self !== window.top
-  }
-  catch {
-    return true
-  }
-})
-const showGuestLoginChip = computed(() =>
-  playAllowed.value
-  && isGuestSession.value
-  && frameLoaded.value
-  && !guestChipDismissed.value
-  && !isEmbeddedInPortal.value,
-)
-const showGuestLoadingNote = computed(() =>
-  playAllowed.value
-  && isGuestSession.value
-  && !frameLoaded.value
-  && !frameFailed.value
-  && !!gameUrl.value,
-)
-
 const launchBlockedMessage = computed(() => {
   if (frameFailed.value) {
     return 'Khung game không tải được. Kiểm tra mạng rồi thử tải lại.'
@@ -97,50 +56,13 @@ const launchBlockedMessage = computed(() => {
   return 'Thiếu launch token hợp lệ từ CCGame. Vào game qua ccgame.org/play/muh5.'
 })
 
-const frameStatus = computed(() => {
-  if (frameSlow.value) {
-    return 'Đang tải tài nguyên game. Lần đầu có thể chậm hơn, lần sau sẽ nhanh hơn.'
-  }
-  if (gameUrl.value && !frameLoaded.value) {
-    return 'Đang tải game...'
-  }
-  return ''
-})
-
-const clearFrameSlowTimer = () => {
-  if (frameSlowTimer !== undefined) {
-    window.clearTimeout(frameSlowTimer)
-    frameSlowTimer = undefined
-  }
-}
-
-const startFrameSlowTimer = () => {
-  if (!import.meta.client || !gameUrl.value) return
-  clearFrameSlowTimer()
-  frameSlowTimer = window.setTimeout(() => {
-    if (!frameLoaded.value && !frameFailed.value) {
-      frameSlow.value = true
-    }
-  }, 12000)
-}
-
-const handleFrameLoad = () => {
-  frameLoaded.value = true
-  frameSlow.value = false
-  clearFrameSlowTimer()
-}
-
 const handleFrameError = () => {
   frameFailed.value = true
-  clearFrameSlowTimer()
 }
 
 const retryFrame = () => {
-  frameLoaded.value = false
   frameFailed.value = false
-  frameSlow.value = false
   frameKey.value++
-  startFrameSlowTimer()
 }
 
 const normalizeSrvAddr = (addr: string): string => {
@@ -215,13 +137,8 @@ const gameUrl = computed(() => {
 })
 
 watch(gameUrl, () => {
-  frameLoaded.value = false
   frameFailed.value = false
-  frameSlow.value = false
-  startFrameSlowTimer()
 }, { immediate: true })
-
-onBeforeUnmount(clearFrameSlowTimer)
 </script>
 
 <template>
@@ -293,59 +210,16 @@ onBeforeUnmount(clearFrameSlowTimer)
       v-else
       :key="frameKey"
       :src="gameUrl"
-      @load="handleFrameLoad"
       @error="handleFrameError"
     />
 
-    <div
-      v-if="showGuestLoadingNote"
-      class="pointer-events-none absolute left-3 right-3 top-14 z-40 flex justify-center sm:top-16"
-    >
-      <p class="pointer-events-none max-w-xs rounded-lg border border-amber-900/40 bg-black/75 px-3 py-2 text-center text-[10px] leading-relaxed text-amber-100/80 sm:text-xs">
-        Khách · có thể
-        <a
-          :href="greenJadeLoginUrl"
-          target="_parent"
-          rel="noopener noreferrer"
-          class="pointer-events-auto font-semibold text-emerald-400 underline-offset-2 hover:underline"
-        >đăng nhập GreenJade</a>
-        sau khi vào map (mở SDK CC).
-      </p>
-    </div>
-
-    <div
-      v-if="playAllowed && gameUrl && frameStatus && !frameLoaded && !frameFailed"
-      class="pointer-events-none absolute left-3 right-3 top-28 z-40 flex justify-center max-sm:top-32"
-    >
-      <div class="pointer-events-auto flex max-w-sm items-center gap-2 rounded-lg border border-gray-800 bg-black/80 px-3 py-2 text-xs text-gray-300">
-        <UIcon
-          name="i-heroicons-arrow-path"
-          class="h-4 w-4 shrink-0 animate-spin text-primary-400"
-        />
-        <span class="min-w-0 flex-1 leading-relaxed">{{ frameStatus }}</span>
-        <UButton
-          v-if="frameSlow"
-          size="xs"
-          color="neutral"
-          variant="soft"
-          @click="retryFrame"
-        >
-          Tải lại
-        </UButton>
-      </div>
-    </div>
-
-    <GuestLoginChip
-      :visible="showGuestLoginChip"
-      @dismiss="guestChipDismissed = true"
-    />
-
-    <div
+    <SdkButton
       v-if="playAllowed"
-      class="pointer-events-none absolute inset-0 z-50 overflow-hidden"
-    >
-      <SdkButton v-model:is-open="isSdkOpen" />
-      <SdkPanel v-model:is-open="isSdkOpen" />
-    </div>
+      v-model:is-open="isSdkOpen"
+    />
+    <SdkPanel
+      v-if="playAllowed"
+      v-model:is-open="isSdkOpen"
+    />
   </div>
 </template>

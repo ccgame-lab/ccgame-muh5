@@ -14,7 +14,6 @@ const emit = defineEmits<{
       v-if="src"
       :src="src"
       class="w-full h-full border-none"
-      allowfullscreen
       allow="autoplay; fullscreen"
       scrolling="no"
       loading="eager"
