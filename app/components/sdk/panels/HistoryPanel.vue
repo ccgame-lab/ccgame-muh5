@@ -1,10 +1,40 @@
 <script setup lang="ts">
-import type { WalletBalance, Transaction } from '~~/types/sdk'
+import { computed } from 'vue'
+import { sdkReadMessage } from '~/utils/sdkReadMessage'
+import type { HistoryReadResult, Transaction } from '~~/types/sdk'
 
-const { data: walletData, pending } = useFetch<{ data: { balance: WalletBalance, history: Transaction[] } }>('/api/wallet', {
-  key: 'wallet-data',
+const route = useRoute()
+
+const { data, pending, error } = useFetch<{ data: HistoryReadResult }>('/api/history', {
+  key: 'sdk-history',
   lazy: true,
+  query: computed(() => ({ launch: route.query.launch })),
 })
+
+const history = computed<HistoryReadResult | null>(() => data.value?.data ?? null)
+const items = computed<Transaction[]>(() => history.value?.items ?? [])
+
+const sealedMessage = (reason?: HistoryReadResult['reason']) =>
+  sdkReadMessage(reason, 'Chưa có dữ liệu lịch sử từ legacy', {
+    session_untrusted: 'Phiên launch không hợp lệ. Vào lại từ CCGame để xem lịch sử ví.',
+    db_error: 'Tạm thời không đọc được lịch sử giao dịch từ legacy.',
+  })
+
+const formatDate = (iso: string): string => {
+  if (!iso) return '—'
+  try {
+    return new Date(iso).toLocaleString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
+  catch {
+    return iso.slice(0, 16)
+  }
+}
 </script>
 
 <template>
@@ -18,7 +48,7 @@ const { data: walletData, pending } = useFetch<{ data: { balance: WalletBalance,
         variant="subtle"
         size="xs"
       >
-        Ví tài khoản
+        Legacy portal
       </UBadge>
     </div>
 
@@ -33,7 +63,7 @@ const { data: walletData, pending } = useFetch<{ data: { balance: WalletBalance,
     </div>
 
     <UCard
-      v-else-if="!walletData?.data.history || walletData.data.history.length === 0"
+      v-else-if="error || history?.sealed"
       variant="subtle"
       class="border border-muted bg-muted/30"
     >
@@ -43,7 +73,23 @@ const { data: walletData, pending } = useFetch<{ data: { balance: WalletBalance,
           class="size-8 text-dimmed"
         />
         <p class="text-sm text-muted">
-          Lịch sử giao dịch trống hoặc đang đồng bộ
+          {{ sealedMessage(history?.reason) }}
+        </p>
+      </div>
+    </UCard>
+
+    <UCard
+      v-else-if="items.length === 0"
+      variant="subtle"
+      class="border border-muted bg-muted/30"
+    >
+      <div class="flex flex-col items-center gap-2 py-8 text-center">
+        <UIcon
+          name="i-heroicons-clock"
+          class="size-8 text-dimmed"
+        />
+        <p class="text-sm text-muted">
+          Chưa có giao dịch Wcoin/Wpoint từ legacy
         </p>
       </div>
     </UCard>
@@ -53,7 +99,7 @@ const { data: walletData, pending } = useFetch<{ data: { balance: WalletBalance,
       class="space-y-2"
     >
       <UCard
-        v-for="tx in walletData.data.history"
+        v-for="tx in items"
         :key="tx.id"
         variant="subtle"
         class="border border-muted bg-elevated"
@@ -64,15 +110,15 @@ const { data: walletData, pending } = useFetch<{ data: { balance: WalletBalance,
             {{ tx.description }}
           </p>
           <p class="text-xs text-dimmed">
-            {{ new Date(tx.createdAt).toLocaleDateString() }}
+            {{ formatDate(tx.createdAt) }} · {{ tx.currency.toUpperCase() }} · {{ tx.type }}
           </p>
         </div>
         <UBadge
-          :color="tx.type === 'deposit' ? 'success' : 'neutral'"
+          :color="tx.amount >= 0 ? 'success' : 'neutral'"
           variant="subtle"
           class="shrink-0 font-semibold tabular-nums"
         >
-          {{ tx.type === 'deposit' ? '+' : '-' }}{{ tx.amount }}
+          {{ tx.amount >= 0 ? '+' : '' }}{{ tx.amount.toLocaleString('vi-VN') }}
         </UBadge>
       </UCard>
     </div>

@@ -32,24 +32,30 @@ Dùng `ecosystem.config.json` (PM2 trên host này parse JSON đúng; file `.cjs
 
 `env` và `env_production` cùng giá trị production.
 
-**Dev HMR (local only):** `bun run dev -- --host 0.0.0.0 --port 4100` — không dùng PM2 production config.
+**Dev local:** `bun run dev` — không dùng PM2 production config.
 
-**SDK UI preview (dev only):** tái dùng `SdkButton` / `SdkPanel`, không iframe Egret / `muh5-client`. Route `404` trên production build (`import.meta.dev`).
+## Rollback
 
-Workflow SDK/UI (mặc định — **không** bật HMR trên `muh5.ccgame.org`):
+**Production MUH5 shell** (`ccgame-muh5`, port `4100`):
 
 ```bash
 cd /www/wwwroot/ccgame/ccgame-muh5
-bun run dev -- --host 0.0.0.0 --port 4101
-# open http://127.0.0.1:4101/sdk-preview
+git checkout <commit-trước>   # hoặc git pull --ff-only khi remote đã revert
+bun run build                 # bắt buộc xong trước restart (xem Checklist cố định)
+pm2 delete ccgame-muh5 2>/dev/null || true
+pm2 start ecosystem.config.json --env production --update-env
+pm2 save
 ```
 
-Dùng port `4101` để tránh đụng production PM2 trên `4100`.
+**Chạy dev nhầm / làm hỏng production PM2:** khôi phục từ `ecosystem.config.json`, `bun run build`, start lại như trên. Chỉ `pm2 save` khi đã xác nhận production `:4100` ổn.
 
-Smoke mobile qua domain/proxy (tạm thời, không phải default):
+**Rollback chỉ SDK UI** (`app/components/sdk/`):
 
-- Có thể chạy dev/HMR qua domain khi cần, nhưng **không `pm2 save`**, không đánh giá performance bằng dev runtime.
-- Xong phải `bun run build` + restart production (`ecosystem.config.json`) ngay.
+```bash
+git checkout -- app/components/sdk/   # hoặc revert commit tương ứng
+bun run build
+pm2 restart ccgame-muh5
+```
 
 ## Validation
 

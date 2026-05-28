@@ -1,36 +1,28 @@
-export interface UserProfile {
-  id: string
-  username: string
-  avatar: string
-}
+export type SdkReadReason
+  = | 'db_not_configured'
+    | 'session_untrusted'
+    | 'username_missing'
+    | 'account_not_found'
+    | 'db_error'
+    | 'no_legacy_source'
+    | 'no_legacy_data'
 
-export interface WalletBalance {
-  wcoin: number
-  wpoint: number
+export interface SdkReadMeta {
+  sealed: boolean
+  reason?: SdkReadReason
 }
 
 export interface Transaction {
   id: string
+  currency: 'wcoin' | 'wpoint'
   amount: number
-  type: 'deposit' | 'withdraw' | 'spend'
+  type: string
   description: string
   createdAt: string
 }
 
-export interface ShopItem {
-  id: string
-  name: string
-  description: string
-  price: number
-  currency: 'wcoin' | 'wpoint'
-  image?: string
-}
-
-export interface EventStatus {
-  id: string
-  name: string
-  isActive: boolean
-  description: string
+export interface HistoryReadResult extends SdkReadMeta {
+  items: Transaction[]
 }
 
 export interface LeaderboardEntry {
@@ -39,7 +31,6 @@ export interface LeaderboardEntry {
   score: number
   level?: number
   job?: number
-  /** legacy users.username (accountname in actors table); useful for self-highlight later */
   accountname?: string
 }
 
@@ -55,17 +46,45 @@ export interface Notice {
   publishedAt?: string
 }
 
-export type WalletSealedReason
-  = | 'db_not_configured'
-    | 'session_untrusted'
-    | 'username_missing'
-    | 'account_not_found'
-    | 'db_error'
+export type NoticesReadResult = SdkReadMeta & {
+  items: Notice[]
+}
+
+export interface GiftcodeItem {
+  id: number
+  code: string
+  usedCount: number
+  limitUsage: number
+  rewardType: string
+  expiresAt?: string
+  redeemed?: boolean
+}
+
+export interface GiftcodeReadResult extends SdkReadMeta {
+  redeemEnabled: false
+  items: GiftcodeItem[]
+  redeemedIds: number[]
+}
+
+export interface MiningMachine {
+  machineIndex: number
+  level: number
+  speedLevel: number
+  storageLevel: number
+  efficiencyLevel: number
+  baseRate: number
+  capacity: number
+  lastClaimAt: string | null
+}
+
+export interface MiningReadResult extends SdkReadMeta {
+  balance: number | null
+  machines: MiningMachine[]
+}
 
 export interface WalletReadResult {
-  /** Whether the response carries real balance values from DB. */
   sealed: boolean
-  reason?: WalletSealedReason
+  reason?: SdkReadReason
   balance: {
     wcoin: number | null
     wpoint: number | null

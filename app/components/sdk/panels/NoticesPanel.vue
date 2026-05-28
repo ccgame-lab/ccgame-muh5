@@ -1,13 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Notice } from '~~/types/sdk'
+import { sdkReadMessage } from '~/utils/sdkReadMessage'
+import type { Notice, NoticesReadResult } from '~~/types/sdk'
 
-const { data, pending, error } = useFetch<{ data: Notice[] }>('/api/notices', {
+const { data, pending, error } = useFetch<{ data: NoticesReadResult }>('/api/notices', {
   key: 'sdk-notices',
   lazy: true,
 })
 
-const notices = computed<Notice[]>(() => data.value?.data ?? [])
+const noticesResult = computed<NoticesReadResult | null>(() => data.value?.data ?? null)
+const notices = computed<Notice[]>(() => noticesResult.value?.items ?? [])
+
+const emptyMessage = computed(() =>
+  sdkReadMessage(noticesResult.value?.reason, 'Chưa có thông báo từ legacy', {
+    db_error: 'Tạm thời không đọc được thông báo từ legacy.',
+  }),
+)
 
 const formatDate = (iso?: string): string => {
   if (!iso) return ''
@@ -56,7 +64,7 @@ const typeBadgeColor = (type: Notice['type']): 'info' | 'success' | 'warning' =>
     </div>
 
     <UCard
-      v-else-if="error || notices.length === 0"
+      v-else-if="error || noticesResult?.sealed || notices.length === 0"
       variant="subtle"
       class="border border-muted bg-muted/30"
     >
@@ -66,7 +74,7 @@ const typeBadgeColor = (type: Notice['type']): 'info' | 'success' | 'warning' =>
           class="size-8 text-dimmed"
         />
         <p class="text-sm text-muted">
-          Chưa có thông báo
+          {{ emptyMessage }}
         </p>
       </div>
     </UCard>

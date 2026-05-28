@@ -91,10 +91,10 @@ const rankBadgeColor = (rank: number): 'warning' | 'neutral' | 'primary' => {
           class="size-8 text-dimmed"
         />
         <p class="text-sm text-muted">
-          Bảng xếp hạng {{ tabLabel.toLowerCase() }} đang niêm phong
+          Chưa có dữ liệu bảng xếp hạng từ legacy
         </p>
         <p class="text-[11px] text-dimmed">
-          Dữ liệu sẽ hiện khi máy chủ S1 mở hoặc khi cấu hình DB sẵn sàng.
+          Kiểm tra cấu hình DB game hoặc thử lại sau.
         </p>
       </div>
     </UCard>

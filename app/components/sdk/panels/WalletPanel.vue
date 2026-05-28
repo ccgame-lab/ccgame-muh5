@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { WalletReadResult, WalletSealedReason } from '~~/types/sdk'
+import { sdkReadMessage } from '~/utils/sdkReadMessage'
+import type { WalletReadResult } from '~~/types/sdk'
 
 const route = useRoute()
 
@@ -17,23 +18,14 @@ const formatBalance = (value: number | null | undefined): string => {
   return value.toLocaleString('vi-VN')
 }
 
-const sealedMessage = computed<string>(() => {
-  const reason: WalletSealedReason | undefined = wallet.value?.reason
-  switch (reason) {
-    case 'db_not_configured':
-      return 'Ví đang niêm phong. Hệ thống đồng bộ số dư chưa sẵn sàng.'
-    case 'session_untrusted':
-      return 'Phiên launch không hợp lệ. Vào lại từ CCGame để xem số dư.'
-    case 'username_missing':
-      return 'Phiên launch thiếu tên tài khoản game.'
-    case 'account_not_found':
-      return 'Chưa có hồ sơ ví cho tài khoản này.'
-    case 'db_error':
-      return 'Tạm thời không đọc được ví. Thử lại sau.'
-    default:
-      return 'Ví đang niêm phong.'
-  }
-})
+const sealedMessage = computed(() =>
+  sdkReadMessage(wallet.value?.reason, 'Ví đang niêm phong.', {
+    db_not_configured: 'Ví đang niêm phong. Hệ thống đồng bộ số dư chưa sẵn sàng.',
+    session_untrusted: 'Phiên launch không hợp lệ. Vào lại từ CCGame để xem số dư.',
+    account_not_found: 'Chưa có hồ sơ ví cho tài khoản này.',
+    db_error: 'Tạm thời không đọc được ví. Thử lại sau.',
+  }),
+)
 </script>
 
 <template>
