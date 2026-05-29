@@ -11,3 +11,160 @@
     cursor: pointer;
   }
 }
+
+/* ──────────────────────────────────────────────────────────
+   SDK motion layer — in-game "juice" (CN/KR gacha-style).
+   All looping/entrance motion is gated behind
+   prefers-reduced-motion: no-preference. Reduced-motion users
+   get the same static composition with no animation.
+   ────────────────────────────────────────────────────────── */
+
+@keyframes sdk-pop-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.96); }
+  60% { opacity: 1; transform: translateY(-2px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes sdk-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes sdk-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--sdk-glow-color, rgb(16 185 129 / 0.45)); }
+  50% { box-shadow: 0 0 16px 2px var(--sdk-glow-color, rgb(16 185 129 / 0.55)); }
+}
+
+@keyframes sdk-shimmer-sweep {
+  0% { transform: translateX(-150%) skewX(-18deg); }
+  100% { transform: translateX(250%) skewX(-18deg); }
+}
+
+@keyframes sdk-shine-text {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+@keyframes sdk-live-pulse {
+  0% { box-shadow: 0 0 0 0 rgb(239 68 68 / 0.55); }
+  70% { box-shadow: 0 0 0 6px rgb(239 68 68 / 0); }
+  100% { box-shadow: 0 0 0 0 rgb(239 68 68 / 0); }
+}
+
+@keyframes sdk-bar-fill {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(var(--sdk-bar, 1)); }
+}
+
+/* Entrance + staggered list reveal */
+.sdk-pop {
+  opacity: 0;
+  animation: sdk-pop-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: calc(var(--sdk-i, 0) * 60ms);
+}
+
+/* Gentle attention float (SDK launcher) */
+.sdk-float {
+  animation: sdk-float 3.2s ease-in-out infinite;
+}
+
+/* Pulsing aura — color set via --sdk-glow-color */
+.sdk-glow {
+  animation: sdk-glow-pulse 2.4s ease-in-out infinite;
+}
+
+.sdk-glow-gold {
+  --sdk-glow-color: rgb(250 204 21 / 0.55);
+}
+
+/* Legendary diagonal light sweep. Host needs position + overflow-hidden. */
+.sdk-shimmer {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.sdk-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgb(255 255 255 / 0.14) 50%,
+    transparent 70%
+  );
+  transform: translateX(-150%) skewX(-18deg);
+  animation: sdk-shimmer-sweep 3.6s ease-in-out infinite;
+  animation-delay: var(--sdk-shimmer-delay, 0s);
+}
+
+/* Animated gold gradient text (top scores / legendary numbers) */
+.sdk-shine-text {
+  background: linear-gradient(
+    90deg,
+    rgb(253 224 71) 0%,
+    rgb(255 255 255) 25%,
+    rgb(250 204 21) 50%,
+    rgb(255 255 255) 75%,
+    rgb(253 224 71) 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: sdk-shine-text 4s linear infinite;
+}
+
+/* Live feed indicator dot */
+.sdk-live-dot {
+  animation: sdk-live-pulse 1.8s ease-out infinite;
+}
+
+/* Scarcity / usage bar fill */
+.sdk-bar-fill {
+  transform-origin: left center;
+  transform: scaleX(var(--sdk-bar, 1));
+  animation: sdk-bar-fill 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Tactile press feedback for interactive juice */
+.sdk-press {
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sdk-press:active {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sdk-pop,
+  .sdk-float,
+  .sdk-glow,
+  .sdk-live-dot,
+  .sdk-bar-fill,
+  .sdk-shine-text {
+    animation: none !important;
+  }
+
+  .sdk-pop {
+    opacity: 1;
+  }
+
+  .sdk-shimmer::after {
+    display: none;
+  }
+
+  .sdk-shine-text {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: rgb(250 204 21);
+  }
+
+  .sdk-bar-fill {
+    transform: scaleX(var(--sdk-bar, 1));
+  }
+}

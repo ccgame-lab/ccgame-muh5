@@ -49,7 +49,7 @@ const formatTime = (iso: string): string => {
 </script>
 
 <template>
-  <div class="space-y-3">
+  <div class="space-y-3 sdk-pop">
     <div class="flex items-center justify-between gap-2">
       <h3 class="text-sm font-semibold text-highlighted">
         Hoạt động
@@ -59,6 +59,7 @@ const formatTime = (iso: string): string => {
         variant="subtle"
         size="xs"
       >
+        <span class="mr-1 inline-block size-1.5 rounded-full bg-error sdk-live-dot" />
         Bảng tin S1
       </UBadge>
     </div>
@@ -94,10 +95,11 @@ const formatTime = (iso: string): string => {
       class="space-y-2"
     >
       <UCard
-        v-for="event in items"
+        v-for="(event, idx) in items"
         :key="event.id"
         variant="subtle"
-        class="border border-muted bg-elevated"
+        class="border border-muted bg-elevated sdk-pop"
+        :style="{ '--sdk-i': idx }"
         :ui="{ body: 'flex items-center gap-3 p-3' }"
       >
         <UIcon

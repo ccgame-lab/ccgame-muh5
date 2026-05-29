@@ -14,6 +14,10 @@ const { data, pending, error } = useFetch<{ data: MiningReadResult }>('/api/mini
 const mining = computed<MiningReadResult | null>(() => data.value?.data ?? null)
 const machines = computed(() => mining.value?.machines ?? [])
 
+const balanceTarget = computed(() => mining.value?.balance ?? null)
+const balanceDisplay = useCountUp(balanceTarget)
+const hasBalance = computed(() => !mining.value?.sealed && mining.value?.balance != null)
+
 const sealedMessage = (reason?: MiningReadResult['reason']) =>
   sdkReadMessage(reason, 'Chưa có dữ liệu mining từ legacy', {
     session_untrusted: 'Phiên launch không hợp lệ. Vào lại từ CCGame để xem máy đào.',
@@ -28,7 +32,7 @@ const formatBalance = (value: number | null | undefined): string => {
 </script>
 
 <template>
-  <div class="space-y-3">
+  <div class="space-y-3 sdk-pop">
     <div class="flex items-center justify-between gap-2">
       <h3 class="text-sm font-semibold text-highlighted">
         Máy đào / Monument
@@ -71,14 +75,20 @@ const formatBalance = (value: number | null | undefined): string => {
     <template v-else>
       <UCard
         variant="subtle"
-        class="border border-muted bg-elevated text-center"
+        class="border border-info/30 bg-elevated text-center sdk-shimmer"
+        :class="{ 'sdk-glow': hasBalance }"
+        :style="{ '--sdk-glow-color': 'rgb(56 189 248 / 0.5)' }"
         :ui="{ body: 'py-4 px-2' }"
       >
-        <p class="text-xs text-muted mb-1">
+        <p class="text-xs text-muted mb-1 flex items-center justify-center gap-1">
+          <UIcon
+            name="i-heroicons-cube-transparent"
+            class="size-3.5 text-info"
+          />
           Kim cương đào (diamond_wallets)
         </p>
-        <p class="text-xl font-bold text-highlighted">
-          {{ formatBalance(mining?.balance) }}
+        <p class="text-2xl font-bold tabular-nums text-info">
+          {{ hasBalance ? balanceDisplay.toLocaleString('vi-VN') : formatBalance(mining?.balance) }}
         </p>
       </UCard>
 
@@ -99,10 +109,11 @@ const formatBalance = (value: number | null | undefined): string => {
         class="space-y-2"
       >
         <UCard
-          v-for="machine in machines"
+          v-for="(machine, idx) in machines"
           :key="machine.machineIndex"
           variant="subtle"
-          class="border border-muted bg-elevated"
+          class="border border-muted bg-elevated sdk-pop sdk-press"
+          :style="{ '--sdk-i': idx }"
           :ui="{ body: 'space-y-1 p-3' }"
         >
           <p class="text-sm font-semibold text-highlighted">

@@ -24,7 +24,7 @@ function closePanel() {
 <template>
   <div
     v-if="isOpen"
-    class="dark fixed z-[100] flex flex-col bg-default ring-1 ring-muted pointer-events-auto overflow-hidden contain-layout"
+    class="dark fixed z-[100] flex flex-col bg-default ring-1 ring-primary/30 pointer-events-auto overflow-hidden contain-layout shadow-2xl shadow-primary/10 sdk-pop"
     :class="[
       'max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-full max-sm:max-h-[80vh] max-sm:border-t max-sm:border-muted max-sm:rounded-t-2xl',
       'sm:top-1/2 sm:-translate-y-1/2 sm:right-4 sm:w-[min(380px,calc(100vw-2rem))] sm:max-h-[72vh] sm:border sm:border-muted sm:rounded-2xl',

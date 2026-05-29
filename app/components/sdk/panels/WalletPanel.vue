@@ -13,6 +13,14 @@ const { data, pending } = useFetch<{ data: WalletReadResult }>('/api/wallet', {
 
 const wallet = computed<WalletReadResult | null>(() => data.value?.data ?? null)
 
+const wcoinTarget = computed(() => wallet.value?.balance.wcoin ?? null)
+const wpointTarget = computed(() => wallet.value?.balance.wpoint ?? null)
+const wcoinDisplay = useCountUp(wcoinTarget)
+const wpointDisplay = useCountUp(wpointTarget)
+
+const hasWcoin = computed(() => !wallet.value?.sealed && wallet.value?.balance.wcoin != null)
+const hasWpoint = computed(() => !wallet.value?.sealed && wallet.value?.balance.wpoint != null)
+
 const formatBalance = (value: number | null | undefined): string => {
   if (value == null) return '—'
   return value.toLocaleString('vi-VN')
@@ -29,7 +37,7 @@ const sealedMessage = computed(() =>
 </script>
 
 <template>
-  <div class="space-y-3">
+  <div class="space-y-3 sdk-pop">
     <div class="flex items-center justify-between gap-2">
       <h3 class="text-sm font-semibold text-highlighted">
         Tổng quan số dư
@@ -59,32 +67,43 @@ const sealedMessage = computed(() =>
     >
       <UCard
         variant="subtle"
-        class="border border-muted bg-elevated text-center"
+        class="border border-warning/30 bg-elevated text-center"
+        :class="{ 'sdk-shimmer sdk-glow sdk-glow-gold': hasWcoin }"
         :ui="{ body: 'py-4 px-2' }"
       >
-        <p class="text-xs text-muted mb-1">
+        <p class="text-xs text-muted mb-1 flex items-center justify-center gap-1">
+          <UIcon
+            name="i-heroicons-currency-dollar"
+            class="size-3.5 text-warning"
+          />
           WCoin
         </p>
         <p
-          class="text-xl font-bold"
-          :class="wallet?.sealed ? 'text-dimmed' : 'text-highlighted'"
+          class="text-xl font-bold tabular-nums"
+          :class="hasWcoin ? 'sdk-shine-text' : 'text-dimmed'"
         >
-          {{ formatBalance(wallet?.balance.wcoin) }}
+          {{ hasWcoin ? wcoinDisplay.toLocaleString('vi-VN') : formatBalance(wallet?.balance.wcoin) }}
         </p>
       </UCard>
       <UCard
         variant="subtle"
-        class="border border-muted bg-elevated text-center"
+        class="border border-primary/30 bg-elevated text-center"
+        :class="{ 'sdk-shimmer': hasWpoint }"
+        :style="{ '--sdk-shimmer-delay': '1.2s' }"
         :ui="{ body: 'py-4 px-2' }"
       >
-        <p class="text-xs text-muted mb-1">
+        <p class="text-xs text-muted mb-1 flex items-center justify-center gap-1">
+          <UIcon
+            name="i-heroicons-sparkles"
+            class="size-3.5 text-primary"
+          />
           WPoint
         </p>
         <p
-          class="text-xl font-bold"
-          :class="wallet?.sealed ? 'text-dimmed' : 'text-highlighted'"
+          class="text-xl font-bold tabular-nums"
+          :class="hasWpoint ? 'text-primary' : 'text-dimmed'"
         >
-          {{ formatBalance(wallet?.balance.wpoint) }}
+          {{ hasWpoint ? wpointDisplay.toLocaleString('vi-VN') : formatBalance(wallet?.balance.wpoint) }}
         </p>
       </UCard>
     </div>

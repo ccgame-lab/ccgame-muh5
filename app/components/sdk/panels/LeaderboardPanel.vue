@@ -42,10 +42,17 @@ const rankBadgeColor = (rank: number): 'warning' | 'neutral' | 'primary' => {
   if (rank <= 3) return 'primary'
   return 'neutral'
 }
+
+const rankMedal = (rank: number): string | null => {
+  if (rank === 1) return '👑'
+  if (rank === 2) return '🥈'
+  if (rank === 3) return '🥉'
+  return null
+}
 </script>
 
 <template>
-  <div class="space-y-3">
+  <div class="space-y-3 sdk-pop">
     <div class="flex items-center justify-between gap-2">
       <h3 class="text-sm font-semibold text-highlighted">
         Bảng xếp hạng
@@ -104,10 +111,14 @@ const rankBadgeColor = (rank: number): 'warning' | 'neutral' | 'primary' => {
       class="space-y-2"
     >
       <UCard
-        v-for="entry in entries"
+        v-for="(entry, idx) in entries"
         :key="`${entry.rank}-${entry.accountname || entry.username}`"
         variant="subtle"
-        class="border border-muted bg-elevated"
+        class="border bg-elevated sdk-pop sdk-press"
+        :class="entry.rank === 1
+          ? 'border-warning/50 sdk-shimmer sdk-glow sdk-glow-gold'
+          : entry.rank <= 3 ? 'border-primary/30 sdk-shimmer' : 'border-muted'"
+        :style="{ '--sdk-i': idx }"
         :ui="{ body: 'flex items-center gap-3 p-2.5' }"
       >
         <UBadge
@@ -115,10 +126,14 @@ const rankBadgeColor = (rank: number): 'warning' | 'neutral' | 'primary' => {
           variant="subtle"
           class="size-8 shrink-0 justify-center font-bold"
         >
-          {{ entry.rank }}
+          <span v-if="rankMedal(entry.rank)">{{ rankMedal(entry.rank) }}</span>
+          <span v-else>{{ entry.rank }}</span>
         </UBadge>
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-semibold text-highlighted truncate">
+          <p
+            class="text-sm font-semibold truncate"
+            :class="entry.rank === 1 ? 'text-highlighted' : 'text-highlighted'"
+          >
             {{ entry.username }}
           </p>
           <p class="text-[11px] text-dimmed truncate">
@@ -131,7 +146,10 @@ const rankBadgeColor = (rank: number): 'warning' | 'neutral' | 'primary' => {
           </p>
         </div>
         <div class="shrink-0 text-right">
-          <p class="text-xs font-bold text-primary">
+          <p
+            class="text-xs font-bold tabular-nums"
+            :class="entry.rank <= 3 ? 'sdk-shine-text' : 'text-primary'"
+          >
             {{ formatScore(entry.score) }}
           </p>
           <p class="text-[10px] uppercase tracking-wide text-dimmed">

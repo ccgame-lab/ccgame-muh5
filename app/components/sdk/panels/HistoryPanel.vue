@@ -38,7 +38,7 @@ const formatDate = (iso: string): string => {
 </script>
 
 <template>
-  <div class="space-y-3">
+  <div class="space-y-3 sdk-pop">
     <div class="flex items-center justify-between gap-2">
       <h3 class="text-sm font-semibold text-highlighted">
         Lịch sử giao dịch ví
@@ -99,10 +99,11 @@ const formatDate = (iso: string): string => {
       class="space-y-2"
     >
       <UCard
-        v-for="tx in items"
+        v-for="(tx, idx) in items"
         :key="tx.id"
         variant="subtle"
-        class="border border-muted bg-elevated"
+        class="border border-muted bg-elevated sdk-pop"
+        :style="{ '--sdk-i': idx }"
         :ui="{ body: 'flex items-center justify-between gap-3 p-3' }"
       >
         <div class="min-w-0">

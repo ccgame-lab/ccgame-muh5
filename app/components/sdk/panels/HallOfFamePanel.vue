@@ -27,7 +27,7 @@ const categoryColor = (category: HallOfFameEntry['category']): 'warning' | 'prim
 </script>
 
 <template>
-  <div class="space-y-3">
+  <div class="space-y-3 sdk-pop">
     <div class="flex items-center justify-between gap-2">
       <h3 class="text-sm font-semibold text-highlighted">
         Vinh danh
@@ -72,15 +72,16 @@ const categoryColor = (category: HallOfFameEntry['category']): 'warning' | 'prim
       class="space-y-2"
     >
       <UCard
-        v-for="entry in items"
+        v-for="(entry, idx) in items"
         :key="entry.id"
         variant="subtle"
-        class="border border-muted bg-elevated"
+        class="border border-warning/30 bg-elevated sdk-pop sdk-press sdk-shimmer"
+        :style="{ '--sdk-i': idx, '--sdk-shimmer-delay': `${(idx % 3) * 0.6}s` }"
         :ui="{ body: 'space-y-2 p-3' }"
       >
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
-            <p class="text-sm font-semibold text-highlighted truncate">
+            <p class="text-sm font-semibold sdk-shine-text truncate">
               {{ entry.categoryLabel || (entry.category === 'donate' ? 'Vua Nạp' : 'Vua Lực Chiến') }}
             </p>
             <p class="text-[11px] text-dimmed truncate">
@@ -88,11 +89,15 @@ const categoryColor = (category: HallOfFameEntry['category']): 'warning' | 'prim
             </p>
           </div>
           <UBadge
-            :color="categoryColor(entry.category)"
+            :color="entry.serverStatus === 'ongoing' ? 'success' : categoryColor(entry.category)"
             variant="subtle"
             size="xs"
             class="shrink-0"
           >
+            <span
+              v-if="entry.serverStatus === 'ongoing'"
+              class="mr-1 inline-block size-1.5 rounded-full bg-success sdk-live-dot"
+            />
             {{ entry.serverStatus === 'ongoing' ? 'Đang diễn ra' : 'Đã kết thúc' }}
           </UBadge>
         </div>
@@ -116,8 +121,8 @@ const categoryColor = (category: HallOfFameEntry['category']): 'warning' | 'prim
           class="flex flex-wrap gap-1"
         >
           <UBadge
-            v-for="(reward, idx) in entry.rewards"
-            :key="idx"
+            v-for="(reward, rIdx) in entry.rewards"
+            :key="rIdx"
             color="neutral"
             variant="subtle"
             size="xs"

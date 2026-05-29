@@ -26,10 +26,23 @@ const usageLabel = (item: { usedCount: number, limitUsage: number }): string => 
   }
   return `${item.usedCount}/${item.limitUsage} lượt`
 }
+
+const usageRatio = (item: { usedCount: number, limitUsage: number }): number => {
+  if (item.limitUsage <= 0) return 0
+  return Math.min(item.usedCount / item.limitUsage, 1)
+}
+
+const isScarce = (item: { usedCount: number, limitUsage: number }): boolean => {
+  return item.limitUsage > 0 && usageRatio(item) >= 0.7 && usageRatio(item) < 1
+}
+
+const isSoldOut = (item: { usedCount: number, limitUsage: number }): boolean => {
+  return item.limitUsage > 0 && item.usedCount >= item.limitUsage
+}
 </script>
 
 <template>
-  <div class="space-y-3">
+  <div class="space-y-3 sdk-pop">
     <div class="flex flex-wrap items-center gap-2">
       <h3 class="text-sm font-semibold text-highlighted">
         Giftcode
@@ -106,10 +119,14 @@ const usageLabel = (item: { usedCount: number, limitUsage: number }): string => 
       />
 
       <UCard
-        v-for="item in items"
+        v-for="(item, idx) in items"
         :key="item.id"
         variant="subtle"
-        class="border border-muted bg-elevated"
+        class="border bg-elevated sdk-pop sdk-press"
+        :class="item.redeemed
+          ? 'border-success/40'
+          : isSoldOut(item) ? 'border-muted opacity-70' : isScarce(item) ? 'border-error/40' : 'border-muted'"
+        :style="{ '--sdk-i': idx }"
         :ui="{ body: 'space-y-2 p-3' }"
       >
         <div class="flex items-start justify-between gap-2">
@@ -124,8 +141,27 @@ const usageLabel = (item: { usedCount: number, limitUsage: number }): string => 
             variant="subtle"
             size="xs"
             class="shrink-0"
+            icon="i-heroicons-check-badge"
           >
-            Đã dùng
+            Đã nhận
+          </UBadge>
+          <UBadge
+            v-else-if="isSoldOut(item)"
+            color="neutral"
+            variant="subtle"
+            size="xs"
+            class="shrink-0"
+          >
+            Hết lượt
+          </UBadge>
+          <UBadge
+            v-else-if="isScarce(item)"
+            color="error"
+            variant="subtle"
+            size="xs"
+            class="shrink-0"
+          >
+            Sắp hết
           </UBadge>
         </div>
 
@@ -133,6 +169,17 @@ const usageLabel = (item: { usedCount: number, limitUsage: number }): string => 
           <span>{{ usageLabel(item) }}</span>
           <span>·</span>
           <span>{{ item.rewardType }}</span>
+        </div>
+
+        <div
+          v-if="item.limitUsage > 0"
+          class="h-1 w-full overflow-hidden rounded-full bg-muted/60"
+        >
+          <div
+            class="h-full rounded-full sdk-bar-fill"
+            :class="isSoldOut(item) ? 'bg-dimmed' : isScarce(item) ? 'bg-error' : 'bg-primary'"
+            :style="{ '--sdk-bar': usageRatio(item) }"
+          />
         </div>
       </UCard>
     </div>

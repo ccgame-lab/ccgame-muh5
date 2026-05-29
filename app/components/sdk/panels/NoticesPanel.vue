@@ -39,7 +39,7 @@ const typeBadgeColor = (type: Notice['type']): 'info' | 'success' | 'warning' =>
 </script>
 
 <template>
-  <div class="space-y-3">
+  <div class="space-y-3 sdk-pop">
     <div class="flex items-center justify-between gap-2">
       <h3 class="text-sm font-semibold text-highlighted">
         Thông báo hệ thống

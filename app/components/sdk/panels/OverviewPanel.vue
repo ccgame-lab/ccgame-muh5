@@ -76,17 +76,17 @@ const tierLabel = computed(() => {
 
   <div
     v-else
-    class="space-y-3"
+    class="space-y-3 sdk-pop"
   >
     <UCard
       variant="subtle"
-      class="border border-muted bg-elevated"
+      class="border border-primary/30 bg-elevated sdk-shimmer"
     >
       <div class="flex flex-col items-center gap-2 px-2 py-4 text-center">
         <UAvatar
           src="https://avatars.githubusercontent.com/u/739984?v=4"
           size="lg"
-          class="ring-2 ring-primary"
+          class="ring-2 ring-primary sdk-glow"
         />
         <div class="min-w-0 space-y-0.5">
           <h3 class="text-base font-semibold text-highlighted truncate max-w-full">
@@ -149,7 +149,7 @@ const tierLabel = computed(() => {
 
       <UCard
         variant="subtle"
-        class="border border-muted bg-elevated"
+        class="border border-warning/30 bg-elevated sdk-shimmer"
         :ui="{ body: 'flex items-center gap-2.5 p-3' }"
       >
         <UIcon
@@ -160,7 +160,7 @@ const tierLabel = computed(() => {
           <p class="text-[10px] font-medium uppercase tracking-wide text-dimmed">
             Hạng tài khoản
           </p>
-          <p class="text-sm font-semibold text-default truncate">
+          <p class="text-sm font-semibold text-warning truncate">
             {{ tierLabel }}
           </p>
         </div>

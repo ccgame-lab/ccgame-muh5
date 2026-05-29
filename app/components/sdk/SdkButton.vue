@@ -56,6 +56,7 @@ function onSdkClick(e: Event) {
   <div
     :ref="initInteract"
     class="pointer-events-auto fixed bottom-4 right-4 z-[110] touch-none select-none"
+    :class="{ 'sdk-float': !isOpen }"
   >
     <UChip
       color="error"
@@ -68,7 +69,8 @@ function onSdkClick(e: Event) {
         color="neutral"
         variant="solid"
         size="lg"
-        class="size-12 rounded-full p-0 shadow-sm ring-1 ring-muted"
+        class="size-12 rounded-full p-0 shadow-lg ring-1 ring-primary/40 sdk-press"
+        :class="{ 'sdk-glow': !isOpen }"
         :ui="{ base: 'justify-center font-black text-lg italic' }"
         label="CC"
         @click="onSdkClick"
