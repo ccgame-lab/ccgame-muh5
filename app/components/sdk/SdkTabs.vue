@@ -30,21 +30,26 @@ const items = computed(() =>
 </script>
 
 <template>
-  <div class="w-full overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-    <UTabs
-      v-model="activeTab"
-      :items="items"
-      color="primary"
-      variant="pill"
-      size="sm"
-      :content="false"
-      class="w-max min-w-full shrink-0"
-      :ui="{
-        list: 'w-max min-w-max flex-nowrap gap-0.5 rounded-none border-b border-muted bg-muted/60 px-1 py-1.5 whitespace-nowrap',
-        trigger: 'shrink-0 whitespace-nowrap max-sm:px-2 sm:px-2.5',
-        label: 'max-sm:sr-only sm:not-sr-only sm:text-[11px] sm:whitespace-nowrap',
-        leadingIcon: 'size-4 shrink-0',
-      }"
-    />
+  <div class="w-full border-b border-muted bg-muted/60 px-1 py-1.5">
+    <div class="flex w-full items-center gap-0.5">
+      <button
+        v-for="tab in items"
+        :key="tab.value"
+        type="button"
+        class="flex h-9 min-w-0 flex-1 items-center justify-center rounded-lg transition-colors"
+        :class="activeTab === tab.value
+          ? 'bg-primary text-inverted shadow-sm'
+          : 'text-muted hover:bg-elevated hover:text-default'"
+        :title="tab.label"
+        :aria-label="tab.label"
+        :aria-pressed="activeTab === tab.value"
+        @click="activeTab = tab.value"
+      >
+        <UIcon
+          :name="tab.icon"
+          class="size-4 shrink-0"
+        />
+      </button>
+    </div>
   </div>
 </template>
