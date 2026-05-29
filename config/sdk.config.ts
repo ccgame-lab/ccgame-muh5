@@ -1,6 +1,7 @@
 export const sdkConfig = {
   tabs: [
     { id: 'overview', label: 'Overview', icon: 'i-heroicons-user' },
+    { id: 'daily', label: 'Daily', icon: 'i-heroicons-calendar-days' },
     { id: 'notices', label: 'Notice', icon: 'i-heroicons-bell' },
     { id: 'giftcode', label: 'Code', icon: 'i-heroicons-gift' },
     { id: 'wallet', label: 'Wallet', icon: 'i-heroicons-wallet' },

@@ -9,6 +9,7 @@ const activeTab = defineModel<string>('activeTab', { required: true })
 
 const SHORT_LABELS: Record<string, string> = {
   overview: 'Tổng quan',
+  daily: 'Hôm nay',
   notices: 'TB',
   giftcode: 'Code',
   wallet: 'Ví',

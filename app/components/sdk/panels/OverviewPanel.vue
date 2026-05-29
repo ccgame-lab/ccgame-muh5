@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const route = useRoute()
 
+const emit = defineEmits<{ close: [] }>()
+
 const { data: bootstrap, pending } = useFetch<{
   data: {
     session: {
@@ -11,7 +13,6 @@ const { data: bootstrap, pending } = useFetch<{
     }
     player: { id: string, username?: string, displayName: string } | null
     server: { id: number, key: string, name: string, srvaddr: string, srvport: string } | null
-    account: { tier: string | null, vip: number } | null
   }
 }>('/api/bootstrap', {
   key: 'bootstrap-data',
@@ -23,17 +24,21 @@ const { data: bootstrap, pending } = useFetch<{
   lazy: true,
 })
 
-const authMode = computed(() => bootstrap.value?.data?.session?.authMode || 'guest')
+const session = computed(() => bootstrap.value?.data?.session ?? null)
+const player = computed(() => bootstrap.value?.data?.player ?? null)
+const server = computed(() => bootstrap.value?.data?.server ?? null)
+
+const authMode = computed(() => session.value?.authMode || 'guest')
 const isGreenJade = computed(() => authMode.value === 'greenjade')
 
 const displayName = computed(() =>
-  bootstrap.value?.data?.player?.displayName
-  || bootstrap.value?.data?.player?.username
+  player.value?.displayName
+  || player.value?.username
   || 'Khách',
 )
 
 const shortPlayerId = computed(() => {
-  const id = bootstrap.value?.data?.player?.id || 'guest'
+  const id = player.value?.id || 'guest'
   if (id.length <= 18) {
     return id
   }
@@ -42,25 +47,38 @@ const shortPlayerId = computed(() => {
 
 const greenJadeLoginUrl = useGreenJadeLoginUrl()
 
-const serverLabel = computed(() => {
-  if (!bootstrap.value?.data?.session?.playAllowed) {
-    return 'Launch niêm phong'
+const serverName = computed(() => {
+  if (session.value?.playAllowed && server.value?.name) {
+    return server.value.name
   }
-  return bootstrap.value?.data?.server?.name || 'S1'
+  return 'S1'
 })
 
-const TIER_LABEL: Record<string, string> = {
-  free: 'Tiêu chuẩn',
+const sessionLabel = computed(() => {
+  const s = session.value
+  if (!s) return 'Chưa xác định'
+  if (s.authMode === 'greenjade' && s.trusted) return 'Đã xác thực'
+  if (s.trusted && s.authMode === 'guest') return 'Khách'
+  if (s.trusted) return 'Launch hợp lệ'
+  return 'Chưa xác định'
+})
+
+// Character name/level/power is not part of bootstrap state; never fabricate it.
+const characterLabel = computed(() => 'Đang đồng bộ')
+
+const gameReady = computed(() => session.value?.playAllowed === true)
+const gameStatusLabel = computed(() => gameReady.value ? 'Sẵn sàng vào game' : 'Đang chờ phiên')
+
+const statusRows = computed(() => [
+  { key: 'account', label: 'Tài khoản', value: displayName.value, icon: 'i-heroicons-user' },
+  { key: 'server', label: 'Máy chủ', value: serverName.value, icon: 'i-heroicons-server' },
+  { key: 'session', label: 'Phiên', value: sessionLabel.value, icon: 'i-heroicons-shield-check' },
+  { key: 'character', label: 'Nhân vật', value: characterLabel.value, icon: 'i-heroicons-sparkles' },
+])
+
+function handleContinue() {
+  emit('close')
 }
-
-const tierLabel = computed(() => {
-  const account = bootstrap.value?.data?.account
-  if (!account) {
-    return '—'
-  }
-  const tier = (account.tier || 'free').toLowerCase()
-  return TIER_LABEL[tier] || account.tier || 'Tiêu chuẩn'
-})
 </script>
 
 <template>
@@ -78,33 +96,66 @@ const tierLabel = computed(() => {
     v-else
     class="space-y-3 sdk-pop"
   >
-    <UCard
-      variant="subtle"
-      class="border border-primary/30 bg-elevated sdk-shimmer"
-    >
-      <div class="flex flex-col items-center gap-2 px-2 py-4 text-center">
-        <UAvatar
-          src="https://avatars.githubusercontent.com/u/739984?v=4"
-          size="lg"
-          class="ring-2 ring-primary sdk-glow"
-        />
-        <div class="min-w-0 space-y-0.5">
-          <h3 class="text-base font-semibold text-highlighted truncate max-w-full">
-            {{ displayName }}
-          </h3>
-          <p class="font-mono text-[11px] text-dimmed truncate max-w-full">
-            {{ shortPlayerId }}
-          </p>
-        </div>
-        <UBadge
-          :color="isGreenJade ? 'success' : 'warning'"
-          variant="subtle"
-          size="sm"
-        >
-          {{ isGreenJade ? 'GreenJade' : 'Khách' }}
-        </UBadge>
+    <div class="flex items-center gap-3 rounded-xl border border-primary/30 bg-elevated px-3 py-2.5">
+      <UAvatar
+        :alt="displayName"
+        icon="i-heroicons-user"
+        size="md"
+        class="ring-2 ring-primary/60 sdk-glow shrink-0"
+      />
+      <div class="min-w-0 flex-1">
+        <h3 class="text-sm font-semibold text-highlighted truncate">
+          {{ displayName }}
+        </h3>
+        <p class="font-mono text-[11px] text-dimmed truncate">
+          {{ shortPlayerId }}
+        </p>
       </div>
-    </UCard>
+      <UBadge
+        :color="isGreenJade ? 'success' : 'warning'"
+        variant="subtle"
+        size="sm"
+        class="shrink-0"
+      >
+        {{ isGreenJade ? 'GreenJade' : 'Khách' }}
+      </UBadge>
+    </div>
+
+    <div class="overflow-hidden rounded-xl border border-muted bg-elevated divide-y divide-muted/60">
+      <div
+        v-for="row in statusRows"
+        :key="row.key"
+        class="flex items-center gap-2.5 px-3 py-2.5"
+      >
+        <UIcon
+          :name="row.icon"
+          class="size-4 shrink-0 text-dimmed"
+        />
+        <span class="text-[11px] font-medium uppercase tracking-wide text-dimmed">
+          {{ row.label }}
+        </span>
+        <span class="ml-auto text-sm font-semibold text-default truncate text-right">
+          {{ row.value }}
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2.5 px-3 py-2.5">
+        <UIcon
+          :name="gameReady ? 'i-heroicons-play-circle' : 'i-heroicons-clock'"
+          class="size-4 shrink-0"
+          :class="gameReady ? 'text-primary' : 'text-dimmed'"
+        />
+        <span class="text-[11px] font-medium uppercase tracking-wide text-dimmed">
+          Trạng thái game
+        </span>
+        <span
+          class="ml-auto text-sm font-semibold truncate text-right"
+          :class="gameReady ? 'text-primary' : 'text-default'"
+        >
+          {{ gameStatusLabel }}
+        </span>
+      </div>
+    </div>
 
     <UAlert
       v-if="!isGreenJade"
@@ -127,44 +178,14 @@ const tierLabel = computed(() => {
       </template>
     </UAlert>
 
-    <div class="grid grid-cols-2 gap-2">
-      <UCard
-        variant="subtle"
-        class="border border-muted bg-elevated"
-        :ui="{ body: 'flex items-center gap-2.5 p-3' }"
-      >
-        <UIcon
-          name="i-heroicons-server"
-          class="size-5 shrink-0 text-dimmed"
-        />
-        <div class="min-w-0">
-          <p class="text-[10px] font-medium uppercase tracking-wide text-dimmed">
-            Máy chủ
-          </p>
-          <p class="text-sm font-semibold text-default truncate">
-            {{ serverLabel }}
-          </p>
-        </div>
-      </UCard>
-
-      <UCard
-        variant="subtle"
-        class="border border-warning/30 bg-elevated sdk-shimmer"
-        :ui="{ body: 'flex items-center gap-2.5 p-3' }"
-      >
-        <UIcon
-          name="i-heroicons-star"
-          class="size-5 shrink-0 text-warning"
-        />
-        <div class="min-w-0">
-          <p class="text-[10px] font-medium uppercase tracking-wide text-dimmed">
-            Hạng tài khoản
-          </p>
-          <p class="text-sm font-semibold text-warning truncate">
-            {{ tierLabel }}
-          </p>
-        </div>
-      </UCard>
-    </div>
+    <UButton
+      :icon="gameReady ? 'i-heroicons-play' : 'i-heroicons-arrow-path'"
+      color="primary"
+      size="md"
+      block
+      class="font-semibold"
+      :label="gameReady ? 'Vào game' : 'Tiếp tục'"
+      @click="handleContinue"
+    />
   </div>
 </template>

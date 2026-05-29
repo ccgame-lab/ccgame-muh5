@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { sdkConfig } from '~~/config/sdk.config'
 import SdkTabs from './SdkTabs.vue'
 import OverviewPanel from './panels/OverviewPanel.vue'
+import DailyPanel from './panels/DailyPanel.vue'
 import NoticesPanel from './panels/NoticesPanel.vue'
 import GiftcodePanel from './panels/GiftcodePanel.vue'
 import WalletPanel from './panels/WalletPanel.vue'
@@ -55,7 +56,11 @@ function closePanel() {
     />
 
     <div class="flex-1 min-h-0 overflow-y-auto bg-default p-3 sm:p-4">
-      <OverviewPanel v-if="activeTab === 'overview'" />
+      <OverviewPanel
+        v-if="activeTab === 'overview'"
+        @close="closePanel"
+      />
+      <DailyPanel v-else-if="activeTab === 'daily'" />
       <NoticesPanel v-else-if="activeTab === 'notices'" />
       <GiftcodePanel v-else-if="activeTab === 'giftcode'" />
       <WalletPanel v-else-if="activeTab === 'wallet'" />
