@@ -1,9 +1,18 @@
 import { apiSuccess } from '../utils/api-response'
 import { getSessionUser } from '../services/session.server'
+import { resolveSdkSession } from '../services/sdk-session.server'
 import { sdkConfig } from '~~/config/sdk.config'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const sessionData = getSessionUser(event)
+
+  let account: { tier: string | null, vip: number } | null = null
+  if (sessionData.trusted) {
+    const resolved = await resolveSdkSession(event)
+    if (resolved.ok) {
+      account = { tier: resolved.user.tier, vip: resolved.user.vip }
+    }
+  }
 
   return apiSuccess({
     session: {
@@ -14,6 +23,7 @@ export default defineEventHandler((event) => {
     },
     player: sessionData.player,
     server: sessionData.server,
+    account,
     config: sdkConfig,
   })
 })

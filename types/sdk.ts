@@ -90,3 +90,33 @@ export interface WalletReadResult {
     wpoint: number | null
   }
 }
+
+export interface HallOfFameEntry {
+  id: number
+  serverName: string
+  serverKey: string
+  serverStatus: 'completed' | 'ongoing'
+  category: 'combat' | 'donate'
+  categoryLabel: string
+  playerName: string | null
+  scoreValue: number | null
+  scoreLabel: string
+  rewards: string[]
+}
+
+export interface HallOfFameReadResult extends SdkReadMeta {
+  items: HallOfFameEntry[]
+}
+
+export interface SocialEvent {
+  id: number
+  username: string | null
+  eventType: string
+  template: string | null
+  metadata: Record<string, unknown> | null
+  createdAt: string
+}
+
+export interface SocialReadResult extends SdkReadMeta {
+  items: SocialEvent[]
+}

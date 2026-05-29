@@ -15,6 +15,8 @@ const SHORT_LABELS: Record<string, string> = {
   history: 'LS',
   leaderboard: 'BXH',
   mining: 'Đào',
+  halloffame: 'Vinh',
+  social: 'HĐ',
 }
 
 const items = computed(() =>

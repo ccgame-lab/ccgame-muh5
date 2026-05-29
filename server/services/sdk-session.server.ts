@@ -13,10 +13,24 @@ export type PortalUser = {
   id: number
   username: string
   name: string | null
-  vip: number | null
+  vip: number
   tier: string | null
   wcoin: number
   wpoint: number
+}
+
+/**
+ * Portal `users` has no numeric `vip` column; tier is a string (default 'free').
+ * Derive a best-effort VIP level from any trailing digits in tier ('vip3' -> 3),
+ * otherwise non-free tiers map to 1 and 'free'/empty maps to 0.
+ */
+export const deriveVipFromTier = (tier: string | null): number => {
+  if (!tier) return 0
+  const normalized = tier.trim().toLowerCase()
+  if (!normalized || normalized === 'free') return 0
+  const match = normalized.match(/(\d+)/)
+  if (match) return safeInt(match[1])
+  return 1
 }
 
 export type ResolvedSdkSession
@@ -57,7 +71,7 @@ export const resolveSdkSession = async (event: H3Event): Promise<ResolvedSdkSess
   try {
     const pool = getPool(portalDb)
     const [rows] = await pool.execute<RowDataPacket[]>(
-      `SELECT id, username, name, vip, tier, wcoin, wpoint
+      `SELECT id, username, name, tier, wcoin, wpoint
        FROM users
        WHERE username = ?
        LIMIT 1`,
@@ -68,6 +82,8 @@ export const resolveSdkSession = async (event: H3Event): Promise<ResolvedSdkSess
       return { ok: false, reason: 'account_not_found' }
     }
 
+    const tier = safeStringOrNull(row.tier)
+
     return {
       ok: true,
       payload,
@@ -75,8 +91,8 @@ export const resolveSdkSession = async (event: H3Event): Promise<ResolvedSdkSess
         id: safeInt(row.id),
         username: safeStringOrNull(row.username) || username,
         name: safeStringOrNull(row.name),
-        vip: row.vip == null ? null : safeInt(row.vip),
-        tier: safeStringOrNull(row.tier),
+        vip: deriveVipFromTier(tier),
+        tier,
         wcoin: safeInt(row.wcoin),
         wpoint: safeInt(row.wpoint),
       },

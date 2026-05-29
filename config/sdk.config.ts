@@ -7,6 +7,8 @@ export const sdkConfig = {
     { id: 'history', label: 'History', icon: 'i-heroicons-clock' },
     { id: 'leaderboard', label: 'Rank', icon: 'i-heroicons-trophy' },
     { id: 'mining', label: 'Mining', icon: 'i-heroicons-cpu-chip' },
+    { id: 'halloffame', label: 'Legends', icon: 'i-heroicons-sparkles' },
+    { id: 'social', label: 'Activity', icon: 'i-heroicons-bolt' },
   ],
   defaultTab: 'overview',
   app: {

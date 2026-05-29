@@ -197,6 +197,8 @@ ss -lntp | grep -E "3100|4100"
 curl -I -H "Host: muh5.ccgame.org" http://127.0.0.1:4100/play
 curl http://127.0.0.1:4100/api/health
 curl "http://127.0.0.1:4100/api/leaderboard?tab=power"
+curl http://127.0.0.1:4100/api/hall-of-fame
+curl http://127.0.0.1:4100/api/social
 # Đảm bảo build production, không dính vite dev:
 curl -s -H "Host: muh5.ccgame.org" http://127.0.0.1:4100/play | grep -E "@vite/client|hmr|vite" || true
 ```

@@ -9,6 +9,8 @@ import WalletPanel from './panels/WalletPanel.vue'
 import HistoryPanel from './panels/HistoryPanel.vue'
 import LeaderboardPanel from './panels/LeaderboardPanel.vue'
 import MiningPanel from './panels/MiningPanel.vue'
+import HallOfFamePanel from './panels/HallOfFamePanel.vue'
+import SocialPanel from './panels/SocialPanel.vue'
 
 const isOpen = defineModel<boolean>('isOpen', { default: false })
 
@@ -60,6 +62,8 @@ function closePanel() {
       <HistoryPanel v-else-if="activeTab === 'history'" />
       <LeaderboardPanel v-else-if="activeTab === 'leaderboard'" />
       <MiningPanel v-else-if="activeTab === 'mining'" />
+      <HallOfFamePanel v-else-if="activeTab === 'halloffame'" />
+      <SocialPanel v-else-if="activeTab === 'social'" />
     </div>
   </div>
 </template>

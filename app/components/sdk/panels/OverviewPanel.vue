@@ -11,6 +11,7 @@ const { data: bootstrap, pending } = useFetch<{
     }
     player: { id: string, username?: string, displayName: string } | null
     server: { id: number, key: string, name: string, srvaddr: string, srvport: string } | null
+    account: { tier: string | null, vip: number } | null
   }
 }>('/api/bootstrap', {
   key: 'bootstrap-data',
@@ -46,6 +47,19 @@ const serverLabel = computed(() => {
     return 'Launch niêm phong'
   }
   return bootstrap.value?.data?.server?.name || 'S1'
+})
+
+const TIER_LABEL: Record<string, string> = {
+  free: 'Tiêu chuẩn',
+}
+
+const tierLabel = computed(() => {
+  const account = bootstrap.value?.data?.account
+  if (!account) {
+    return '—'
+  }
+  const tier = (account.tier || 'free').toLowerCase()
+  return TIER_LABEL[tier] || account.tier || 'Tiêu chuẩn'
 })
 </script>
 
@@ -144,10 +158,10 @@ const serverLabel = computed(() => {
         />
         <div class="min-w-0">
           <p class="text-[10px] font-medium uppercase tracking-wide text-dimmed">
-            VIP
+            Hạng tài khoản
           </p>
-          <p class="text-sm font-semibold text-default">
-            VIP 0
+          <p class="text-sm font-semibold text-default truncate">
+            {{ tierLabel }}
           </p>
         </div>
       </UCard>
