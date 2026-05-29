@@ -6,6 +6,9 @@
 .cache
 dist
 
+# Deploy build artifacts
+artifacts
+
 # Node dependencies
 node_modules
 
