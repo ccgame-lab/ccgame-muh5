@@ -61,6 +61,21 @@
         }
         @keyframes ccgame-spin { to { transform: rotate(360deg); } }
     </style>
+    <script>
+        (function () {
+            var proto = HTMLCanvasElement.prototype;
+            var original = proto.getContext;
+            proto.getContext = function (type, attributes) {
+                if (type === '2d') {
+                    attributes = attributes || {};
+                    if (attributes.willReadFrequently === undefined) {
+                        attributes.willReadFrequently = true;
+                    }
+                }
+                return original.call(this, type, attributes);
+            };
+        })();
+    </script>
 </head>
 
 <body>
