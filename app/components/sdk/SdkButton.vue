@@ -7,6 +7,9 @@ const isOpen = defineModel<boolean>('isOpen', { default: false })
 const sdkPos = { x: 0, y: 0 }
 const isSdkDragging = ref(false)
 
+// Reserve the top band for the ccgame-web control pill; SDK stays in the lower region.
+const TOP_RESERVED = 96
+
 function initInteract(el: HTMLElement | ComponentPublicInstance | Element | null) {
   if (!import.meta.client) return
   import('interactjs').then((m) => {
@@ -18,7 +21,12 @@ function initInteract(el: HTMLElement | ComponentPublicInstance | Element | null
         inertia: true,
         modifiers: [
           interact.modifiers.restrictRect({
-            restriction: 'body',
+            restriction: () => ({
+              top: TOP_RESERVED,
+              left: 0,
+              right: window.innerWidth,
+              bottom: window.innerHeight,
+            }),
             endOnly: false,
           }),
         ],
