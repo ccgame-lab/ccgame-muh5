@@ -83,7 +83,7 @@ const STATE_META: Record<ItemState, { icon: string, color: string, label: string
     </div>
 
     <p class="text-[11px] leading-snug text-muted">
-      Danh sách theo dõi phiên chơi. Trạng thái đọc từ phiên hiện tại, không phải phần thưởng.
+      Danh sách theo dõi phiên chơi. Trạng thái đọc từ phiên hiện tại, chỉ dùng để theo dõi.
     </p>
 
     <div
