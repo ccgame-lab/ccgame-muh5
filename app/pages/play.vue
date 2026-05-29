@@ -8,9 +8,16 @@ definePageMeta({
 const isSdkOpen = ref(false)
 
 const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
 
 const frameFailed = ref(false)
+const frameLoaded = ref(false)
 const frameKey = ref(0)
+
+const ccgamePortalUrl = computed(() =>
+  String(runtimeConfig.public.ccgamePortalUrl || 'https://ccgame.org').replace(/\/+$/, ''),
+)
+const ccgamePlayUrl = computed(() => `${ccgamePortalUrl.value}/play/muh5`)
 
 const { data: bootstrap, pending } = useFetch<{
   data: {
@@ -41,27 +48,44 @@ const { data: bootstrap, pending } = useFetch<{
 
 const playAllowed = computed(() => bootstrap.value?.data?.session?.playAllowed === true)
 
-const launchBlockedMessage = computed(() => {
-  if (frameFailed.value) {
-    return 'Khung game không tải được. Kiểm tra mạng rồi thử tải lại.'
-  }
+const sessionSource = computed(() => bootstrap.value?.data?.session?.source || '')
+const serverName = computed(() => bootstrap.value?.data?.server?.name || 'S1')
 
-  const source = bootstrap.value?.data?.session?.source
-  if (source === 'invalid_launch') {
-    return 'Phiên launch không hợp lệ hoặc đã hết hạn. Vào lại từ CCGame để tiếp tục.'
+const isExpiredOrInvalid = computed(() =>
+  sessionSource.value === 'invalid_launch' || frameFailed.value,
+)
+
+const accessTitle = computed(() => {
+  if (frameFailed.value) {
+    return 'Không tải được game'
   }
-  if (source === 'unsigned_legacy') {
-    return 'Chế độ tương thích unsigned (không tin cậy). Chỉ dùng cho thử nghiệm.'
+  if (sessionSource.value === 'invalid_launch') {
+    return 'Phiên đã hết hạn'
   }
-  return 'Thiếu launch token hợp lệ từ CCGame. Vào game qua ccgame.org/play/muh5.'
+  return 'Trạng thái truy cập'
+})
+
+const accessMessage = computed(() => {
+  if (frameFailed.value) {
+    return 'Khung game chưa tải được. Kiểm tra mạng rồi tạo phiên mới.'
+  }
+  if (sessionSource.value === 'invalid_launch') {
+    return 'Phiên chơi đã hết hạn hoặc không còn hợp lệ. Mở lại từ CCGame để tạo phiên mới.'
+  }
+  return 'Cần mở game từ CCGame để tạo phiên chơi.'
 })
 
 const handleFrameError = () => {
   frameFailed.value = true
 }
 
+const handleFrameLoaded = () => {
+  frameLoaded.value = true
+}
+
 const retryFrame = () => {
   frameFailed.value = false
+  frameLoaded.value = false
   frameKey.value++
 }
 
@@ -138,6 +162,7 @@ const gameUrl = computed(() => {
 
 watch(gameUrl, () => {
   frameFailed.value = false
+  frameLoaded.value = false
 }, { immediate: true })
 </script>
 
@@ -149,10 +174,10 @@ watch(gameUrl, () => {
     >
       <UIcon
         name="i-heroicons-arrow-path"
-        class="w-8 h-8 animate-spin text-primary-400"
+        class="w-7 h-7 animate-spin text-primary-400"
       />
-      <p class="max-w-xs text-sm text-gray-300 leading-relaxed">
-        Đang mở phiên chơi...
+      <p class="text-sm text-gray-300 leading-relaxed">
+        Đang kiểm tra lối vào...
       </p>
     </div>
 
@@ -160,31 +185,39 @@ watch(gameUrl, () => {
       v-else-if="!playAllowed || frameFailed"
       class="absolute inset-0 z-20 flex items-center justify-center p-6 bg-black"
     >
-      <div class="w-full max-w-md space-y-4 text-center">
-        <UIcon
-          name="i-heroicons-lock-closed"
-          class="w-12 h-12 text-amber-500 mx-auto"
-        />
-        <h1 class="text-lg font-bold text-white">
-          Launch bị niêm phong
-        </h1>
-        <p class="text-sm text-gray-400 leading-relaxed">
-          {{ launchBlockedMessage }}
-        </p>
-        <UBadge
-          color="warning"
-          variant="subtle"
-          class="mx-auto"
-        >
-          {{ bootstrap?.data?.session?.source || 'sealed' }} · trusted: {{ bootstrap?.data?.session?.trusted ? 'yes' : 'no' }}
-        </UBadge>
-        <UButton
-          v-if="frameFailed"
-          color="primary"
-          @click="retryFrame"
-        >
-          Thử tải lại
-        </UButton>
+      <div class="w-full max-w-sm space-y-5 rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
+        <div class="mx-auto flex size-12 items-center justify-center rounded-full bg-primary-500/10 ring-1 ring-primary-500/30">
+          <UIcon
+            :name="isExpiredOrInvalid ? 'i-heroicons-clock' : 'i-heroicons-shield-check'"
+            class="size-6 text-primary-400"
+          />
+        </div>
+        <div class="space-y-1.5">
+          <h1 class="text-base font-semibold text-white">
+            {{ accessTitle }}
+          </h1>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            {{ accessMessage }}
+          </p>
+        </div>
+        <div class="flex flex-col gap-2">
+          <UButton
+            v-if="frameFailed"
+            color="primary"
+            block
+            label="Tạo phiên mới"
+            @click="retryFrame"
+          />
+          <UButton
+            :to="ccgamePlayUrl"
+            target="_parent"
+            external
+            :color="frameFailed ? 'neutral' : 'primary'"
+            :variant="frameFailed ? 'soft' : 'solid'"
+            block
+            label="Về CCGame"
+          />
+        </div>
       </div>
     </div>
 
@@ -192,34 +225,69 @@ watch(gameUrl, () => {
       v-else-if="!gameUrl"
       class="absolute inset-0 z-20 flex items-center justify-center p-6 bg-black"
     >
-      <div class="w-full max-w-md space-y-4 text-center">
-        <UIcon
-          name="i-heroicons-exclamation-triangle"
-          class="w-12 h-12 text-amber-500 mx-auto"
+      <div class="w-full max-w-sm space-y-5 rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
+        <div class="mx-auto flex size-12 items-center justify-center rounded-full bg-primary-500/10 ring-1 ring-primary-500/30">
+          <UIcon
+            name="i-heroicons-arrow-path"
+            class="size-6 text-primary-400"
+          />
+        </div>
+        <div class="space-y-1.5">
+          <h1 class="text-base font-semibold text-white">
+            Đang chuẩn bị nhân vật
+          </h1>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Phiên chơi hợp lệ nhưng chưa có thông tin nhân vật. Mở lại từ CCGame để tạo phiên mới.
+          </p>
+        </div>
+        <UButton
+          :to="ccgamePlayUrl"
+          target="_parent"
+          external
+          color="primary"
+          block
+          label="Về CCGame"
         />
-        <h1 class="text-lg font-bold text-white">
-          Thiếu tên nhân vật game
-        </h1>
-        <p class="text-sm text-gray-400 leading-relaxed">
-          Launch token hợp lệ nhưng không có username game. Vào lại từ CCGame để tiếp tục.
-        </p>
       </div>
     </div>
 
-    <GameFrame
-      v-else
-      :key="frameKey"
-      :src="gameUrl"
-      @error="handleFrameError"
-    />
+    <template v-else>
+      <Transition name="sdk-fade">
+        <div
+          v-if="!frameLoaded"
+          class="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black px-6 text-center"
+        >
+          <UIcon
+            name="i-heroicons-arrow-path"
+            class="w-7 h-7 animate-spin text-primary-400"
+          />
+          <p class="text-sm text-gray-300 leading-relaxed">
+            Đang mở phiên chơi...
+          </p>
+          <p class="text-[11px] font-mono uppercase tracking-wide text-gray-500">
+            {{ serverName }} · Phiên chơi đã sẵn sàng
+          </p>
+        </div>
+      </Transition>
 
-    <SdkButton
-      v-if="playAllowed"
-      v-model:is-open="isSdkOpen"
-    />
-    <SdkPanel
-      v-if="playAllowed"
-      v-model:is-open="isSdkOpen"
-    />
+      <GameFrame
+        :key="frameKey"
+        :src="gameUrl"
+        @load="handleFrameLoaded"
+        @error="handleFrameError"
+      />
+
+      <SdkButton v-model:is-open="isSdkOpen" />
+      <SdkPanel v-model:is-open="isSdkOpen" />
+    </template>
   </div>
 </template>
+
+<style scoped>
+.sdk-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.sdk-fade-leave-to {
+  opacity: 0;
+}
+</style>
