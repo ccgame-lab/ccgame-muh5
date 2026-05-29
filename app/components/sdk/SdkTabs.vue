@@ -39,9 +39,9 @@ const items = computed(() =>
     :content="false"
     class="w-full shrink-0"
     :ui="{
-      list: 'w-full gap-0.5 rounded-none border-b border-muted bg-muted/60 px-1 py-1.5',
-      trigger: 'max-sm:min-w-9 max-sm:px-2 sm:px-2.5',
-      label: 'max-sm:sr-only sm:not-sr-only sm:text-[11px]',
+      list: 'w-full flex-nowrap gap-0.5 overflow-x-auto whitespace-nowrap rounded-none border-b border-muted bg-muted/60 px-1 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+      trigger: 'shrink-0 whitespace-nowrap max-sm:px-2 sm:px-2.5',
+      label: 'max-sm:sr-only sm:not-sr-only sm:text-[11px] sm:whitespace-nowrap',
       leadingIcon: 'size-4 shrink-0',
     }"
   />
