@@ -64,25 +64,26 @@ function onSdkClick(e: Event) {
   <div
     :ref="initInteract"
     class="pointer-events-auto fixed bottom-4 right-4 z-[110] touch-none select-none"
-    :class="{ 'sdk-float': !isOpen }"
   >
-    <UChip
-      color="error"
-      :show="!isOpen"
-      inset
-      size="sm"
-    >
-      <UButton
-        aria-label="Mở CCGame SDK"
-        color="neutral"
-        variant="solid"
-        size="lg"
-        class="size-12 rounded-full p-0 shadow-lg ring-1 ring-primary/40 sdk-press"
-        :class="{ 'sdk-glow': !isOpen }"
-        :ui="{ base: 'justify-center font-black text-lg italic' }"
-        label="CC"
-        @click="onSdkClick"
-      />
-    </UChip>
+    <div :class="{ 'sdk-float': !isOpen }">
+      <UChip
+        color="error"
+        :show="!isOpen"
+        inset
+        size="sm"
+      >
+        <UButton
+          aria-label="Mở CCGame SDK"
+          color="neutral"
+          variant="solid"
+          size="lg"
+          class="size-12 rounded-full p-0 shadow-lg ring-1 ring-primary/40 sdk-press"
+          :class="{ 'sdk-glow': !isOpen }"
+          :ui="{ base: 'justify-center font-black text-lg italic' }"
+          label="CC"
+          @click="onSdkClick"
+        />
+      </UChip>
+    </div>
   </div>
 </template>
