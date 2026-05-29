@@ -15,6 +15,7 @@ const emit = defineEmits<{
       :src="src"
       class="w-full h-full border-none"
       allow="autoplay; fullscreen"
+      referrerpolicy="no-referrer"
       scrolling="no"
       loading="eager"
       @load="emit('load')"

@@ -27,7 +27,7 @@ export const safeEqual = (a: string, b: string): boolean => {
 }
 
 export const getLaunchSecret = (): string | null => {
-  const secret = process.env.MUH5_LAUNCH_SECRET
+  const secret = process.env.MUH5_LAUNCH_SECRET || process.env.CCGAME_LAUNCH_SECRET
   if (secret) {
     return secret
   }
