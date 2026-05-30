@@ -5,7 +5,7 @@
         MUH5 Shell
       </h1>
       <p class="text-gray-400 text-lg mb-8">
-        Game Client Launch Gateway
+        Cổng vào thế giới game
       </p>
 
       <UCard class="bg-gray-900 border-gray-800">
@@ -14,10 +14,10 @@
           class="w-12 h-12 text-primary-500 mx-auto mb-4"
         />
         <h2 class="text-xl font-semibold mb-2">
-          Ready to Play?
+          Sẵn sàng chơi?
         </h2>
         <p class="text-sm text-gray-400 mb-6">
-          Launch into the game world with the integrated SDK overlay.
+          Khởi động vào thế giới game với SDK overlay tích hợp.
         </p>
         <UButton
           to="/play"
@@ -25,7 +25,7 @@
           size="lg"
           block
         >
-          Launch Game
+          Vào Game
         </UButton>
       </UCard>
     </div>

@@ -26,7 +26,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-gray-800 py-4 text-center text-gray-500 text-sm shrink-0">
-      &copy; 2026 CCGame MUH5. All rights reserved.
+      &copy; 2026 CCGame MUH5. Đã đăng ký bản quyền.
     </footer>
   </div>
 </template>
