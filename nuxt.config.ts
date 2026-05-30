@@ -20,6 +20,8 @@ export default defineNuxtConfig({
   // Values come from environment (NUXT_MUH5_PORTAL_DB_*, NUXT_MUH5_GAME_DB_*).
   // Empty defaults => endpoints fall back to sealed/empty state safely.
   runtimeConfig: {
+    adminPassword: '',
+    adminSessionSecret: '',
     muh5PortalDbHost: '',
     muh5PortalDbPort: '3306',
     muh5PortalDbName: 'muh5_ccgame',
