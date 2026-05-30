@@ -1,38 +1,38 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-950">
-    <UCard class="w-full max-w-sm">
-      <template #header>
-        <div class="text-center">
-          <h1 class="text-xl font-bold text-white">MUH5 Admin</h1>
-          <p class="text-sm text-gray-400 mt-1">Enter password to continue</p>
-        </div>
-      </template>
+    <div class="w-72">
+      <h1 class="text-sm font-medium text-gray-400 mb-3 text-center">MUH5 Admin</h1>
 
       <UForm :state="state" @submit="onSubmit">
-        <UFormField label="Password" name="password">
+        <div class="flex gap-1.5">
           <UInput
             v-model="state.password"
-            type="password"
-            placeholder="Admin password"
+            :type="showPassword ? 'text' : 'password'"
+            placeholder="Password"
             autofocus
-            class="w-full"
-          />
-        </UFormField>
-
-        <UButton
-          type="submit"
-          block
-          :loading="loading"
-          class="mt-4"
-        >
-          Sign in
-        </UButton>
-
-        <p v-if="error" class="text-red-400 text-sm mt-3 text-center">
+            size="sm"
+            class="flex-1"
+          >
+            <template #trailing>
+              <UButton
+                variant="ghost"
+                color="neutral"
+                size="xs"
+                :icon="showPassword ? 'i-heroicons-eye-slash' : 'i-heroicons-eye'"
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                @click="showPassword = !showPassword"
+              />
+            </template>
+          </UInput>
+          <UButton type="submit" size="sm" :loading="loading">
+            Go
+          </UButton>
+        </div>
+        <p v-if="error" class="text-red-400 text-xs mt-2 text-center">
           {{ error }}
         </p>
       </UForm>
-    </UCard>
+    </div>
   </div>
 </template>
 
@@ -42,6 +42,7 @@ definePageMeta({
 })
 
 const state = reactive({ password: '' })
+const showPassword = ref(false)
 const loading = ref(false)
 const error = ref('')
 
