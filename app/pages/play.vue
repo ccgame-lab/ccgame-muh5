@@ -149,7 +149,7 @@ const gameUrl = computed(() => {
     srvport,
   })
 
-  // Guest: unique short nick only. Do NOT set roleCount=0 — it skips preload/initGame and
+  // Guest: unique short nick only. Do NOT set roleCount=0 - it skips preload/initGame and
   // crashes doEnterGame when the account already has a character (server role list > 0).
   if (bootstrap.value?.data?.session?.authMode === 'guest') {
     const nick = player?.suggestedCharacterName?.trim()

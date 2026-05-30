@@ -18,8 +18,8 @@ die() { printf '[package] ERROR: %s\n' "$*" >&2; exit 1; }
 require_cmd() { command -v "$1" >/dev/null 2>&1 || die "Missing command: $1"; }
 
 verify_output() {
-  [[ -f "${REPO_ROOT}/.output/server/index.mjs" ]] || die "Missing .output/server/index.mjs — build failed?"
-  [[ -d "${REPO_ROOT}/.output/public/_nuxt" ]]     || die "Missing .output/public/_nuxt — build failed?"
+  [[ -f "${REPO_ROOT}/.output/server/index.mjs" ]] || die "Missing .output/server/index.mjs - build failed?"
+  [[ -d "${REPO_ROOT}/.output/public/_nuxt" ]]     || die "Missing .output/public/_nuxt - build failed?"
 }
 
 build_local() {

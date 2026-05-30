@@ -26,7 +26,7 @@ const sealedMessage = (reason?: MiningReadResult['reason']) =>
   })
 
 const formatBalance = (value: number | null | undefined): string => {
-  if (value == null) return '—'
+  if (value == null) return '-'
   return value.toLocaleString('vi-VN')
 }
 </script>

@@ -13,7 +13,7 @@
 }
 
 /* ──────────────────────────────────────────────────────────
-   SDK motion layer — in-game "juice" (CN/KR gacha-style).
+   SDK motion layer - in-game "juice" (CN/KR gacha-style).
    All looping/entrance motion is gated behind
    prefers-reduced-motion: no-preference. Reduced-motion users
    get the same static composition with no animation.
@@ -68,7 +68,7 @@
   animation: sdk-float 3.2s ease-in-out infinite;
 }
 
-/* Pulsing aura — color set via --sdk-glow-color */
+/* Pulsing aura - color set via --sdk-glow-color */
 .sdk-glow {
   animation: sdk-glow-pulse 2.4s ease-in-out infinite;
 }

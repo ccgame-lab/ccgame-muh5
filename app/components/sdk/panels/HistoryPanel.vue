@@ -21,7 +21,7 @@ const sealedMessage = (reason?: HistoryReadResult['reason']) =>
   })
 
 const formatDate = (iso: string): string => {
-  if (!iso) return '—'
+  if (!iso) return '-'
   try {
     return new Date(iso).toLocaleString('vi-VN', {
       day: '2-digit',

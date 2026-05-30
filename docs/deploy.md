@@ -1,4 +1,4 @@
-# CCGame MUH5 — Deploy Guide
+# CCGame MUH5 - Deploy Guide
 
 > **Runtime:** Production dùng `bun` làm interpreter. Không dùng `node` để chạy `.output/server/index.mjs`.
 
@@ -97,10 +97,10 @@ Rollback chỉ đổi symlink + pm2 reload. Nhanh, không ảnh hưởng DB.
 ## Lần đầu tiên (First-time setup VPS)
 
 ```bash
-# Trên VPS — chạy một lần duy nhất
+# Trên VPS - chạy một lần duy nhất
 mkdir -p /opt/ccgame-muh5/releases /opt/ccgame-muh5/shared
 
-# Copy .env hiện tại vào shared (đổi HOST về 127.0.0.1 — nginx proxy nội bộ)
+# Copy .env hiện tại vào shared (đổi HOST về 127.0.0.1 - nginx proxy nội bộ)
 sed 's/^HOST=0.0.0.0/HOST=127.0.0.1/' \
   /www/wwwroot/ccgame/ccgame-muh5/.env > /opt/ccgame-muh5/shared/.env
 chmod 600 /opt/ccgame-muh5/shared/.env
@@ -124,7 +124,7 @@ pm2 status ccgame-muh5
 
 ## Environment Variables
 
-File `/opt/ccgame-muh5/shared/.env` — không commit, không push.
+File `/opt/ccgame-muh5/shared/.env` - không commit, không push.
 
 ```dotenv
 # ── Process ──────────────────────────────────────────────
@@ -169,7 +169,7 @@ location / {
 }
 ```
 
-Vhost: `muh5.ccgame.org` (+ `muh5-ws.ccgame.org` cho game client). Không cần đổi khi deploy — port giữ nguyên 4100.
+Vhost: `muh5.ccgame.org` (+ `muh5-ws.ccgame.org` cho game client). Không cần đổi khi deploy - port giữ nguyên 4100.
 
 ---
 
@@ -177,12 +177,12 @@ Vhost: `muh5.ccgame.org` (+ `muh5-ws.ccgame.org` cho game client). Không cần 
 
 | Symptom | Fix |
 |---------|-----|
-| `Bun is not defined` at startup | PM2 chưa dùng `interpreter: bun` — kiểm tra `shared/ecosystem.config.cjs` |
-| Port 4100 not responding | `pm2 logs ccgame-muh5` — xem lỗi boot |
+| `Bun is not defined` at startup | PM2 chưa dùng `interpreter: bun` - kiểm tra `shared/ecosystem.config.cjs` |
+| Port 4100 not responding | `pm2 logs ccgame-muh5` - xem lỗi boot |
 | `cwd` vẫn trỏ `/www/...` sau deploy | `pm2 restart` không đổi cwd. `pm2 delete` + `pm2 start` từ ecosystem mới |
 | Shell unstyled / `_nuxt/*.js` 404 | Build chưa xong đã restart. Chạy lại `package.sh` + `deploy.sh` |
 | ENV vars not picked up | `--update-env` đã có trong script. Kiểm tra `shared/.env` |
-| `NUXT_MUH5_*` thay đổi nhưng không có hiệu lực | Nuxt bakes `runtimeConfig` lúc build — cần rebuild + redeploy |
+| `NUXT_MUH5_*` thay đổi nhưng không có hiệu lực | Nuxt bakes `runtimeConfig` lúc build - cần rebuild + redeploy |
 | `/report` 404 trong logs | Game client gửi telemetry tới route shell không có. Vô hại, ngoài phạm vi Task 01 |
 
 ---

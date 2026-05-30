@@ -6,7 +6,7 @@
 # Usage:
 #   CCGAME_RELEASE=<name> bash scripts/deploy.sh <path/to/ccgame-muh5-<name>.tar.gz>
 #
-# Thường chạy sau package.sh — copy dòng "Deploy:" từ output của package.sh.
+# Thường chạy sau package.sh - copy dòng "Deploy:" từ output của package.sh.
 
 set -euo pipefail
 
@@ -60,7 +60,7 @@ CURRENT="${OPT_BASE}/current"
 
 die_r() { printf '[deploy-remote] ERROR: %s\n' "$*" >&2; exit 1; }
 
-[[ -f "${SHARED}/.env" ]] || die_r "Missing ${SHARED}/.env — copy thủ công trước deploy lần đầu"
+[[ -f "${SHARED}/.env" ]] || die_r "Missing ${SHARED}/.env - copy thủ công trước deploy lần đầu"
 [[ ! -d "${REL}" ]]        || die_r "Release already exists: ${REL}"
 
 mkdir -p "${OPT_BASE}/releases"

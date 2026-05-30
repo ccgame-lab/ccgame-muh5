@@ -33,7 +33,7 @@ const entries = computed<LeaderboardEntry[]>(() => data.value?.data?.entries ?? 
 const tabLabel = computed(() => (tab.value === 'level' ? 'Cấp độ' : 'Lực chiến'))
 
 const formatScore = (value: number): string => {
-  if (!Number.isFinite(value)) return '—'
+  if (!Number.isFinite(value)) return '-'
   return value.toLocaleString('vi-VN')
 }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scripts/rollback.sh
-# Rollback symlink-only — không xóa release, không DB rollback.
+# Rollback symlink-only - không xóa release, không DB rollback.
 #
 # Usage:
 #   bash scripts/rollback.sh               # list releases + current trên VPS

@@ -18,7 +18,7 @@ const emptyMessage = computed(() =>
 )
 
 const formatScore = (value: number | null): string => {
-  if (value == null) return '—'
+  if (value == null) return '-'
   return value.toLocaleString('vi-VN')
 }
 

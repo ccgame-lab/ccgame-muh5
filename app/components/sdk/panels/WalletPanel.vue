@@ -22,7 +22,7 @@ const hasWcoin = computed(() => !wallet.value?.sealed && wallet.value?.balance.w
 const hasWpoint = computed(() => !wallet.value?.sealed && wallet.value?.balance.wpoint != null)
 
 const formatBalance = (value: number | null | undefined): string => {
-  if (value == null) return '—'
+  if (value == null) return '-'
   return value.toLocaleString('vi-VN')
 }
 
