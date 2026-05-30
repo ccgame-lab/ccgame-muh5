@@ -17,6 +17,11 @@ const items = computed<NavigationMenuItem[]>(() => [
     icon: 'i-lucide-trophy',
     to: '/admin/hall-of-fame',
   },
+  {
+    label: 'Accounts',
+    icon: 'i-lucide-shield',
+    to: '/admin/accounts',
+  },
 ])
 
 async function logout() {

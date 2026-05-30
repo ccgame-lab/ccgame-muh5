@@ -3,7 +3,8 @@ definePageMeta({
   layout: false,
 })
 
-const state = reactive({ password: '' })
+const roles = ['Owner', 'Admin']
+const state = reactive({ username: 'Owner', password: '' })
 const showPassword = ref(false)
 const loading = ref(false)
 const error = ref('')
@@ -15,7 +16,7 @@ async function onSubmit() {
   try {
     await $fetch('/api/admin/login', {
       method: 'POST',
-      body: { password: state.password },
+      body: { username: state.username, password: state.password },
     })
     await navigateTo('/admin')
   }
@@ -37,6 +38,10 @@ async function onSubmit() {
         </template>
 
         <UForm :state="state" @submit="onSubmit">
+          <UFormField label="Username" name="username" class="mb-3">
+            <USelect v-model="state.username" :items="roles" class="w-full" />
+          </UFormField>
+
           <UFormField label="Password" name="password">
             <UInput
               v-model="state.password"
