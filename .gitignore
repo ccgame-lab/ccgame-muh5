@@ -1,27 +1,25 @@
-# Nuxt dev/build outputs
+# Build / dev outputs (Nuxt, Nitro, bundlers) — match at any depth
 .output
 .data
 .nuxt
 .nitro
 .cache
 dist
-
-# Deploy build artifacts
 artifacts
 
-# Node dependencies
+# Dependencies
 node_modules
 
 # Logs
 logs
 *.log
 
-# Misc
+# OS / editor cruft
 .DS_Store
 .fleet
 .idea
 
-# Local env files
+# Local env files (never commit secrets)
 .env
 .env.*
 !.env.example
