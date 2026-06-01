@@ -12,6 +12,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\HallOfFameController;
 use App\Http\Controllers\TransactionHistoryController;
+use App\Http\Controllers\Auth\GreenJadeAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,11 +25,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Minimal Fallback Auth Route (Smoke test fix)
+// GreenJade Auth Routes
 Route::middleware(['web'])->group(function () {
-    Route::get('/login', function () {
-        return response('Login bridge is not enabled on MUH5 staging yet.', 200);
-    })->name('login');
+    Route::get('/login', [GreenJadeAuthController::class, 'loginBridge'])->name('login');
+    Route::get('/auth/redirect', [GreenJadeAuthController::class, 'redirect'])->name('auth.greenjade.login.perform');
+    Route::get('/auth/callback', [GreenJadeAuthController::class, 'callback'])->name('greenjade.callback');
+    Route::post('/logout', [GreenJadeAuthController::class, 'logout'])->name('logout');
+    Route::get('/auth/logout', [GreenJadeAuthController::class, 'performLogout'])->name('auth.greenjade.logout.perform');
 });
 
 // Unified Game entrance with signed token query support
