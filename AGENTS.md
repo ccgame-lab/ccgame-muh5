@@ -1,0 +1,55 @@
+# AGENTS.md — ccgame-muh5 Agent Rules
+
+## Stack
+
+- **Framework**: Laravel 12 lean (only `laravel/framework` + `laravel/tinker`)
+- **Auth**: GreenJade OAuth PKCE, session-based
+- **DB app**: Eloquent ORM + Laravel migrations
+- **DB game**: `DB::connection(...)->table(...)` (no Eloquent for game DB)
+- **Frontend**: Not ported. Left to `ccgame-web` (Nuxt 4) later.
+- **Not used**: FlightPHP, Slim 4, PHP custom, Filament, Jetstream, Sanctum, TypeScript app-shell
+
+## Setup commands
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+```
+
+## Code style
+
+- `declare(strict_types=1)` in every PHP file
+- PHP return types + parameter types on all methods
+- No over-engineering: flat services, minimal abstraction
+- Follow existing Laravel controller/service patterns
+
+## Hard boundaries
+
+- No `migrate:fresh`, `db:wipe`, reset, import, restore
+- No touching production DB or Redis
+- No reading or committing `.env` / secrets
+- No touching game server processes
+- No changing payment/wallet/economy from a UI task
+- No pasting secrets into chat, commits, or docs
+
+## Safe work
+
+Usually safe:
+- Route/controller port from legacy
+- Migration port (dry-run first)
+- Service refactor (pure logic)
+- Testing with in-memory SQLite
+
+Needs extra care:
+- GreenJade OAuth callback and logout
+- Game bridge (GmApiService, launch tokens)
+- Wallet/wcoin/wpoint transaction logic
+- Player tool (charge/send-mail — restricted)
+
+## Verification
+
+- `php artisan route:list` — route sanity
+- `php artisan migrate --pretend` — review SQL before running
+- `composer run pint:dirty` — style check
+- `php artisan test --compact` — test suite
