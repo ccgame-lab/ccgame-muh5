@@ -145,7 +145,7 @@
             padding: 0.85rem 1rem;
             background: var(--bg-card);
             border-bottom: 1px solid var(--border-light);
-            transition: background 0.15s ease;
+            transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
         }
 
         .hof-legend-item:last-child {
