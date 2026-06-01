@@ -1,0 +1,234 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>奇迹</title>
+    <link rel="preconnect" href="https://cdn.ccgame.org" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.ccgame.org">
+    <link rel="preconnect" href="https://muh5-ws.ccgame.org">
+    <link rel="dns-prefetch" href="https://muh5-ws.ccgame.org">
+    <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="full-screen" content="true" />
+    <meta name="screen-orientation" content="portrait" />
+    <meta name="x5-fullscreen" content="true" />
+    <meta name="360-fullscreen" content="true" />
+    <style>
+        html, body {
+            -ms-touch-action: none;
+            background: #050505;
+            padding: 0;
+            border: 0;
+            margin: 0;
+            height: 100%;
+        }
+        #ccgame-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            box-sizing: border-box;
+            background: #050505;
+            color: #d1d5db;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            text-align: center;
+        }
+        #ccgame-loader-card { max-width: 320px; }
+        #ccgame-loader-spinner {
+            width: 34px;
+            height: 34px;
+            margin: 0 auto 14px;
+            border: 2px solid #1f2937;
+            border-top-color: #34d399;
+            border-radius: 999px;
+            animation: ccgame-spin 1s linear infinite;
+        }
+        #ccgame-loader-title {
+            margin: 0 0 8px;
+            color: #f9fafb;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        #ccgame-loader-status {
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.55;
+            color: #9ca3af;
+        }
+        @keyframes ccgame-spin { to { transform: rotate(360deg); } }
+    </style>
+    <script>
+        (function () {
+            var proto = HTMLCanvasElement.prototype;
+            var original = proto.getContext;
+            proto.getContext = function (type, attributes) {
+                if (type === '2d') {
+                    attributes = attributes || {};
+                    if (attributes.willReadFrequently === undefined) {
+                        attributes.willReadFrequently = true;
+                    }
+                }
+                return original.call(this, type, attributes);
+            };
+        })();
+    </script>
+</head>
+
+<body>
+    <div style="margin: auto;width: 100%;height: 100%;" class="egret-player"
+         data-entry-class="Main"
+         data-orientation="portrait"
+         data-scale-mode="fixedNarrow"
+         data-frame-rate="30"
+         data-content-width="720"
+         data-content-height="1280"
+         data-show-paint-rect="false"
+         data-multi-fingered="2"
+         data-show-fps="false" data-show-log="false"
+         data-show-fps-style="x:0,y:0,size:12,textColor:0xffffff,bgAlpha:0.9">
+    </div>
+    <div id="ccgame-loader">
+        <div id="ccgame-loader-card">
+            <div id="ccgame-loader-spinner"></div>
+            <p id="ccgame-loader-title">Đang tải MU H5</p>
+            <p id="ccgame-loader-status">Đang chuẩn bị tài nguyên. Lần đầu tải có thể lâu hơn, lần sau sẽ nhanh hơn.</p>
+        </div>
+    </div>
+<script src="config.js"></script>
+<script>
+
+    var scriptTotal = 0;
+    var scriptLoaded = 0;
+    var loaderSlowTimer = window.setTimeout(function () {
+        setLoaderStatus('Đang tải tài nguyên game. Lần đầu có thể chậm hơn, lần sau sẽ nhanh hơn.');
+    }, 9000);
+
+    var clearLoaderSlowTimer = function () {
+        if (loaderSlowTimer) {
+            window.clearTimeout(loaderSlowTimer);
+            loaderSlowTimer = null;
+        }
+    };
+
+    var setLoaderTitle = function (text) {
+        var el = document.getElementById('ccgame-loader-title');
+        if (el) {
+            el.textContent = text;
+        }
+    };
+
+    var setLoaderStatus = function (text) {
+        var el = document.getElementById('ccgame-loader-status');
+        if (el) {
+            el.textContent = text;
+        }
+    };
+
+    var failLoader = function (text) {
+        clearLoaderSlowTimer();
+        setLoaderTitle('Tải game bị gián đoạn');
+        setLoaderStatus(text + ' Bấm để tải lại.');
+        var loader = document.getElementById('ccgame-loader');
+        if (loader) {
+            loader.style.cursor = 'pointer';
+            loader.onclick = function () {
+                window.location.reload();
+            };
+        }
+    };
+
+    var hideLoaderSoon = function () {
+        clearLoaderSlowTimer();
+        window.setTimeout(function () {
+            var loader = document.getElementById('ccgame-loader');
+            if (loader) {
+                loader.style.display = 'none';
+            }
+        }, 400);
+    };
+
+    var loadScript = function (list, callback) {
+        var loaded = 0;
+        var loadNext = function () {
+            loadSingleScript(list[loaded], function () {
+                loaded++;
+                if (loaded >= list.length) {
+                    callback();
+                }
+                else {
+                    loadNext();
+                }
+            })
+        };
+        loadNext();
+    };
+
+    var loadSingleScript = function (src, callback) {
+        var s = document.createElement('script');
+        s.async = false;
+        s.src = src;
+        s.addEventListener('load', function () {
+            scriptLoaded++;
+            if (scriptTotal > 0) {
+                setLoaderStatus('Đang tải tài nguyên ' + scriptLoaded + '/' + scriptTotal + '. Lần sau sẽ nhanh hơn.');
+            }
+            s.parentNode.removeChild(s);
+            s.removeEventListener('load', arguments.callee, false);
+            callback();
+        }, false);
+        s.addEventListener('error', function () {
+            failLoader('Không tải được tài nguyên game.');
+        }, false);
+        document.body.appendChild(s);
+    };
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', './manifest.json', true);
+    xhr.timeout = 20000;
+    xhr.addEventListener("load", function () {
+        var manifest;
+        try {
+            manifest = JSON.parse(xhr.response);
+        } catch (e) {
+            failLoader('Manifest game không hợp lệ.');
+            return;
+        }
+        var list = manifest.initial.concat(manifest.game);
+        scriptTotal = list.length;
+        setLoaderTitle('Đang tải tài nguyên game');
+        setLoaderStatus('Đang tải tài nguyên 0/' + scriptTotal + '. Lần sau sẽ nhanh hơn.');
+        loadScript(list, function () {
+            setLoaderTitle('Đang vào game');
+            setLoaderStatus('Đã tải xong tài nguyên. Đang vào game...');
+            /**
+             * {
+             * "renderMode":, //Engine rendering mode, "canvas" or "webgl"
+             * "audioType": 0 //Use the audio type, 0: default, 2: web audio, 3: audio
+             * "antialias": //Whether the anti-aliasing is enabled in WebGL mode, true: on, false: off, defaults to false
+             * "calculateCanvasScaleFactor": //a function return canvas scale factor
+             * }
+             **/
+            egret.runEgret({ renderMode: "webgl", audioType: 0, calculateCanvasScaleFactor:function(context) {
+                var backingStore = context.backingStorePixelRatio ||
+                    context.webkitBackingStorePixelRatio ||
+                    context.mozBackingStorePixelRatio ||
+                    context.msBackingStorePixelRatio ||
+                    context.oBackingStorePixelRatio ||
+                    context.backingStorePixelRatio || 1;
+                return (window.devicePixelRatio || 1) / backingStore;
+            }});
+            hideLoaderSoon();
+        });
+    });
+    xhr.addEventListener('error', function () { failLoader('Không tải được manifest game.'); });
+    xhr.addEventListener('timeout', function () { failLoader('Tải manifest game quá lâu.'); });
+
+    xhr.send(null);
+</script>
+</body>
+
+</html>
