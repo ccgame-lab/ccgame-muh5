@@ -24,6 +24,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Minimal Fallback Auth Route (Smoke test fix)
+Route::middleware(['web'])->group(function () {
+    Route::get('/login', function () {
+        return response('Login bridge is not enabled on MUH5 staging yet.', 200);
+    })->name('login');
+});
+
 // Unified Game entrance with signed token query support
 Route::get('/play', [PlayController::class, 'entry'])->name('play.index');
 
