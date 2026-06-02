@@ -109,9 +109,11 @@ class GMOperations extends Page implements HasForms
                             ->badgeColor('gray')
                             ->icon('heroicon-m-lock-closed')
                             ->schema([
-                                \Filament\Schemas\Components\Placeholder::make('sealed_batch')
-                                    ->content('Currency operations sealed until settlement flow is implemented.')
-                                    ->extraAttributes(['class' => 'fi-ta-empty-state-description']),
+                                TextInput::make('sealed_batch')
+                                    ->label('')
+                                    ->default('Currency operations sealed until settlement flow is implemented.')
+                                    ->disabled()
+                                    ->dehydrated(false),
                             ]),
 
                         Tab::make('Event Reward')
@@ -170,9 +172,11 @@ class GMOperations extends Page implements HasForms
                             ->badgeColor('gray')
                             ->icon('heroicon-m-lock-closed')
                             ->schema([
-                                \Filament\Schemas\Components\Placeholder::make('sealed_topup')
-                                    ->content('Currency operations sealed until settlement flow is implemented.')
-                                    ->extraAttributes(['class' => 'fi-ta-empty-state-description']),
+                                TextInput::make('sealed_topup')
+                                    ->label('')
+                                    ->default('Currency operations sealed until settlement flow is implemented.')
+                                    ->disabled()
+                                    ->dehydrated(false),
                             ]),
                     ])
                     ->statePath('data'),
