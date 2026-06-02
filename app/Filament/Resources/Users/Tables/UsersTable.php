@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Tables;
 
-use App\Filament\Resources\Users\Actions\AddCoinAction;
-use App\Filament\Resources\Users\Actions\AddWPointSilentAction;
 use App\Filament\Resources\Users\Actions\GmBanAction;
 use App\Filament\Resources\Users\Actions\GmKickAction;
 use App\Filament\Resources\Users\Actions\GmLookupAction;
@@ -59,8 +57,6 @@ class UsersTable
             ->recordActions([
                 GmLookupAction::make(),
                 SendItemMailAction::make(),
-                AddCoinAction::make(),
-                AddWPointSilentAction::make(),
                 GmKickAction::make(),
                 GmBanAction::make(),
                 EditAction::make(),

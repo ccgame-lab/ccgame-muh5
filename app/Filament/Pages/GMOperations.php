@@ -6,7 +6,6 @@ namespace App\Filament\Pages;
 
 use App\Jobs\ExecuteGmCommand;
 use App\Models\Server;
-use App\Models\User;
 use App\Services\Game\GmApiService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
@@ -106,40 +105,13 @@ class GMOperations extends Page implements HasForms
                             ]),
 
                         Tab::make('Batch WCoin')
-                            ->badge('Nguy hiểm')
-                            ->badgeColor('danger')
-                            ->icon('heroicon-m-exclamation-triangle')
+                            ->badge('Đã khóa')
+                            ->badgeColor('gray')
+                            ->icon('heroicon-m-lock-closed')
                             ->schema([
-                                Select::make('batch_type')
-                                    ->label('Đối tượng')
-                                    ->options([
-                                        'all' => 'Tất cả người chơi',
-                                        'vip' => 'Người chơi VIP',
-                                    ])
-                                    ->required()
-                                    ->reactive(),
-                                TextInput::make('batch_amount')
-                                    ->label('Số lượng WCoin')
-                                    ->numeric()
-                                    ->required(),
-                                TextInput::make('batch_reason')
-                                    ->label('Lý do')
-                                    ->required(),
-                                Actions::make([
-                                    Action::make('send_batch')
-                                        ->label('Thực hiện cộng WCoin hàng loạt')
-                                        ->icon('heroicon-m-bolt')
-                                        ->color('warning')
-                                        ->requiresConfirmation()
-                                        ->modalHeading('Cộng WCoin hàng loạt')
-                                        ->modalDescription('Hệ thống sẽ cộng WCoin cho tất cả người chơi thuộc nhóm đã chọn.')
-                                        ->modalSubmitActionLabel('Xác nhận')
-                                        ->modalCancelActionLabel('Hủy bỏ')
-                                        ->action(function (Action $action): void {
-                                            $this->processBatchWCoin($action);
-                                        })
-                                        ->successNotificationTitle('Đã cộng WCoin thành công.'),
-                                ]),
+                                \Filament\Schemas\Components\Placeholder::make('sealed_batch')
+                                    ->content('Currency operations sealed until settlement flow is implemented.')
+                                    ->extraAttributes(['class' => 'fi-ta-empty-state-description']),
                             ]),
 
                         Tab::make('Event Reward')
@@ -194,40 +166,13 @@ class GMOperations extends Page implements HasForms
                                 ]),
                             ]),
                         Tab::make('Topup List')
+                            ->badge('Đã khóa')
+                            ->badgeColor('gray')
+                            ->icon('heroicon-m-lock-closed')
                             ->schema([
-                                TextInput::make('topup_wcoin_amount')
-                                    ->label('Số lượng WCoin (VND)')
-                                    ->numeric()
-                                    ->default(0)
-                                    ->minValue(0),
-                                TextInput::make('topup_wpoint_amount')
-                                    ->label('Số lượng WPoint (Donate)')
-                                    ->numeric()
-                                    ->default(0)
-                                    ->minValue(0),
-                                Textarea::make('topup_player_list')
-                                    ->label('Danh sách Username')
-                                    ->placeholder("user1\nuser2\nuser3")
-                                    ->helperText('Mỗi dòng một username')
-                                    ->required(),
-                                TextInput::make('topup_reason')
-                                    ->label('Lý do')
-                                    ->required(),
-                                Actions::make([
-                                    Action::make('send_topup_list')
-                                        ->label('Thực hiện cộng tiền hàng loạt')
-                                        ->icon('heroicon-m-banknotes')
-                                        ->color('success')
-                                        ->requiresConfirmation()
-                                        ->modalHeading('Cộng tiền theo danh sách')
-                                        ->modalDescription('Hệ thống sẽ cộng tiền cho danh sách người chơi đã nhập.')
-                                        ->modalSubmitActionLabel('Xác nhận')
-                                        ->modalCancelActionLabel('Hủy bỏ')
-                                        ->action(function (Action $action): void {
-                                            $this->processTopupList($action);
-                                        })
-                                        ->successNotificationTitle('Đã gửi yêu cầu cộng tiền thành công.'),
-                                ]),
+                                \Filament\Schemas\Components\Placeholder::make('sealed_topup')
+                                    ->content('Currency operations sealed until settlement flow is implemented.')
+                                    ->extraAttributes(['class' => 'fi-ta-empty-state-description']),
                             ]),
                     ])
                     ->statePath('data'),
@@ -275,51 +220,6 @@ class GMOperations extends Page implements HasForms
         ]);
 
         ExecuteGmCommand::dispatch($log->id);
-
-        $action->success();
-    }
-
-    public function processBatchWCoin(Action $action): void
-    {
-        Log::info('GMOperations: Starting processBatchWCoin');
-        $formData = $this->data['data'] ?? $this->data ?? [];
-
-        $query = User::query();
-        if (($formData['batch_type'] ?? '') === 'vip') {
-            $query->where('tier', 'vip');
-        }
-
-        $users = $query->get(['id', 'username']);
-        $count = $users->count();
-
-        if ($count === 0) {
-            Notification::make()->title('Không tìm thấy người chơi nào.')->warning()->send();
-            $action->cancel();
-
-            return;
-        }
-
-        $amount = (int) ($formData['batch_amount'] ?? 0);
-        if ($amount <= 0) {
-            Notification::make()->title('Số lượng WCoin phải lớn hơn 0.')->danger()->send();
-            $action->cancel();
-
-            return;
-        }
-
-        foreach ($users as $user) {
-            $log = gm_log([
-                'action' => 'charge_wcoin',
-                'target' => $user->username,
-                'payload' => [
-                    'target_user_id' => $user->id,
-                    'amount' => $amount,
-                    'reason' => $formData['batch_reason'] ?? '',
-                ],
-            ]);
-
-            ExecuteGmCommand::dispatch($log->id);
-        }
 
         $action->success();
     }
@@ -384,70 +284,6 @@ class GMOperations extends Page implements HasForms
             ]);
 
             ExecuteGmCommand::dispatch($log->id);
-        }
-
-        $action->success();
-    }
-
-    public function processTopupList(Action $action): void
-    {
-        Log::info('GMOperations: Starting processTopupList');
-        $formData = $this->data['data'] ?? $this->data ?? [];
-
-        $usernames = array_filter(array_map('trim', explode("\n", $formData['topup_player_list'] ?? '')));
-
-        if (empty($usernames)) {
-            Notification::make()->title('Danh sách người chơi trống.')->danger()->send();
-            $action->halt();
-
-            return;
-        }
-
-        $wcoinAmount = (int) ($formData['topup_wcoin_amount'] ?? 0);
-        $wpointAmount = (int) ($formData['topup_wpoint_amount'] ?? 0);
-
-        if ($wcoinAmount <= 0 && $wpointAmount <= 0) {
-            Notification::make()->title('Phải nhập số lượng cho ít nhất 1 loại tiền lớn hơn 0.')->danger()->send();
-            $action->halt();
-
-            return;
-        }
-
-        $reason = $formData['topup_reason'] ?? '';
-
-        foreach ($usernames as $username) {
-            $user = User::where('username', $username)->first(['id', 'username']);
-            if (! $user) {
-                Log::warning("Topup List: User not found for account {$username}. Skipping.");
-
-                continue;
-            }
-
-            if ($wcoinAmount > 0) {
-                $log = gm_log([
-                    'action' => 'charge_wcoin',
-                    'target' => $user->username,
-                    'payload' => [
-                        'target_user_id' => $user->id,
-                        'amount' => $wcoinAmount,
-                        'reason' => $reason,
-                    ],
-                ]);
-                ExecuteGmCommand::dispatch($log->id);
-            }
-
-            if ($wpointAmount > 0) {
-                $log2 = gm_log([
-                    'action' => 'charge_wpoint',
-                    'target' => $user->username,
-                    'payload' => [
-                        'target_user_id' => $user->id,
-                        'amount' => $wpointAmount,
-                        'reason' => $reason,
-                    ],
-                ]);
-                ExecuteGmCommand::dispatch($log2->id);
-            }
         }
 
         $action->success();
