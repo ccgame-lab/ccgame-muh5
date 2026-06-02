@@ -1,26 +1,102 @@
-# CODEX — ccgame-muh5 Port Context
+# CODEX - ccgame-muh5 Port Context
 
 > File này hướng dẫn craft PHP code cho ccgame-muh5.
 > Đọc trước khi viết bất kỳ dòng code nào.
 
 ---
 
-## 1. Kiến trúc tổng thể
+## 0. Current decision - MUH5 game shell only
 
-```
-ccgame-web (Nuxt 4)          → public launcher, guest surface, AI MC
-ccgame-muh5 (Laravel 12 + Blade + Vite SDK)  → MUH5 game surface (auth, game bridge, dashboard)
-muh5.ccgame (Laravel 12)     → legacy auth ID cũ, sẽ port dần sang ccgame-muh5
+MUH5 Laravel không còn là portal sản phẩm. `ccgame-web` owns portal, session, login, game selection và launcher. `ccgame-muh5` chỉ owns game shell, launch-token verifier, game asset serving và SDK panel data.
+
+Public route surface phải gần như chỉ còn:
+
+```text
+GET /
+GET /play
+GET /api/sdk/bootstrap.php
 ```
 
-**Quan hệ:**
-- `ccgame-web` = guest-first, signed launch token → `ccgame-muh5`
-- `ccgame-muh5` = auth, game bridge, dashboard, admin
-- `muh5.ccgame` = legacy Laravel — đọc reference, không sửa
+Giữ trong MUH5:
+- `/` redirect về `/play` hoặc về `https://ccgame.org`
+- `/play` là core game shell
+- `/api/sdk/bootstrap.php` là data source chính cho SDK panel
+- `/muh5-client/*` là game client assets public
+- `public/assets/sdk/ccgame-sdk.js` và `public/assets/sdk/ccgame-sdk.css` render SDK panel
+
+Không expose standalone functional pages trong MUH5:
+- Không `/hall-of-fame`
+- Không `/hall-of-fame/rankings`
+- Không `/dashboard/*`
+- Không `/history/*`
+- Không `/announcements/latest`
+- Không `/announcements/ack` trừ khi SDK panel thật sự cần và owner approve
+
+UI phụ như Hall of Fame, announcements, transaction history, wallet display phải nằm trong SDK panel overlay. Phase đầu gom data vào `/api/sdk/bootstrap.php`; chỉ tách sau thành `/api/sdk/hall-of-fame`, `/api/sdk/history`, `/api/sdk/announcements` nếu bootstrap bắt đầu nặng.
+
+Hard boundaries hiện tại:
+- Không động `PlayController`
+- Không động launch token verification
+- Không động provisioning account/passwd
+- Không động `ccgame-web`
+- Không động GreenJade apps/server
+- Không động DB schema
+- Không mutation wallet/payment/balance/settlement từ UI task
+- Không thêm standalone pages
+
+### SDK panel UX mode
+
+SDK panel là in-game tool overlay, không phải marketing page.
+
+Design dials:
+- `DESIGN_VARIANCE`: 4/10
+- `MOTION_INTENSITY`: 3/10
+- `VISUAL_DENSITY`: 7/10
+
+Rules:
+- Existing product UI redesign, not landing page
+- One accent, one radius system, one theme
+- Dense but scan-friendly in-game overlay
+- Không dùng em dash hoặc en dash
+- Không fake status dots nếu không có real status
+- Không decorative dashboard filler
+- Không AI-purple, mesh blobs, scroll cues, version labels, decorative text strips
+- Không add dependencies
+
+Audit trước khi code phase SDK panel:
+- Inspect `public/assets/sdk/ccgame-sdk.js`
+- Inspect `public/assets/sdk/ccgame-sdk.css`
+- Inspect `GET /api/sdk/bootstrap.php` response shape
+- Inspect SDK DOM mount point trong `resources/views/play.blade.php`
+- Return current panel structure, data fields used, missing loading/empty/error/offline states, tab IA proposal, visual tokens, what to preserve, what to remove, one-sentence design read
+- Không edit file trong audit phase
+
+Phase code SDK panel phải nhỏ:
+- Allowed files: `public/assets/sdk/ccgame-sdk.js`, `public/assets/sdk/ccgame-sdk.css`
+- Tabs: Tổng quan, BXH, Thông báo, Giao dịch
+- Use existing `/api/sdk/bootstrap.php` only
+- Implement loading, empty, error states
+- Keep panel compact and game-safe
+- No new endpoints, no standalone pages, no DB writes
 
 ---
 
-## 2. Legacy `muh5.ccgame` — Cấu trúc cần port
+## 1. Kiến trúc tổng thể
+
+```
+ccgame-web (Nuxt 4)          -> portal, login, game selection, launcher
+ccgame-muh5 (Laravel 12 + Blade + SDK assets) -> MUH5 game shell, launch-token verifier, SDK panel data
+muh5.ccgame (Laravel 12)     -> legacy reference only
+```
+
+**Quan hệ:**
+- `ccgame-web` = portal-first, signed launch token -> `ccgame-muh5`
+- `ccgame-muh5` = launch-token-only game shell + SDK bootstrap
+- `muh5.ccgame` = legacy Laravel reference, đọc reference, không sửa
+
+---
+
+## 2. Legacy `muh5.ccgame` - Cấu trúc cần port
 
 ### 2.1 Routes (web.php)
 
@@ -49,12 +125,12 @@ muh5.ccgame (Laravel 12)     → legacy auth ID cũ, sẽ port dần sang ccgame
 | GET | `/playgame/status.php` | Closure | Server status |
 
 **Auth-protected group** (`auth`, `jetstream.auth_session`, `verified`):
-- `/mining/*` — DiamondGeneratorController (claim, upgrade, unlock, checkin, leaderboard, boost, ascend, wpoint purchase, servers)
-- `/lucky-spin/*` — LuckySpinController (checkin, login-status, spin, buy-fruit)
-- `/pshop/*` — PShopController (purchase, claim-daily, claim-milestone, craft-crystal)
-- `/s1-shop/*` — S1ShopController (index, purchase)
-- `/history/*` — TransactionHistoryController (wpoint, wcoin)
-- `/player-tool/*` — PlayerToolController (charge, send-mail, items) — restricted to quocquoc
+- `/mining/*` - DiamondGeneratorController (claim, upgrade, unlock, checkin, leaderboard, boost, ascend, wpoint purchase, servers)
+- `/lucky-spin/*` - LuckySpinController (checkin, login-status, spin, buy-fruit)
+- `/pshop/*` - PShopController (purchase, claim-daily, claim-milestone, craft-crystal)
+- `/s1-shop/*` - S1ShopController (index, purchase)
+- `/history/*` - TransactionHistoryController (wpoint, wcoin)
+- `/player-tool/*` - PlayerToolController (charge, send-mail, items) - restricted to quocquoc
 
 ### 2.2 Auth Flow (GreenJade ID OAuth)
 
@@ -116,19 +192,19 @@ $ps = hash_hmac('sha256', $user->username.'|'.$server->id.'|'.$time, config('por
 ### 2.6 Models (30 models)
 
 Key models:
-- `User` — portal_uid, username, wcoin, wpoint, tier, checkin_boost
-- `Server` — id (manual), name, host, port, db_name, db_connection_name, status, visible
-- `DiamondWallet` — user_id, lifetime_mined, ascension_level, diamond_blocks, max_active_boosts
-- `DiamondMachine` — user_id, level, last_claim_at, slot
-- `DiamondBoost` — user_id, type, multiplier, expires_at
-- `Giftcode` — code, type, rewards, max_uses, used_count, expires_at
-- `PShopOrder` — user_id, item_id, amount, status, test_order
-- `HallOfFameLegend` — user_id, season_id, rank, score
-- `Season` — name, start_time, end_time, is_active
+- `User` - portal_uid, username, wcoin, wpoint, tier, checkin_boost
+- `Server` - id (manual), name, host, port, db_name, db_connection_name, status, visible
+- `DiamondWallet` - user_id, lifetime_mined, ascension_level, diamond_blocks, max_active_boosts
+- `DiamondMachine` - user_id, level, last_claim_at, slot
+- `DiamondBoost` - user_id, type, multiplier, expires_at
+- `Giftcode` - code, type, rewards, max_uses, used_count, expires_at
+- `PShopOrder` - user_id, item_id, amount, status, test_order
+- `HallOfFameLegend` - user_id, season_id, rank, score
+- `Season` - name, start_time, end_time, is_active
 - `S1ShopItem` / `S1ShopPurchase` / `S1PlayerBoost`
-- `SocialEvent` — template, metadata, is_active
-- `WebWallet` — user_id, balance
-- `WPointTransaction` / `WCoinTransaction` — user_id, type, amount, reference
+- `SocialEvent` - template, metadata, is_active
+- `WebWallet` - user_id, balance
+- `WPointTransaction` / `WCoinTransaction` - user_id, type, amount, reference
 - `SpinLog` / `FruitPurchaseLog` / `CheckinLog`
 - `Announcement` / `Admin` / `GmAction`
 
@@ -136,7 +212,7 @@ Key models:
 
 | Service | Mô tả |
 |---------|-------|
-| `PortalAuthService` | Login, consumeToken, issueToken, spend, reward — gọi Portal API |
+| `PortalAuthService` | Login, consumeToken, issueToken, spend, reward - gọi Portal API |
 | `GmApiService` | Game DB operations (gmcmd, feecallback, actors) |
 | `DiamondMiningService` | Mining calculation engine |
 | `WCoinService` | WCoin balance management |
@@ -153,41 +229,41 @@ Key models:
 
 ### 2.8 Config files
 
-- `config/portal.php` — PORTAL_URL, PORTAL_API_URL, GAME_CODE, GAME_SECRET, API_SECRET, exchange_rate
-- `config/muh5.php` — server_open, allowed_usernames, game info, website meta, facebook, portal, game_db
-- `config/services.php` — greenjade_id (base_url, client_id, client_secret, redirect_uri)
-- `config/economy.php` — max_diamond_per_day, wpoint_checkin_amount, wpoint_streak_bonus
-- `config/pshop.php` — PShop item configs
-- `config/game_items.php` — Item definitions
+- `config/portal.php` - PORTAL_URL, PORTAL_API_URL, GAME_CODE, GAME_SECRET, API_SECRET, exchange_rate
+- `config/muh5.php` - server_open, allowed_usernames, game info, website meta, facebook, portal, game_db
+- `config/services.php` - greenjade_id (base_url, client_id, client_secret, redirect_uri)
+- `config/economy.php` - max_diamond_per_day, wpoint_checkin_amount, wpoint_streak_bonus
+- `config/pshop.php` - PShop item configs
+- `config/game_items.php` - Item definitions
 
 ### 2.9 Database (36 migrations)
 
 Key tables:
-- `users` — portal_uid, username, password, name, email, tier, wcoin, wpoint, checkin_boost_expires_at
-- `servers` — id, name, host, port, db_name, db_connection_name, status, visible, opened_at
-- `diamond_wallets` — user_id, lifetime_mined, ascension_level, diamond_blocks, max_active_boosts
-- `diamond_machines` — user_id, level, last_claim_at, slot
+- `users` - portal_uid, username, password, name, email, tier, wcoin, wpoint, checkin_boost_expires_at
+- `servers` - id, name, host, port, db_name, db_connection_name, status, visible, opened_at
+- `diamond_wallets` - user_id, lifetime_mined, ascension_level, diamond_blocks, max_active_boosts
+- `diamond_machines` - user_id, level, last_claim_at, slot
 - `diamond_claim_logs`, `diamond_upgrades`, `diamond_daily_logs`, `diamond_boosts`
-- `diamond_transactions` — user_id, type, amount, reference, status
-- `wpoint_transactions`, `wcoin_transactions` — user_id, type, amount, reference
-- `web_wallets` — user_id, balance
+- `diamond_transactions` - user_id, type, amount, reference, status
+- `wpoint_transactions`, `wcoin_transactions` - user_id, type, amount, reference
+- `web_wallets` - user_id, balance
 - `giftcodes`, `giftcode_redemptions`
-- `pshop_orders` — user_id, item_id, amount, status, test_order, amount_spent
-- `hall_of_fame_legends` — user_id, season_id, rank, score
+- `pshop_orders` - user_id, item_id, amount, status, test_order, amount_spent
+- `hall_of_fame_legends` - user_id, season_id, rank, score
 - `seasons`, `top_spend_logs`, `p_shop_events`
 - `s1_shop_items`, `s1_shop_purchases`, `s1_player_boosts`
-- `social_events` — template, metadata, is_active
+- `social_events` - template, metadata, is_active
 - `spin_logs`, `fruit_purchase_logs`, `checkin_logs`
 - `announcements`, `admins`, `gm_actions`
 - `failed_transactions`
 
-### 2.10 Frontend — hai legacy
+### 2.10 Frontend - hai legacy
 
 **muh5.ccgame:** TypeScript SPA (không Nuxt) render trong `app-shell.blade.php`:
-- `resources/js/app-shell/boot.ts` — bootstrap từ data attributes
-- `resources/js/app-shell/router.ts` — client-side routing
-- `resources/js/app-shell/pages/` — mỗi page render HTML string + mount()
-- `resources/js/public/home.ts` — public home page (login card)
+- `resources/js/app-shell/boot.ts` - bootstrap từ data attributes
+- `resources/js/app-shell/router.ts` - client-side routing
+- `resources/js/app-shell/pages/` - mỗi page render HTML string + mount()
+- `resources/js/public/home.ts` - public home page (login card)
 
 **ccgame-muh5 reference/legacy:** Nuxt 4 app dùng làm FE tham khảo cho `/play` shell + SDK overlay. **Không deploy.**
 
@@ -204,9 +280,9 @@ Key tables:
 
 ### 3.1 Isolation rules
 
-- **Mỗi game isolated** — mỗi game có repo, VPS, DB/runtime riêng.
+- **Mỗi game isolated** - mỗi game có repo, VPS, DB/runtime riêng.
 - **`ccgame-muh5` không share runtime** với GreenJade main portal, `ccgame-web`, hay game khác.
-- **Không deploy chung** — không chạy MUH5 backend trong cùng process/vm với app khác.
+- **Không deploy chung** - không chạy MUH5 backend trong cùng process/vm với app khác.
 
 ---
 
@@ -225,7 +301,7 @@ Key tables:
 - App DB: Eloquent ORM + Laravel migrations (giữ nguyên convention legacy)
 - Game DB: `DB::connection(...)->table(...)`, không Eloquent model
 - Collation: `utf8mb4_unicode_ci` (không `utf8mb4_0900_ai_ci`)
-- Không chạy migrate tự động trên production — luôn `--pretend` trước
+- Không chạy migrate tự động trên production - luôn `--pretend` trước
 
 ### 4.3 Auth
 
@@ -261,33 +337,33 @@ Key tables:
 
 ## 5. Quy trình port (theo phase)
 
-### Phase 0 — Setup skeleton
+### Phase 0 - Setup skeleton
 1. Scaffold Laravel vào thư mục tạm, copy file cần vào `ccgame-muh5`
 2. `composer install` với `laravel/framework` + `tinker`
 3. Xóa Filament/Jetstream/Sanctum khỏi composer.json
 4. Giữ nguyên `.git/`, `AGENTS.md`, `CODEX.md`, `opencode.json`
 
-### Phase 1 — Core data layer
+### Phase 1 - Core data layer
 1. Copy migrations từ legacy (36 files) → sửa namespace
 2. Copy config files (portal, muh5, economy, game_items, services, pshop)
 3. Thêm game DB connections vào `config/database.php`
 4. Kiểm tra collation, dry-run migrate (`--pretend`)
 
-### Phase 2 — Models + Services
+### Phase 2 - Models + Services
 1. Copy 30 Eloquent models → sửa namespace
 2. Copy 14 services → sửa use/namespace
 3. Copy helper functions (`app/Support/gm.php`)
 
-### Phase 3 — Auth + Middleware
+### Phase 3 - Auth + Middleware
 1. Port GreenJadeAuthController (PKCE OAuth flow)
 2. Thiết lập routes auth (login/register/callback/logout)
 3. Middleware: auth, admin-only, throttle
 
-### Phase 4 — Game Bridge
+### Phase 4 - Game Bridge
 1. Port PlayController (launcher, game entry, launch token)
 2. Port GmApiService (game DB operations)
 
-### Phase 5 — Dashboard + Features
+### Phase 5 - Dashboard + Features
 Port từng module theo thứ tự ưu tiên:
 1. Dashboard stats + checkin-status
 2. Mining (DiamondGeneratorController)
@@ -300,13 +376,13 @@ Port từng module theo thứ tự ưu tiên:
 9. Transaction History
 10. Player Tool (restricted)
 
-### Phase 6 — Testing
+### Phase 6 - Testing
 1. Thiết lập Pest
 2. Feature tests cho từng module
 3. Auth flow test (login → callback → dashboard → logout)
 4. Wallet/payment test với throttle
 
-### Phase 7 — Deploy
+### Phase 7 - Deploy
 1. Setup `.env` production (không copy từ local)
 2. `php artisan config:cache`
 3. `php artisan route:cache`

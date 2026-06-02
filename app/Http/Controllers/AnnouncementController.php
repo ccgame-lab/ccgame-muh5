@@ -11,6 +11,36 @@ use Illuminate\Http\Request;
 class AnnouncementController extends Controller
 {
     /**
+     * @return list<array<string, mixed>>
+     */
+    public function sdkPayload(): array
+    {
+        try {
+            return Announcement::query()
+                ->active()
+                ->latest('id')
+                ->limit(5)
+                ->get()
+                ->map(fn (Announcement $announcement): array => [
+                    'id' => $announcement->id,
+                    'title' => $announcement->title,
+                    'content' => $announcement->body,
+                    'body' => $announcement->body,
+                    'type' => $announcement->type,
+                    'icon' => $announcement->icon ?? $this->defaultIcon((string) $announcement->type),
+                    'link' => $announcement->link,
+                    'created_at' => $announcement->created_at?->toDateTimeString(),
+                ])
+                ->values()
+                ->all();
+        } catch (\Throwable $e) {
+            report($e);
+
+            return [];
+        }
+    }
+
+    /**
      * Return the latest active announcement (for polling).
      */
     public function latest(Request $request): JsonResponse

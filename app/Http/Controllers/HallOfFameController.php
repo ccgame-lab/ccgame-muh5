@@ -74,7 +74,56 @@ class HallOfFameController extends Controller
         return response()->json($data);
     }
 
-    private function generateRankings(): array
+    /**
+     * @return array{servers: list<array<string, mixed>>, rankings: array<string, mixed>, legends: list<array<string, mixed>>}
+     */
+    public function sdkPayload(): array
+    {
+        try {
+            $rankings = $this->generateRankings(false);
+
+            return [
+                'servers' => $rankings['servers'] ?? [],
+                'rankings' => $rankings,
+                'legends' => $this->fetchLegends(),
+            ];
+        } catch (\Throwable $e) {
+            report($e);
+
+            return [
+                'servers' => [],
+                'rankings' => [],
+                'legends' => [],
+            ];
+        }
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function fetchLegends(): array
+    {
+        return HallOfFameLegend::query()
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn (HallOfFameLegend $legend): array => [
+                'id' => $legend->id,
+                'server_name' => $legend->server_name,
+                'server_key' => $legend->server_key,
+                'server_status' => $legend->server_status,
+                'category' => $legend->category,
+                'category_label' => $legend->category_label,
+                'player_name' => $legend->player_name,
+                'score_value' => $legend->score_value,
+                'score_label' => $legend->score_label,
+                'rewards' => $legend->rewards,
+                'sort_order' => $legend->sort_order,
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function generateRankings(bool $storeFullRankings = true): array
     {
         $allActors = $this->fetchAllActors();
         $servers = Server::query()
@@ -95,7 +144,9 @@ class HallOfFameController extends Controller
             'playtime' => $this->sortAll($allActors, 'exp'),
         ];
 
-        Cache::put('hall_of_fame:full_rankings', $fullGameRankings, self::FULL_CACHE_TTL);
+        if ($storeFullRankings) {
+            Cache::put('hall_of_fame:full_rankings', $fullGameRankings, self::FULL_CACHE_TTL);
+        }
 
         return [
             // ── In-game Rankings (top 50 for display) ──
