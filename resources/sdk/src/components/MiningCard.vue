@@ -1,39 +1,16 @@
 <template>
   <section class="ccgame-sdk-mining-card" v-if="quote">
     <div class="ccgame-sdk-mining-header">
-      <div class="ccgame-sdk-mining-core" :style="coreStyle">
-        <div class="ccgame-sdk-mining-core-inner" />
-        <div class="ccgame-sdk-mining-core-glow" />
-      </div>
-      <div class="ccgame-sdk-mining-title">
-        <span class="ccgame-sdk-mining-label">LÒ KC</span>
-        <strong class="ccgame-sdk-mining-rate">{{ fmt(quote.rate_per_hour) }} KC/h</strong>
-      </div>
+      <span class="ccgame-sdk-mining-label">LÒ KC</span>
+      <strong class="ccgame-sdk-mining-rate">{{ fmt(quote.rate_per_hour) }} KC/h</strong>
     </div>
 
-    <div class="ccgame-sdk-mining-stats">
-      <div class="ccgame-sdk-mining-stat-row">
-        <span>Hiệu suất lò</span>
-        <span class="ccgame-sdk-mining-eff" :style="{ color: effColor }">{{ pct(quote.efficiency) }}%</span>
-      </div>
-      <div class="ccgame-sdk-mining-bar">
-        <div class="ccgame-sdk-mining-bar-fill" :style="{ width: pct(quote.efficiency) + '%', background: effColor }" />
-      </div>
-
-      <div class="ccgame-sdk-mining-stat-row">
-        <span>Hôm nay</span>
-        <span>{{ fmt(claimedToday) }} / {{ fmt(quote.daily_cap) }}</span>
-      </div>
-      <div class="ccgame-sdk-mining-bar">
-        <div class="ccgame-sdk-mining-bar-fill" :style="{ width: capPct + '%', background: '#c9a94e' }" />
-      </div>
-
-      <p v-if="quote.boost_multiplier > 1" class="ccgame-sdk-mining-boost">
-        Boost x{{ quote.boost_multiplier }} đang chạy
-      </p>
-      <p v-if="quote.legacy_power_bonus > 0" class="ccgame-sdk-mining-boost">
-        Gia trì cũ +{{ pct(quote.legacy_power_bonus) }}%
-      </p>
+    <div class="ccgame-sdk-mining-bar">
+      <div class="ccgame-sdk-mining-bar-fill" :style="{ width: pct(quote.efficiency) + '%', background: effColor }" />
+    </div>
+    <div class="ccgame-sdk-mining-eff-row">
+      <span>Hiệu suất</span>
+      <span :style="{ color: effColor }">{{ pct(quote.efficiency) }}%</span>
     </div>
 
     <div class="ccgame-sdk-mining-actions">
@@ -70,7 +47,6 @@
 import { ref, computed, onMounted } from 'vue'
 
 const quote = ref(null)
-const claimedToday = ref(0)
 const loading = ref(false)
 const result = ref(null)
 const error = ref(null)
@@ -82,7 +58,6 @@ async function fetchQuote() {
     const res = await fetch(`/api/mining/quote?u=${encodeURIComponent(userId)}`)
     if (!res.ok) throw new Error('failed')
     quote.value = await res.json()
-    claimedToday.value = quote.value.daily_cap - (quote.value._daily_remaining ?? quote.value.daily_cap)
   } catch {
     quote.value = null
   }
@@ -148,15 +123,6 @@ const effColor = computed(() => {
   if (e >= 0.6) return '#d4a54a'
   return '#e6a832'
 })
-
-const capPct = computed(() => {
-  if (!quote.value) return 0
-  return Math.min(100, (claimedToday.value / quote.value.daily_cap) * 100)
-})
-
-const coreStyle = computed(() => ({
-  '--eff': quote.value?.efficiency ?? 0.35,
-}))
 
 const claimBtnClass = computed(() => {
   const e = quote.value?.efficiency ?? 0.35

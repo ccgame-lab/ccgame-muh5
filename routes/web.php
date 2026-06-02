@@ -63,6 +63,7 @@ Route::get('/api/sdk/bootstrap', function (\Illuminate\Http\Request $request) {
         'wallet' => $wallet,
         'tabs' => [
             ['key' => 'overview', 'label' => 'Tổng quan'],
+            ['key' => 'donate', 'label' => 'Đặc quyền'],
             ['key' => 'ranking', 'label' => 'BXH'],
             ['key' => 'changelog', 'label' => 'Cập nhật'],
         ],

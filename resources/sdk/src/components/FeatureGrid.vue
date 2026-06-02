@@ -6,7 +6,6 @@
       :href="f.href || '#'"
       :target="f.href && f.href.startsWith('http') ? '_blank' : '_top'"
       class="ccgame-sdk-btn"
-      :class="{ 'ccgame-sdk-btn--gold': f.key === 'topup' || f.key === 'wallet' }"
     >
       <span class="ccgame-sdk-btn-label">{{ f.label }}</span>
       <span v-if="f.note" class="ccgame-sdk-btn-note">{{ f.note }}</span>
