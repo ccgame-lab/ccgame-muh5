@@ -25,12 +25,15 @@
       <span class="ccgame-sdk-value ccgame-sdk-value--gold">{{ fmt(wallet.wpoint) }}</span>
     </div>
 
+    <MiningCard />
+
     <FeatureGrid :features="features" />
   </div>
 </template>
 
 <script setup>
 import FeatureGrid from './FeatureGrid.vue'
+import MiningCard from './MiningCard.vue'
 
 defineProps({
   player: { type: Object, default: () => ({ id:0, name:'', level:0, vip:0 }) },
