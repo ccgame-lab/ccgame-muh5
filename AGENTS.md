@@ -32,6 +32,7 @@ php artisan key:generate
 - No touching game server processes
 - No changing payment/wallet/economy from a UI task
 - No pasting secrets into chat, commits, or docs
+- Deploy using `./deploy.ps1` or `bash deploy.sh`. These scripts handle the remote sync and explicitly use `--pretend` for migrations. Scripts must NEVER run real migrate.
 
 ## Safe work
 
