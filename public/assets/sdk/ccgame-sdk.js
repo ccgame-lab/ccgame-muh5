@@ -1,4 +1,4 @@
-// ccgame-sdk.js — Legacy Hub v1 Integration
+// ccgame-sdk.js - Hub Integration
 (function () {
     'use strict';
 
@@ -111,7 +111,7 @@
         const safeDisplayName = escapeHtml(displayName);
         const safeReturnUrl = escapeHtml(returnUrl);
 
-        // ── 1. Khởi tạo Giao diện DOM ───────────────────────────────────
+        // 1. Khởi tạo Giao diện DOM
         
         // FAB (Floating Action Button Toggle)
         const fab = document.createElement('div');
@@ -135,15 +135,9 @@
             </div>
             <div class="ccgame-sdk-tabs">
                 <button class="ccgame-sdk-tab ccgame-sdk-tab--active" data-target="ccgame-sdk-pane-overview">Tổng quan</button>
+                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-ranking">BXH</button>
                 <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-announcements">Thông báo</button>
-                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-giftcodes">Giftcode</button>
-                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-wallet">Ví</button>
-                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-pshop">Cửa hàng</button>
-                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-luckyspin">Vòng quay</button>
-                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-monument">Đào KC</button>
-                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-history">Lịch sử</button>
-                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-ranking">Ranking</button>
-                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-support">Hỗ trợ</button>
+                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-history">Giao dịch</button>
             </div>
             <div class="ccgame-sdk-body" style="position: relative; min-height: 250px;">
                 <!-- 1. Tab: Tổng quan -->
@@ -154,78 +148,19 @@
                     </div>
                 </div>
 
-                <!-- 2. Tab: Thông báo -->
-                <div id="ccgame-sdk-pane-announcements" class="ccgame-sdk-pane">
-                    <div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Chưa có thông báo.</div>
-                </div>
-
-                <!-- 3. Tab: Giftcode -->
-                <div id="ccgame-sdk-pane-giftcodes" class="ccgame-sdk-pane">
-                    <!-- Form đổi Giftcode (PATCH 1 - portal_credit Only) -->
-                    <div style="background: #161624; border: 1px solid #222235; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
-                        <div style="font-size: 9px; color: #c9a94e; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.05em;">Đổi mã quà tặng</div>
-                        <div style="display: flex; gap: 8px;">
-                            <input type="text" id="ccgame-sdk-giftcode-input" placeholder="Nhập mã Giftcode..." style="flex: 1; background: #0d0d14; border: 1px solid #2a2a3d; border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 11px; outline: none; font-family: monospace;" />
-                            <button id="ccgame-sdk-giftcode-submit" style="background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; border-radius: 6px; padding: 6px 14px; font-size: 11px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; white-space: nowrap;">Nhận</button>
-                        </div>
-                        <div id="ccgame-sdk-giftcode-status" style="font-size: 9px; margin-top: 6px; min-height: 12px; display: none;"></div>
-                    </div>
-                    <!-- Danh sách các Giftcode khả dụng -->
-                    <div id="ccgame-sdk-giftcode-list-container">
-                        <div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 10px 0; line-height: 1.4;">Nhập mã Giftcode bạn nhận được từ sự kiện.</div>
-                    </div>
-                </div>
-
-                <!-- 4. Tab: Ví -->
-                <div id="ccgame-sdk-pane-wallet" class="ccgame-sdk-pane">
-                    <div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Chưa có thông tin số dư.</div>
-                </div>
-
-                <!-- Pane: Cửa hàng (PShop) -->
-                <div id="ccgame-sdk-pane-pshop" class="ccgame-sdk-pane">
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 10px; text-align: center; background: #161624; border: 1px solid #222235; border-radius: 8px;">
-                        <span style="font-size: 24px; margin-bottom: 10px;">🛍️</span>
-                        <div style="font-size: 11px; font-weight: bold; color: #c9a94e; text-transform: uppercase; margin-bottom: 4px;">Cửa hàng vật phẩm</div>
-                        <div style="font-size: 10px; color: #8a8aaa; line-height: 1.4;">Cửa hàng vật phẩm đang chuẩn bị mở.<br>Hãy tích lũy Wpoint để mua sắm vật phẩm S1.</div>
-                    </div>
-                </div>
-
-                <!-- Pane: Vòng quay (Lucky Spin) -->
-                <div id="ccgame-sdk-pane-luckyspin" class="ccgame-sdk-pane">
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 10px; text-align: center; background: #161624; border: 1px solid #222235; border-radius: 8px;">
-                        <span style="font-size: 24px; margin-bottom: 10px;">🎡</span>
-                        <div style="font-size: 11px; font-weight: bold; color: #c9a94e; text-transform: uppercase; margin-bottom: 4px;">Vòng quay may mắn</div>
-                        <div style="font-size: 10px; color: #8a8aaa; line-height: 1.4;">Vòng quay may mắn đang chuẩn bị mở.<br>Cơ hội trúng trang bị cực phẩm MUH5 S1.</div>
-                    </div>
-                </div>
-
-                <!-- Pane: Đào KC (Monument) -->
-                <div id="ccgame-sdk-pane-monument" class="ccgame-sdk-pane">
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 10px; text-align: center; background: #161624; border: 1px solid #222235; border-radius: 8px;">
-                        <span style="font-size: 24px; margin-bottom: 10px;">💎</span>
-                        <div style="font-size: 11px; font-weight: bold; color: #c9a94e; text-transform: uppercase; margin-bottom: 4px;">Máy đào Kim Cương</div>
-                        <div style="font-size: 10px; color: #8a8aaa; line-height: 1.4;">Máy đào Kim Cương đang bảo trì chuẩn bị S1.<br>Hệ thống tự động khai thác và quy đổi sẽ sớm ra mắt.</div>
-                    </div>
-                </div>
-
-                <!-- 5. Tab: Lịch sử -->
-                <div id="ccgame-sdk-pane-history" class="ccgame-sdk-pane">
-                    <div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Chưa có lịch sử giao dịch.</div>
-                </div>
-
-                <!-- 6. Tab: Ranking -->
+                <!-- 2. Tab: BXH -->
                 <div id="ccgame-sdk-pane-ranking" class="ccgame-sdk-pane">
                     <div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Chưa có dữ liệu bảng vinh danh.</div>
                 </div>
 
-                <!-- 7. Tab: Hỗ trợ -->
-                <div id="ccgame-sdk-pane-support" class="ccgame-sdk-pane">
-                    <p class="ccgame-sdk-support-text">
-                        Nếu gặp lỗi trong quá trình nạp thẻ, đăng nhập hoặc trải nghiệm game, vui lòng liên hệ CSKH qua fanpage chính thức.
-                    </p>
-                    <a class="ccgame-sdk-btn" href="https://fb.com/ccgame.org" target="_blank" style="text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px; background:#161624; border-color:#2a2a3d; color:#c9a94e;">
-                        FANPAGE HỖ TRỢ
-                    </a>
+                <!-- 3. Tab: Thông báo -->
+                <div id="ccgame-sdk-pane-announcements" class="ccgame-sdk-pane">
+                    <div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Chưa có thông báo.</div>
+                </div>
+
+                <!-- 4. Tab: Giao dịch -->
+                <div id="ccgame-sdk-pane-history" class="ccgame-sdk-pane">
+                    <div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 20px 0;">Chưa có lịch sử giao dịch.</div>
                 </div>
             </div>
         `;
@@ -234,7 +169,7 @@
         root.appendChild(fab);
         root.appendChild(panel);
 
-        // ── 2. Logic Lazy-Loading Fetch Bootstrap ───────────────────────
+        // 2. Logic Lazy-Loading Fetch Bootstrap
         let isLoaded = false;
 
         function loadBootstrapData() {
@@ -246,7 +181,7 @@
             overlay.className = 'ccgame-sdk-loading-overlay';
             overlay.innerHTML = `
                 <div class="ccgame-sdk-spinner"></div>
-                <div style="font-size: 9px; color: #4a4a6a; letter-spacing: 0.05em; text-transform: uppercase;">Đang kết nối cổng legacy...</div>
+                <div style="font-size: 9px; color: #4a4a6a; letter-spacing: 0.05em; text-transform: uppercase;">Đang tải dữ liệu...</div>
             `;
             body.appendChild(overlay);
 
@@ -267,26 +202,21 @@
                     renderBootstrapData(data);
                 })
                 .catch(err => {
-                    console.error('CCGame SDK Legacy: could not load bootstrap data.', err);
+                    console.error('CCGame SDK: could not load bootstrap data.', err);
                     overlay.remove();
                     
                     const errorMsg = err.message === '401'
                         ? 'Phiên chơi chưa đăng nhập hoặc đã hết hạn.<br><span style="font-size: 9px; color:#4a4a6a; margin-top:6px; display:block;">Vui lòng đăng nhập lại qua ccgame.org</span>'
-                        : 'Không tải được dữ liệu legacy.<br><span style="font-size: 9px; color:#4a4a6a; margin-top:6px; display:block;">Vui lòng F5 trang hoặc thử lại sau.</span>';
+                        : 'Không tải được dữ liệu.<br><span style="font-size: 9px; color:#4a4a6a; margin-top:6px; display:block;">Vui lòng F5 trang hoặc thử lại sau.</span>';
 
                     // Điền lỗi vào tất cả các tab cần thiết (trừ tab Hỗ trợ)
                     const errorHtml = `<div class="ccgame-sdk-error-msg">${errorMsg}</div>`;
                     
                     const panIds = [
                         'ccgame-sdk-pane-overview', 
-                        'ccgame-sdk-pane-announcements', 
-                        'ccgame-sdk-giftcode-list-container', 
-                        'ccgame-sdk-pane-wallet', 
-                        'ccgame-sdk-pane-history', 
                         'ccgame-sdk-pane-ranking',
-                        'ccgame-sdk-pane-pshop',
-                        'ccgame-sdk-pane-luckyspin',
-                        'ccgame-sdk-pane-monument'
+                        'ccgame-sdk-pane-announcements', 
+                        'ccgame-sdk-pane-history'
                     ];
                     panIds.forEach(id => {
                         const el = document.getElementById(id);
@@ -317,11 +247,14 @@
                 `;
             }
 
-            // ── Tab 1: Tổng quan ──
+            // Tab 1: Tổng quan
             const paneOverview = document.getElementById('ccgame-sdk-pane-overview');
             if (paneOverview) {
                 const name = data.user && data.user.name ? data.user.name : safeDisplayName;
                 const username = data.user && data.user.username ? data.user.username : safeUser;
+                const vip = data.user && data.user.vip !== undefined ? 'VIP ' + data.user.vip : (data.user && data.user.tier ? data.user.tier : 'Thường');
+                const wcoin = data.user && data.user.wallet && data.user.wallet.wcoin !== undefined ? data.user.wallet.wcoin.toLocaleString() : '0';
+                const wpoint = data.user && data.user.wallet && data.user.wallet.wpoint !== undefined ? data.user.wallet.wpoint.toLocaleString() : '0';
 
                 paneOverview.innerHTML = `
                     <div style="margin-bottom: 12px; text-align: center;">
@@ -341,28 +274,27 @@
                                 : '<span class="ccgame-sdk-badge ccgame-sdk-badge--soon">Chưa bind</span>'}
                         </span>
                     </div>
-                    
-                    <div class="ccgame-sdk-section-title">Trạng thái máy chủ</div>
                     <div class="ccgame-sdk-row">
-                        <span class="ccgame-sdk-label">Kết nối game</span>
-                        <span class="ccgame-sdk-value"><span class="ccgame-sdk-badge ccgame-sdk-badge--online">Hoạt động</span></span>
+                        <span class="ccgame-sdk-label">Cấp VIP</span>
+                        <span class="ccgame-sdk-value ccgame-sdk-value--gold" style="font-weight:700;">${escapeHtml(vip)}</span>
                     </div>
                     <div class="ccgame-sdk-row">
-                        <span class="ccgame-sdk-label">Phiên chơi</span>
-                        <span class="ccgame-sdk-value" style="color: #4cde80;">Hợp lệ</span>
+                        <span class="ccgame-sdk-label">Số dư Wcoin</span>
+                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">🪙 ${wcoin}</span>
+                    </div>
+                    <div class="ccgame-sdk-row">
+                        <span class="ccgame-sdk-label">Số dư Wpoint</span>
+                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">🔮 ${wpoint}</span>
                     </div>
                     
                     <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
                         <button class="ccgame-sdk-btn" id="ccgame-sdk-btn-play" style="margin-top: 0; background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; font-weight: bold;">VÀO GAME</button>
-                        <div style="display: flex; gap: 8px; width: 100%;">
-                            <button class="ccgame-sdk-btn" id="ccgame-sdk-btn-go-wallet" style="flex: 1; margin-top: 0; background: #161624; border-color: #2a2a3d; color: #c9a94e;">NẠP / VÍ</button>
-                            <button class="ccgame-sdk-btn" id="ccgame-sdk-btn-go-giftcode" style="flex: 1; margin-top: 0; background: #161624; border-color: #2a2a3d; color: #c9a94e;">GIFTCODE</button>
-                        </div>
+                        <a class="ccgame-sdk-btn" href="${safeReturnUrl}" target="_top" style="text-decoration: none; display: flex; align-items: center; justify-content: center; margin-top: 0; background: #161624; border-color: #2a2a3d; color: #c9a94e; font-weight: bold;">NẠP TIỀN / VÍ CHÍNH</a>
                     </div>
                 `;
             }
 
-            // ── Tab 2: Thông báo ──
+            // Tab 2: Thông báo
             const paneAnn = document.getElementById('ccgame-sdk-pane-announcements');
             if (paneAnn) {
                 if (data.announcements && data.announcements.length > 0) {
@@ -386,50 +318,8 @@
                 }
             }
 
-            // ── Tab 3: Giftcode (Render danh sách động) ──
-            const listContainer = document.getElementById('ccgame-sdk-giftcode-list-container');
-            if (listContainer) {
-                // Luôn hiển thị dòng thông báo tĩnh trong phase hiện tại (chưa mở game_mail public)
-                listContainer.innerHTML = '<div style="font-size: 11px; color: #4a4a6a; text-align: center; padding: 10px 0; line-height: 1.4;">Nhập mã Giftcode bạn nhận được từ sự kiện.</div>';
-            }
-
-            // ── Tab 4: Ví ──
-            const paneWallet = document.getElementById('ccgame-sdk-pane-wallet');
-            if (paneWallet) {
-                const wcoin = data.user && data.user.wallet && data.user.wallet.wcoin !== undefined ? data.user.wallet.wcoin.toLocaleString() : '0';
-                const wpoint = data.user && data.user.wallet && data.user.wallet.wpoint !== undefined ? data.user.wallet.wpoint.toLocaleString() : '0';
-                const vip = data.user && data.user.vip !== undefined ? 'VIP ' + data.user.vip : (data.user && data.user.tier ? data.user.tier : 'Thường');
-                const diamondBalance = data.diamond && data.diamond.balance ? data.diamond.balance.toLocaleString() : '0';
-
-                paneWallet.innerHTML = `
-                    <div class="ccgame-sdk-row">
-                        <span class="ccgame-sdk-label">Cấp VIP</span>
-                        <span class="ccgame-sdk-value ccgame-sdk-value--gold" style="font-weight:700;">${escapeHtml(vip)}</span>
-                    </div>
-                    <div class="ccgame-sdk-row">
-                        <span class="ccgame-sdk-label">Số dư Wcoin</span>
-                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">🪙 ${wcoin}</span>
-                    </div>
-                    <div class="ccgame-sdk-row">
-                        <span class="ccgame-sdk-label">Số dư Wpoint</span>
-                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">🔮 ${wpoint}</span>
-                    </div>
-                    <div class="ccgame-sdk-row">
-                        <span class="ccgame-sdk-label">Kim Cương đào</span>
-                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">💎 ${diamondBalance}</span>
-                    </div>
-                    <div style="font-size: 9px; color: #4a4a6a; line-height: 1.5; margin-top: 14px; text-align: center; padding: 0 10px;">
-                        Wcoin dùng để chơi Vòng quay may mắn.<br>
-                        Wpoint dùng mua vật phẩm tại Cửa hàng điểm (PShop).
-                    </div>
-                    
-                    <a class="ccgame-sdk-btn" href="${safeReturnUrl}" target="_top" style="margin-top: 14px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; font-weight: bold;">
-                        NẠP TIỀN / VÍ CHÍNH
-                    </a>
-                `;
-            }
-
-            // ── Tab 5: Lịch sử ──
+            
+            // Tab 4: Giao dịch
             const paneHistory = document.getElementById('ccgame-sdk-pane-history');
             if (paneHistory) {
                 let wcoinRows = '';
@@ -501,7 +391,7 @@
                 `;
             }
 
-            // ── Tab 6: Ranking (Bảng vinh danh) ──
+            // Tab 2: Ranking
             const paneRanking = document.getElementById('ccgame-sdk-pane-ranking');
             if (paneRanking) {
                 if (data.ranking && data.ranking.length > 0) {
@@ -537,74 +427,7 @@
             }
         }
 
-        // ── 3. Logic Đổi Giftcode (PATCH 1 - portal_credit Only) ────────
-        const gcInput = panel.querySelector('#ccgame-sdk-giftcode-input');
-        const gcSubmit = panel.querySelector('#ccgame-sdk-giftcode-submit');
-        const gcStatus = panel.querySelector('#ccgame-sdk-giftcode-status');
-
-        if (gcSubmit && gcInput && gcStatus) {
-            gcSubmit.addEventListener('click', function () {
-                const codeVal = gcInput.value.trim();
-                if (codeVal === '') {
-                    gcStatus.style.display = 'block';
-                    gcStatus.style.color = '#f44336';
-                    gcStatus.textContent = 'Vui lòng nhập mã giftcode.';
-                    showToast('Vui lòng nhập mã giftcode.', 'error');
-                    return;
-                }
-
-                // Khóa form chống double click
-                gcInput.disabled = true;
-                gcSubmit.disabled = true;
-                gcSubmit.textContent = 'Xử lý...';
-                gcStatus.style.display = 'block';
-                gcStatus.style.color = '#c9a94e';
-                gcStatus.textContent = 'Đang gửi yêu cầu...';
-
-                const formData = new FormData();
-                formData.append('code', codeVal);
-
-                fetch('api/sdk/giftcode/redeem.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(res => {
-                    return res.json().then(data => {
-                        if (!res.ok) {
-                            throw new Error(data.message || 'Lỗi không xác định.');
-                        }
-                        return data;
-                    });
-                })
-                .then(data => {
-                    gcStatus.style.color = '#4cde80';
-                    gcStatus.textContent = data.message || 'Đổi quà thành công!';
-                    showToast(data.message || 'Đổi quà thành công!', 'success');
-                    gcInput.value = '';
-                    
-                    // Reload bootstrap để hot update lại Wcoin/Wpoint mới lên SDK
-                    setTimeout(() => {
-                        loadBootstrapData();
-                        // Reset form
-                        gcInput.disabled = false;
-                        gcSubmit.disabled = false;
-                        gcSubmit.textContent = 'Nhận';
-                    }, 1500);
-                })
-                .catch(err => {
-                    gcStatus.style.color = '#f44336';
-                    gcStatus.textContent = err.message;
-                    showToast(err.message, 'error');
-                    
-                    // Mở khóa form cho người chơi nhập lại
-                    gcInput.disabled = false;
-                    gcSubmit.disabled = false;
-                    gcSubmit.textContent = 'Nhận';
-                });
-            });
-        }
-
-        // ── 4. Xử lý Sự kiện Toggle & Tabs ──────────────────────────────
+        // 4. Xử lý Sự kiện Toggle & Tabs
         let isOpen = false;
 
         function togglePanel() {
@@ -661,14 +484,7 @@
             if (e.target.id === 'ccgame-sdk-btn-play') {
                 togglePanel();
             }
-            if (e.target.id === 'ccgame-sdk-btn-go-wallet') {
-                const wTab = panel.querySelector('.ccgame-sdk-tab[data-target="ccgame-sdk-pane-wallet"]');
-                if (wTab) wTab.click();
-            }
-            if (e.target.id === 'ccgame-sdk-btn-go-giftcode') {
-                const gTab = panel.querySelector('.ccgame-sdk-tab[data-target="ccgame-sdk-pane-giftcodes"]');
-                if (gTab) gTab.click();
-            }
+
         });
     });
 })();
