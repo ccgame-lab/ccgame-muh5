@@ -94,7 +94,12 @@ async function doClaim() {
       body: JSON.stringify({ u: userId, server_id: 1 }),
     })
     const d = await res.json()
-    if (!res.ok) { error.value = d.error || 'Claim thất bại.'; return }
+    if (!res.ok) {
+      error.value = res.status === 401
+        ? 'Phiên chơi chưa xác thực, hãy tải lại trang.'
+        : (d.error || 'Chưa thể xử lý, thử lại sau.')
+      return
+    }
     result.value = d
     await fetchQuote()
     window.dispatchEvent(new CustomEvent('mining:claim'))
@@ -112,7 +117,12 @@ async function doMaintain() {
       body: JSON.stringify({ u: userId }),
     })
     const d = await res.json()
-    if (!res.ok) { error.value = d.error || 'Bảo trì thất bại.'; return }
+    if (!res.ok) {
+      error.value = res.status === 401
+        ? 'Phiên chơi chưa xác thực, hãy tải lại trang.'
+        : (d.error || 'Chưa thể xử lý, thử lại sau.')
+      return
+    }
     await fetchQuote()
     window.dispatchEvent(new CustomEvent('mining:maintain'))
   } catch (e) {

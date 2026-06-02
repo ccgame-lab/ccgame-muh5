@@ -103,7 +103,7 @@ Route::get('/api/sdk/ranking', function () {
 Route::get('/api/mining/quote', function (\Illuminate\Http\Request $request) {
     $user = \App\Models\User::where('username', (string) $request->query('u', ''))->first();
     if (! $user) {
-        return response()->json(['error' => 'Unauthorized'], 401);
+        return response()->json(['error' => 'Phiên chơi chưa xác thực, hãy tải lại trang.'], 401);
     }
 
     return response()->json(app(\App\Services\LegacyMiningService::class)->quote($user));
@@ -111,9 +111,9 @@ Route::get('/api/mining/quote', function (\Illuminate\Http\Request $request) {
 
 // Maintain — reset efficiency to 100%
 Route::post('/api/mining/maintain', function (\Illuminate\Http\Request $request) {
-    $user = \App\Models\User::where('username', (string) $request->query('u', ''))->first();
+    $user = \App\Models\User::where('username', (string) $request->input('u', ''))->first();
     if (! $user) {
-        return response()->json(['error' => 'Unauthorized'], 401);
+        return response()->json(['error' => 'Phiên chơi chưa xác thực, hãy tải lại trang.'], 401);
     }
 
     try {
@@ -130,7 +130,7 @@ Route::post('/api/mining/claim', function (\Illuminate\Http\Request $request) {
     $username = (string) $request->input('u', '');
     $user = \App\Models\User::where('username', $username)->first();
     if (! $user) {
-        return response()->json(['error' => 'Unauthorized'], 401);
+        return response()->json(['error' => 'Phiên chơi chưa xác thực, hãy tải lại trang.'], 401);
     }
 
     $serverId = (int) ($request->input('server_id', 1));
