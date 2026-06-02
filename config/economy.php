@@ -493,4 +493,61 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Legacy Mining — simplified maintenance-based idle faucet
+    |--------------------------------------------------------------------------
+    |
+    | Replaces complex multi-machine/upgrade/ascend model.
+    | One user = one mining state.
+    | Core loop: claim KC → efficiency decays → maintain to restore → optional timed boost.
+    |
+    | Formula:
+    |   effective_rate = base_rate_per_hour * efficiency * boost_multiplier
+    |   daily_cap      = base_daily_cap * cap_multiplier
+    |
+    | Efficiency:
+    |   - Starts 1.0 after maintenance.
+    |   - Decays by efficiency_decay_per_hour per hour since last_maintained_at.
+    |   - Never below min_efficiency.
+    |
+    | Boost:
+    |   - Tiered multipliers + cap multipliers with timed expiry.
+    |   - Empty/expired = multiplier 1.0
+    |
+    | Daily cap:
+    |   - base_daily_cap × active cap_multiplier
+    |   - Always enforced at claim time
+    |
+    */
+
+    'legacy_mining' => [
+        'enabled' => true,
+
+        'base_rate_per_hour'        => 20_000,
+        'base_daily_cap'            => 300_000,
+
+        'maintenance_cooldown_hours' => 6,
+        'efficiency_decay_per_hour'  => 0.03,
+        'min_efficiency'             => 0.35,
+
+        'boosts' => [
+            'small' => [
+                'multiplier'     => 1.2,
+                'cap_multiplier' => 1.5,
+                'hours'          => 12,
+            ],
+            'medium' => [
+                'multiplier'     => 1.5,
+                'cap_multiplier' => 2.5,
+                'hours'          => 24,
+            ],
+            'whale' => [
+                'multiplier'     => 2.0,
+                'cap_multiplier' => 5.0,
+                'hours'          => 72,
+            ],
+        ],
+    ],
+
 ];

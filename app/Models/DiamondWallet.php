@@ -13,6 +13,11 @@ class DiamondWallet extends Model
         'lifetime_mined',
         'lifetime_spent',
         'ascension_level',
+        'last_maintained_at',
+        'boost_multiplier',
+        'boost_until',
+        'cap_multiplier',
+        'cap_until',
     ];
 
     protected function casts(): array
@@ -22,6 +27,11 @@ class DiamondWallet extends Model
             'lifetime_mined' => 'integer',
             'lifetime_spent' => 'integer',
             'ascension_level' => 'integer',
+            'last_maintained_at' => 'datetime',
+            'boost_until' => 'datetime',
+            'cap_until' => 'datetime',
+            'boost_multiplier' => 'decimal:2',
+            'cap_multiplier' => 'decimal:2',
         ];
     }
 

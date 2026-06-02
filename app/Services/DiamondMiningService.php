@@ -320,6 +320,10 @@ class DiamondMiningService
      */
     public function upgradeMachine(User $user, int $machineIndex, string $upgradeType): bool
     {
+        if (! config('economy.legacy_mining.enabled', true)) {
+            throw new Exception('Upgrade system is sealed. Use LegacyMiningService for the simplified mining loop.');
+        }
+
         return DB::transaction(function () use ($user, $machineIndex, $upgradeType) {
             $machine = DiamondMachine::where('user_id', $user->id)
                 ->where('machine_index', $machineIndex)
@@ -383,6 +387,10 @@ class DiamondMiningService
      */
     public function unlockMachine(User $user, int $machineIndex): bool
     {
+        if (! config('economy.legacy_mining.enabled', true)) {
+            throw new Exception('Unlock system is sealed. Use LegacyMiningService for the simplified mining loop.');
+        }
+
         $wpointCosts = config('economy.wpoint_machine_costs', []);
         if (! isset($wpointCosts[$machineIndex])) {
             throw new Exception('Invalid machine tier.');
@@ -439,6 +447,10 @@ class DiamondMiningService
      */
     public function ascend(User $user): array
     {
+        if (! config('economy.legacy_mining.enabled', true)) {
+            throw new Exception('Ascension system is sealed. Use LegacyMiningService for the simplified mining loop.');
+        }
+
         return DB::transaction(function () use ($user): array {
             $wallet = DiamondWallet::where('user_id', $user->id)->lockForUpdate()->firstOrFail();
             $nextLevel = $wallet->ascension_level + 1;
@@ -533,6 +545,10 @@ class DiamondMiningService
      */
     public function applyBoost(User $user, int $tierIndex): DiamondBoost
     {
+        if (! config('economy.legacy_mining.enabled', true)) {
+            throw new Exception('Boost system is sealed. Use LegacyMiningService::applyBoost for the simplified mining loop.');
+        }
+
         $boosts = config('economy.boosts', []);
         if (! isset($boosts[$tierIndex])) {
             throw new Exception('Invalid boost tier.');

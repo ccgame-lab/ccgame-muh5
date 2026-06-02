@@ -96,3 +96,50 @@ Route::get('/api/sdk/ranking', function () {
 
     return response()->json(['types' => $types, 'items' => $items]);
 });
+
+// ─── Legacy Mining API (simplified maintenance-based idle faucet) ─────────────
+
+// Quote — read-only mining state for UI
+Route::get('/api/mining/quote', function (\Illuminate\Http\Request $request) {
+    $user = \App\Models\User::where('username', (string) $request->query('u', ''))->first();
+    if (! $user) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    return response()->json(app(\App\Services\LegacyMiningService::class)->quote($user));
+})->name('mining.quote');
+
+// Maintain — reset efficiency to 100%
+Route::post('/api/mining/maintain', function (\Illuminate\Http\Request $request) {
+    $user = \App\Models\User::where('username', (string) $request->query('u', ''))->first();
+    if (! $user) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    try {
+        $result = app(\App\Services\LegacyMiningService::class)->maintain($user);
+
+        return response()->json($result);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 400);
+    }
+})->name('mining.maintain');
+
+// Claim — collect accumulated KC
+Route::post('/api/mining/claim', function (\Illuminate\Http\Request $request) {
+    $username = (string) $request->input('u', '');
+    $user = \App\Models\User::where('username', $username)->first();
+    if (! $user) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    $serverId = (int) ($request->input('server_id', 1));
+
+    try {
+        $result = app(\App\Services\LegacyMiningService::class)->claim($user, $serverId);
+
+        return response()->json($result);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 400);
+    }
+})->name('mining.claim');
