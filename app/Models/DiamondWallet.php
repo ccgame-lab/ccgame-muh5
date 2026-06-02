@@ -18,6 +18,7 @@ class DiamondWallet extends Model
         'boost_until',
         'cap_multiplier',
         'cap_until',
+        'last_claimed_at',
     ];
 
     protected function casts(): array
@@ -30,6 +31,7 @@ class DiamondWallet extends Model
             'last_maintained_at' => 'datetime',
             'boost_until' => 'datetime',
             'cap_until' => 'datetime',
+            'last_claimed_at' => 'datetime',
             'boost_multiplier' => 'decimal:2',
             'cap_multiplier' => 'decimal:2',
         ];
