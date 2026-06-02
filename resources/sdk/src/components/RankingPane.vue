@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, watch } from 'vue'
 import RankCard from './RankCard.vue'
 
 const props = defineProps({
@@ -35,7 +35,7 @@ const props = defineProps({
   items: { type: Object, default: () => ({}) },
   active: { type: String, default: '' },
 })
-const emit = defineEmits(['load', 'update:active'])
+const emit = defineEmits(['update:active'])
 
 const activeSub = computed(() => props.types.find(t => t.key === props.active))
 const players = computed(() => {
@@ -61,5 +61,9 @@ function secondaryVal(p) {
   return v ?? ''
 }
 
-onMounted(() => emit('load'))
+watch(() => props.types, (types) => {
+  if (types.length && !props.active) {
+    emit('update:active', types[0].key)
+  }
+}, { immediate: true })
 </script>

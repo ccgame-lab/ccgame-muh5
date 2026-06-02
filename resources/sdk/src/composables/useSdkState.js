@@ -62,5 +62,6 @@ export function useSdkState() {
     state: readonly(state),
     loadBootstrap,
     loadRanking,
+    setRankingActive(key) { state.rankingActive = key; },
   }
 }
