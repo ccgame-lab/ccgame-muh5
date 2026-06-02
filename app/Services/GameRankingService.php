@@ -15,12 +15,8 @@ class GameRankingService
     /**
      * Lấy top actors từ game DB cho một danh mục ranking.
      *
-     * Mỗi game engine có thể định nghĩa config riêng:
-     * [
-     *   'columns' => ['actorname', 'level', 'totalpower'],
-     *   'sort' => 'totalpower',
-     *   'label' => 'Lực Chiến',
-     * ]
+     * Output fields luôn được normalize: name, level, zs, power, vip, job, server.
+     * Game engine khác chỉ cần đổi extra_columns và sort trong controller.
      */
     public function topActors(array $config): array
     {
@@ -29,6 +25,9 @@ class GameRankingService
             ->get();
 
         $all = collect();
+        $sortPrimary = $config['sort'] ?? 'level';
+        $sortSecondary = $config['sort_secondary'] ?? null;
+
         foreach ($servers as $server) {
             $conn = $server->db_connection_name;
             if (! $conn) {
@@ -37,10 +36,13 @@ class GameRankingService
             try {
                 $rows = DB::connection($conn)
                     ->table('actors')
-                    ->select(array_merge(['actorname', 'accountname', 'level', 'job', 'serverindex'], $config['extra_columns'] ?? []))
+                    ->select(array_merge(
+                        ['actorname', 'level', 'job', 'vip_level', 'zhuansheng_lv', 'totalpower'],
+                        $config['extra_columns'] ?? [],
+                    ))
                     ->where('level', '>', 1)
                     ->get()
-                    ->map(fn ($a) => $this->format($a, $config, $server->name));
+                    ->map(fn ($a) => $this->format($a, $server->name));
 
                 $all = $all->merge($rows);
             } catch (\Throwable) {
@@ -48,26 +50,38 @@ class GameRankingService
             }
         }
 
-        return $all
-            ->sortByDesc($config['sort'] ?? 'level')
+        $sorted = $all->sortByDesc(function ($actor) use ($sortPrimary, $sortSecondary) {
+            $primary = $actor[$sortPrimary] ?? 0;
+
+            if ($sortSecondary) {
+                $secondary = $actor[$sortSecondary] ?? 0;
+
+                return [$primary, $secondary];
+            }
+
+            return $primary;
+        });
+
+        return $sorted
             ->take($config['limit'] ?? self::DEFAULT_LIMIT)
             ->values()
+            ->map(fn (array $item, int $i) => array_merge(['rank' => $i + 1], $item))
             ->all();
     }
 
-    private function format(object $actor, array $config, string $serverName): array
+    /**
+     * Normalize actor fields về contract chuẩn.
+     */
+    private function format(object $actor, string $serverName): array
     {
-        $entry = [
+        return [
             'name' => $actor->actorname,
-            'level' => $actor->level,
-            'job' => $actor->job,
+            'level' => (int) $actor->level,
+            'zs' => (int) $actor->zhuansheng_lv,
+            'power' => (int) $actor->totalpower,
+            'vip' => (int) $actor->vip_level,
+            'job' => (int) $actor->job,
             'server' => $serverName,
         ];
-
-        foreach ($config['extra_columns'] ?? [] as $col) {
-            $entry[$col] = $actor->$col ?? null;
-        }
-
-        return $entry;
     }
 }

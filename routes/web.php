@@ -87,7 +87,7 @@ Route::get('/api/sdk/ranking', function () {
         $types[] = [
             'key' => $r['key'],
             'label' => $r['label'],
-            'metric' => $r['display_metric'],
+            'metric' => $r['metric'],
             'secondary_metric' => $r['secondary_metric'] ?? '',
             'secondary_label' => $r['secondary_label'] ?? '',
         ];

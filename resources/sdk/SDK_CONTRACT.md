@@ -32,12 +32,12 @@ Lazy fetch only when BXH tab is first opened.
 ```json
 {
   "types": [
-    { "key": "reborn", "label": "Chuyển Sinh", "metric": "zhuansheng_lv", "secondary_metric": "level", "secondary_label": "Cấp" },
-    { "key": "power", "label": "Lực Chiến", "metric": "totalpower", "secondary_metric": "level", "secondary_label": "Cấp" }
+    { "key": "zs", "label": "Chuyển Sinh", "metric": "zs", "secondary_metric": "level", "secondary_label": "Cấp" },
+    { "key": "power", "label": "Lực Chiến", "metric": "power", "secondary_metric": "zs", "secondary_label": "ZS" }
   ],
   "items": {
-    "reborn": [{ "name": "PlayerName", "level": 88, "zhuansheng_lv": 3, "totalpower": 12345 }],
-    "power": [{ "name": "PlayerName", "totalpower": 12345, "level": 88 }]
+    "zs": [{ "name": "PlayerName", "level": 88, "zs": 3, "power": 12345, "vip": 2 }],
+    "power": [{ "name": "PlayerName", "level": 88, "zs": 3, "power": 12345, "vip": 2 }]
   }
 }
 ```
@@ -45,6 +45,7 @@ Lazy fetch only when BXH tab is first opened.
 ## Rules
 
 - Frontend is a dumb renderer. Backend is the single source of truth.
+- SDK endpoints are in `routes/web.php` because the iframe page uses web middleware for consistency.
 - No wallet mutation, payment logic, or settlement in SDK code.
 - No hardcoded server name or game title — all from API.
 - No hardcoded tabs — tabs array drives navigation.

@@ -9,37 +9,35 @@ use App\Services\GameRankingService;
 class HallOfFameController extends Controller
 {
     /**
-     * SDK bootstrap payload: lightweight snapshot of key rankings.
+     * SDK ranking payload.
      *
-     * Mỗi category định nghĩa display_metric để SDK JS biết nên highlight cột nào.
-     * Game khác chỉ cần copy array này + đổi extra_columns + sort.
+     * Mỗi game clone chỉ cần sửa array này + đổi extra_columns nếu DB khác.
+     * Output fields đã normalize: name, level, zs, power, vip.
      */
     public function sdkPayload(GameRankingService $service): array
     {
         return [
             [
-                'key' => 'reborn',
+                'key' => 'zs',
                 'label' => 'Chuyển Sinh',
-                'display_metric' => 'zhuansheng_lv',
-                'display_label' => 'ZS',
-                'secondary_label' => 'Cấp',
+                'metric' => 'zs',
                 'secondary_metric' => 'level',
+                'secondary_label' => 'Cấp',
                 'players' => $service->topActors([
-                    'extra_columns' => ['zhuansheng_lv', 'level', 'totalpower'],
-                    'sort' => 'zhuansheng_lv',
+                    'sort' => 'zs',
+                    'sort_secondary' => 'level',
                     'limit' => 10,
                 ]),
             ],
             [
                 'key' => 'power',
                 'label' => 'Lực Chiến',
-                'display_metric' => 'totalpower',
-                'display_label' => 'Power',
-                'secondary_label' => 'Cấp',
-                'secondary_metric' => 'level',
+                'metric' => 'power',
+                'secondary_metric' => 'zs',
+                'secondary_label' => 'ZS',
                 'players' => $service->topActors([
-                    'extra_columns' => ['totalpower', 'level', 'zhuansheng_lv'],
-                    'sort' => 'totalpower',
+                    'sort' => 'power',
+                    'sort_secondary' => 'zs',
                     'limit' => 10,
                 ]),
             ],
