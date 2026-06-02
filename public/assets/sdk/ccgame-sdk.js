@@ -250,8 +250,8 @@
             `;
             body.appendChild(overlay);
 
-            // Fetch API bootstrap.php từ thư mục tương đối
-            fetch('api/sdk/bootstrap.php')
+            // Fetch API bootstrap từ thư mục tương đối
+            fetch('api/sdk/bootstrap')
                 .then(res => {
                     if (res.status === 401) {
                         throw new Error('401');

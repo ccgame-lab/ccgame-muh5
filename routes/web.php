@@ -23,7 +23,7 @@ Route::get('/', function () {
 
 Route::get('/play', [PlayController::class, 'entry'])->name('play.index');
 
-Route::get('/api/sdk/bootstrap.php', function () {
+Route::get('/api/sdk/bootstrap', function () {
     $hallOfFame = [
         'servers' => [],
         'rankings' => [],
