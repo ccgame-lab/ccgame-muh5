@@ -71,9 +71,10 @@ Audit trước khi code phase SDK panel:
 - Return current panel structure, data fields used, missing loading/empty/error/offline states, tab IA proposal, visual tokens, what to preserve, what to remove, one-sentence design read
 - Không edit file trong audit phase
 
-Phase code SDK panel phải nhỏ:
+Phase code SDK panel phải nhỏ (SDKPANEL4 IA):
 - Allowed files: `public/assets/sdk/ccgame-sdk.js`, `public/assets/sdk/ccgame-sdk.css`
-- Tabs: Tổng quan, BXH, Thông báo, Giao dịch
+- Tabs: Tổng quan, Giao dịch, BXH, Thông báo
+- Trong tab Tổng quan: Chứa account summary và một Compact Utility Grid nén các tính năng legacy (Nạp/Ví, Giftcode, Cửa hàng, Vòng quay, Đào KC, Hỗ trợ) dưới dạng các action buttons có trạng thái (Active/Soon/Maintenance) thay vì tạo tab rời.
 - Use existing `/api/sdk/bootstrap.php` only
 - Implement loading, empty, error states
 - Keep panel compact and game-safe
