@@ -108,33 +108,52 @@
 .ccgame-sdk-mining-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .ccgame-sdk-mining-title { display: flex; flex-direction: column; }
 .ccgame-sdk-mining-label { font-size: 8px; color: #4a4a6a; text-transform: uppercase; letter-spacing: 0.06em; }
-.ccgame-sdk-mining-rate { font-size: 15px; font-weight: 700; color: #c9a94e; font-variant-numeric: tabular-nums; }
+.ccgame-sdk-mining-rate { font-size: 15px; font-weight: 700; color: #f0c040; font-variant-numeric: tabular-nums; }
 
-/* Crystal visual — pure CSS, no Three.js */
-.ccgame-sdk-mining-crystal { width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.ccgame-sdk-mining-crystal-core {
-  width: 28px; height: 28px;
-  background: radial-gradient(circle at 30% 30%, rgba(201,169,78,calc(0.4 + var(--eff) * 0.5)), rgba(100,80,40,calc(0.15 + var(--eff) * 0.3)));
-  border-radius: 6px;
-  transform: rotate(45deg);
-  animation: ccgame-sdk-crystal-spin calc(6s - var(--eff) * 3s) linear infinite;
-  box-shadow: 0 0 calc(8px + var(--eff) * 16px) rgba(201,169,78,calc(0.1 + var(--eff) * 0.3));
-  transition: box-shadow 0.6s, background 0.6s;
+/* KC Core visual — glowing crystal, pure CSS */
+.ccgame-sdk-mining-core { width: 40px; height: 40px; flex-shrink: 0; position: relative; display: flex; align-items: center; justify-content: center; }
+.ccgame-sdk-mining-core-glow {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle, rgba(240,192,64,calc(var(--eff) * 0.35)) 0%, transparent 70%);
+  animation: ccgame-sdk-core-pulse 2s ease-in-out infinite;
 }
-@keyframes ccgame-sdk-crystal-spin { to { transform: rotate(405deg); } }
+.ccgame-sdk-mining-core-inner {
+  width: 22px; height: 22px;
+  background: radial-gradient(circle at 35% 35%, rgba(255,220,100,calc(0.5 + var(--eff) * 0.5)), rgba(180,120,30,calc(0.2 + var(--eff) * 0.5)));
+  border-radius: 5px;
+  transform: rotate(45deg);
+  animation: ccgame-sdk-core-spin calc(4s - var(--eff) * 2s) linear infinite;
+  box-shadow: 0 0 calc(6px + var(--eff) * 14px) rgba(240,192,64,calc(0.15 + var(--eff) * 0.35));
+  transition: box-shadow 0.6s ease, background 0.6s ease;
+  z-index: 1;
+}
+@keyframes ccgame-sdk-core-spin { to { transform: rotate(405deg); } }
+@keyframes ccgame-sdk-core-pulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
 
 .ccgame-sdk-mining-stats { margin-bottom: 10px; }
 .ccgame-sdk-mining-stat-row { display: flex; justify-content: space-between; font-size: 9px; color: #6a6a8a; margin-bottom: 2px; }
+.ccgame-sdk-mining-eff { font-weight: 700; }
 .ccgame-sdk-mining-bar { height: 3px; background: #1a1a2e; border-radius: 2px; margin-bottom: 6px; overflow: hidden; }
 .ccgame-sdk-mining-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
 .ccgame-sdk-mining-boost { font-size: 9px; color: #c9a94e; margin: 4px 0 0; padding: 3px 7px; background: rgba(201,169,78,0.08); border-radius: 4px; display: inline-block; }
 
 .ccgame-sdk-mining-actions { display: flex; gap: 6px; }
-.ccgame-sdk-mining-btn { flex: 1; padding: 7px 0; border-radius: 6px; border: 1px solid #2a2a3d; background: #1a1a2a; color: #8a8aaa; font-size: 10px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em; transition: opacity 0.15s, background 0.15s; }
+.ccgame-sdk-mining-btn {
+  flex: 1; padding: 7px 0; border-radius: 6px; border: 1px solid #2a2a3d;
+  background: #1a1a2a; color: #8a8aaa;
+  font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
 .ccgame-sdk-mining-btn:hover { background: #22223a; }
 .ccgame-sdk-mining-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.ccgame-sdk-mining-btn--claim { background: #c9a94e; color: #0d0d14; border-color: #c9a94e; }
-.ccgame-sdk-mining-btn--claim:hover { background: #d4b55e; }
 
-.ccgame-sdk-mining-result { font-size: 10px; color: #4caf50; text-align: center; margin-top: 6px; font-weight: 600; }
+.ccgame-sdk-mining-btn--primary {
+  background: #c9a94e; color: #0d0d14; border-color: #c9a94e;
+  box-shadow: 0 2px 10px rgba(201,169,78,0.2);
+}
+.ccgame-sdk-mining-btn--primary:hover { background: #d4b55e; }
+
+.ccgame-sdk-mining-result { font-size: 10px; text-align: center; margin-top: 6px; font-weight: 600; }
+.ccgame-sdk-mining-result--claim { color: #4caf50; }
+.ccgame-sdk-mining-result--muted { color: #5a5a7a; font-weight: 500; }
 .ccgame-sdk-mining-error { font-size: 9px; color: #f44336; text-align: center; margin-top: 6px; }

@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- CCGame SDK Stylesheet -->
-    <link rel="stylesheet" href="{{ asset('assets/sdk/ccgame-sdk.css') }}?v=mining-card">
+    <link rel="stylesheet" href="{{ asset('assets/sdk/ccgame-sdk.css') }}?v=lo-kc">
     
     <style>
         :root {
@@ -303,6 +303,6 @@
     
     <!-- CCGame SDK JavaScript Core -->
     <script>window.ccgame = { user: "{{ $user ?? '' }}" };</script>
-    <script type="module" src="{{ asset('assets/sdk/ccgame-sdk.js') }}?v=mining-card"></script>
+    <script type="module" src="{{ asset('assets/sdk/ccgame-sdk.js') }}?v=lo-kc"></script>
 </body>
 </html>
