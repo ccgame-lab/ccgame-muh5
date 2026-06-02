@@ -63,6 +63,7 @@ const fabRef = ref(null)
 
 // Dragging state
 let dragging = false
+let didDrag = false
 let startX = 0
 let startY = 0
 let origX = 0
@@ -92,6 +93,7 @@ function onDragStart(e) {
   origX = el.getBoundingClientRect().left
   origY = el.getBoundingClientRect().top
   dragging = false
+  didDrag = false
   document.addEventListener('mousemove', onDragMove)
   document.addEventListener('mouseup', onDragEnd)
   document.addEventListener('touchmove', onDragMove, { passive: false })
@@ -118,6 +120,7 @@ function onDragMove(e) {
 }
 
 function onDragEnd() {
+  didDrag = dragging
   document.removeEventListener('mousemove', onDragMove)
   document.removeEventListener('mouseup', onDragEnd)
   document.removeEventListener('touchmove', onDragMove)
@@ -126,7 +129,7 @@ function onDragEnd() {
 }
 
 function onFabClick() {
-  if (dragging) return
+  if (didDrag) { didDrag = false; return }
   open.value = !open.value
 }
 </script>

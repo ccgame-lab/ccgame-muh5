@@ -1,4 +1,4 @@
-import { reactive, readonly, computed } from 'vue'
+import { reactive, readonly } from 'vue'
 
 const state = reactive({
   loaded: false,

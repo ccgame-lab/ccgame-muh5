@@ -13,7 +13,7 @@
       <RankCard
         v-for="(p, i) in players"
         :key="p.name"
-        :rank="i+1"
+        :rank="p.rank || i + 1"
         :name="p.name"
         :primary="primaryVal(p)"
         :primaryLabel="activeSub?.label"
