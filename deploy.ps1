@@ -37,42 +37,42 @@ Write-Host "Starting remote deployment on ccgame-prod..."
 
 $RemoteCmd = @"
 set -e
-echo "Cleaning up temp directory..."
+echo 'Cleaning up temp directory...'
 rm -rf /tmp/ccgame-muh5-sync
 
-echo "Cloning repository..."
+echo 'Cloning repository...'
 git clone --branch master https://github.com/ccgame-lab/ccgame-muh5.git /tmp/ccgame-muh5-sync
 
-echo "Syncing files to production..."
+echo 'Syncing files to production...'
 rsync -aHAX --exclude='.git' --exclude='.env*' --exclude='storage/' --exclude='vendor/' --exclude='bootstrap/cache/' --exclude='node_modules/' --exclude='update.zip' /tmp/ccgame-muh5-sync/ /www/wwwroot/ccgame/ccgame-muh5/
 
 cd /www/wwwroot/ccgame/ccgame-muh5
 
-echo "Installing composer dependencies..."
+echo 'Installing composer dependencies...'
 composer install --no-dev --optimize-autoloader
 
-echo "Clearing caches..."
+echo 'Clearing caches...'
 php artisan optimize:clear
 
-echo "Checking migrations (pretend mode)..."
+echo 'Checking migrations pretend mode...'
 php artisan migrate --pretend --force
 
-echo "Setting permissions for storage, bootstrap/cache, public..."
+echo 'Setting permissions for storage, bootstrap/cache, public...'
 chown -R www:www storage bootstrap/cache public
 
-echo "Running smoke tests..."
-echo "Testing /play..."
+echo 'Running smoke tests...'
+echo 'Testing play...'
 curl -I https://muh5.ccgame.org/play
-echo "Testing /admin/login..."
+echo 'Testing admin login...'
 curl -I https://muh5.ccgame.org/admin/login
-echo "Testing /api/sdk/bootstrap..."
+echo 'Testing api sdk bootstrap...'
 curl -s https://muh5.ccgame.org/api/sdk/bootstrap | head -c 300
-echo ""
+echo ''
 
-echo "Cleaning up temp directory..."
+echo 'Cleaning up temp directory...'
 rm -rf /tmp/ccgame-muh5-sync
 
-echo "Deployment finished successfully."
+echo 'Deployment finished successfully.'
 "@
 
 ssh ccgame-prod $RemoteCmd
