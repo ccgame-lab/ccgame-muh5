@@ -27,7 +27,9 @@ class Announcement extends Model
         'icon',
         'link',
         'is_active',
+        'starts_at',
         'expires_at',
+        'sort_order',
     ];
 
     /**
@@ -37,7 +39,9 @@ class Announcement extends Model
     {
         return [
             'is_active' => 'boolean',
+            'starts_at' => 'datetime',
             'expires_at' => 'datetime',
+            'sort_order' => 'integer',
         ];
     }
 

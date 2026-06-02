@@ -19,6 +19,7 @@ class HallOfFameLegend extends Model
         'score_value',
         'score_label',
         'rewards',
+        'is_active',
         'sort_order',
     ];
 
@@ -27,6 +28,7 @@ class HallOfFameLegend extends Model
         return [
             'rewards' => 'array',
             'score_value' => 'integer',
+            'is_active' => 'boolean',
             'sort_order' => 'integer',
         ];
     }

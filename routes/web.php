@@ -42,6 +42,16 @@ Route::get('/api/sdk/bootstrap', function () {
         report($e);
     }
 
+    $features = [];
+    try {
+        $features = \App\Models\SdkFeature::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['key', 'label', 'status', 'url', 'note'])
+            ->toArray();
+    } catch (Throwable $e) {
+        report($e);
+    }
+
     return response()->json([
         'user' => [
             'name' => 'Khách',
@@ -53,5 +63,6 @@ Route::get('/api/sdk/bootstrap', function () {
         'ranking' => $hallOfFame['legends'] ?? [],
         'hallOfFame' => $hallOfFame,
         'diamond' => ['balance' => 0],
+        'features' => $features,
     ]);
 })->name('sdk.bootstrap');
