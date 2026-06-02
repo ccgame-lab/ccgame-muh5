@@ -126,7 +126,7 @@
         panel.innerHTML = `
             <div class="ccgame-sdk-header">
                 <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <div class="ccgame-sdk-header-title">CCGame SDK</div>
+                    <div class="ccgame-sdk-header-title">MUH5</div>
                     <div id="ccgame-sdk-header-user-info" style="font-size: 8px; color: #8a8aaa; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
                         <span>Đang tải thông tin...</span>
                     </div>
@@ -135,9 +135,9 @@
             </div>
             <div class="ccgame-sdk-tabs">
                 <button class="ccgame-sdk-tab ccgame-sdk-tab--active" data-target="ccgame-sdk-pane-overview">Tổng quan</button>
+                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-history">Giao dịch</button>
                 <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-ranking">BXH</button>
                 <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-announcements">Thông báo</button>
-                <button class="ccgame-sdk-tab" data-target="ccgame-sdk-pane-history">Giao dịch</button>
             </div>
             <div class="ccgame-sdk-body" style="position: relative; min-height: 250px;">
                 <!-- 1. Tab: Tổng quan -->
@@ -237,13 +237,10 @@
                 const wpoint = data.user && data.user.wallet && data.user.wallet.wpoint !== undefined ? data.user.wallet.wpoint : 0;
                 headerUserInfo.innerHTML = `
                     <span style="color: #c9a94e; font-weight: bold;">${escapeHtml(name)}</span>
-                    <span style="color: #4a4a6a;">|</span>
+                    <span style="color: #4a4a6a;">&middot;</span>
                     <span>${sId}</span>
-                    <span style="color: #4a4a6a;">|</span>
-                    <span style="background: rgba(201, 169, 78, 0.1); color: #c9a94e; padding: 1px 3px; border-radius: 3px; font-size: 7px; text-transform: uppercase;">${modeText}</span>
-                    <span style="color: #4a4a6a;">|</span>
-                    <span>🪙 ${wcoin.toLocaleString()}</span>
-                    <span>🔮 ${wpoint.toLocaleString()}</span>
+                    <span style="color: #4a4a6a;">&middot;</span>
+                    <span style="color: #8a8aaa;">${modeText}</span>
                 `;
             }
 
@@ -259,7 +256,6 @@
                 paneOverview.innerHTML = `
                     <div style="margin-bottom: 12px; text-align: center;">
                         <div style="font-size: 14px; font-weight: 700; color: #c9a94e; text-transform: uppercase; margin-bottom: 2px;">${escapeHtml(name)}</div>
-                        <div style="font-size: 9px; color: #4a4a6a; letter-spacing: 0.05em;">CHIẾN BINH MUH5</div>
                     </div>
                     
                     <div class="ccgame-sdk-row">
@@ -280,15 +276,15 @@
                     </div>
                     <div class="ccgame-sdk-row">
                         <span class="ccgame-sdk-label">Số dư Wcoin</span>
-                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">🪙 ${wcoin}</span>
+                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">${wcoin}</span>
                     </div>
                     <div class="ccgame-sdk-row">
                         <span class="ccgame-sdk-label">Số dư Wpoint</span>
-                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">🔮 ${wpoint}</span>
+                        <span class="ccgame-sdk-value ccgame-sdk-value--gold">${wpoint}</span>
                     </div>
                     
                     <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
-                        <button class="ccgame-sdk-btn" id="ccgame-sdk-btn-play" style="margin-top: 0; background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; font-weight: bold;">VÀO GAME</button>
+                        <button class="ccgame-sdk-btn" id="ccgame-sdk-btn-play" style="margin-top: 0; background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; font-weight: bold; text-transform: uppercase;">Đóng panel</button>
                         <a class="ccgame-sdk-btn" href="${safeReturnUrl}" target="_top" style="text-decoration: none; display: flex; align-items: center; justify-content: center; margin-top: 0; background: #161624; border-color: #2a2a3d; color: #c9a94e; font-weight: bold;">NẠP TIỀN / VÍ CHÍNH</a>
                     </div>
                 `;
