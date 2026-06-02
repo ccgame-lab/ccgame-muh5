@@ -10,6 +10,7 @@ class DiamondWallet extends Model
     protected $fillable = [
         'user_id',
         'balance',
+        'diamond_blocks',
         'lifetime_mined',
         'lifetime_spent',
         'ascension_level',
@@ -25,6 +26,7 @@ class DiamondWallet extends Model
     {
         return [
             'balance' => 'integer',
+            'diamond_blocks' => 'integer',
             'lifetime_mined' => 'integer',
             'lifetime_spent' => 'integer',
             'ascension_level' => 'integer',
