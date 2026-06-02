@@ -32,7 +32,7 @@ class SendGameMailJob implements ShouldQueue
     {
         $gmService = app(\App\Services\Game\GmApiService::class);
 
-        $gmService->sendGameMail(
+        $gmService->sendItemMail(
             $this->server,
             $this->playerId,
             $this->title,

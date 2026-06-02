@@ -30,10 +30,6 @@ class DiamondMiningJob implements ShouldQueue
     {
         $gmService = app(\App\Services\Game\GmApiService::class);
 
-        $gmService->executeCommand('add_yuanbao', $this->server, [
-            'username' => $this->username,
-            'amount' => $this->amount,
-            'action_uuid' => $this->actionUuid,
-        ]);
+        $gmService->chargeCurrency($this->server, $this->username, $this->amount);
     }
 }
