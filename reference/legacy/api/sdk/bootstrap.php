@@ -63,19 +63,18 @@ function get_safe_columns(PDO $pdo, string $table, array $allowed_cols): array
 $whitelist = [
     'users' => ['id', 'username', 'name', 'vip', 'tier', 'wcoin', 'wpoint', 'created_at'],
     'web_wallets' => ['user_id', 'wcoin', 'wpoint', 'balance'],
-    'announcements' => ['id', 'title', 'content', 'active', 'created_at'],
+    'changelogs' => ['id', 'title', 'version_date', 'player_notes', 'server_id', 'is_published', 'created_at'],
     'giftcodes' => ['id', 'code', 'description', 'used_count', 'limit_usage', 'reward_type'],
     'diamond_wallets' => ['user_id', 'balance'],
     'diamond_machines' => ['user_id', 'machine_index', 'level', 'speed_level', 'storage_level', 'efficiency_level', 'base_rate', 'capacity', 'last_claim_at'],
     'wcoin_transactions' => ['id', 'user_id', 'amount', 'type', 'description', 'created_at'],
     'wpoint_transactions' => ['id', 'user_id', 'amount', 'type', 'description', 'created_at'],
-    'hall_of_fame_legends' => ['id', 'server_name', 'category', 'rewards', 'created_at'],
     'social_events' => ['id', 'username', 'event_type', 'description', 'created_at']
 ];
 
 // Khởi tạo các mảng dữ liệu mặc định để tránh lỗi rỗng
 $user_data = [];
-$announcements = [];
+$changelogs = [];
 $giftcodes = [];
 $diamond = [
     'balance' => 0,
@@ -132,27 +131,29 @@ try {
 
 $user_db_id = $user_data['id'] ?? null;
 
-// 5. Lấy thông báo (announcements - Limit 5)
+// 5. Lấy changelog (changelogs - Limit 5)
 try {
-    if (table_exists($pdo, 'announcements')) {
-        $cols = get_safe_columns($pdo, 'announcements', $whitelist['announcements']);
+    if (table_exists($pdo, 'changelogs')) {
+        $cols = get_safe_columns($pdo, 'changelogs', $whitelist['changelogs']);
         if ($cols) {
             $select = implode(', ', array_map(fn($c) => "`$c`", $cols));
-            $query = "SELECT $select FROM `announcements`";
+            $query = "SELECT $select FROM `changelogs`";
             $where = [];
-            if (in_array('active', $cols, true)) {
-                $where[] = "`active` = 1";
+            if (in_array('is_published', $cols, true)) {
+                $where[] = "`is_published` = 1";
             }
             if (!empty($where)) {
                 $query .= " WHERE " . implode(" AND ", $where);
             }
             if (in_array('created_at', $cols, true)) {
                 $query .= " ORDER BY `created_at` DESC";
+            } elseif (in_array('version_date', $cols, true)) {
+                $query .= " ORDER BY `version_date` DESC";
             } else {
                 $query .= " ORDER BY `id` DESC";
             }
             $query .= " LIMIT 5";
-            $announcements = $pdo->query($query)->fetchAll();
+            $changelogs = $pdo->query($query)->fetchAll();
         }
     }
 } catch (Exception $e) {
@@ -268,7 +269,7 @@ $features = [
 // Trả về JSON kết quả
 echo json_encode([
     'user' => $user_data,
-    'announcements' => $announcements,
+    'announcements' => $changelogs,
     'giftcodes' => $giftcodes,
     'diamond' => $diamond,
     'transactions' => $transactions,

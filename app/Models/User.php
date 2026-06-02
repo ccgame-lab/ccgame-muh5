@@ -48,7 +48,6 @@ class User extends Authenticatable
         'last_login_ip',
         'last_login_at',
         'checkin_boost_expires_at',
-        'last_seen_announcement_id',
     ];
 
     /**

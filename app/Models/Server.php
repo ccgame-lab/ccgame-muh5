@@ -55,6 +55,7 @@ class Server extends Model
         'port',
         'db_name',
         'db_connection_name',
+        'server_path',
         'status',
         'priority',
         'opened_at',

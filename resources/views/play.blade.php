@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- CCGame SDK Stylesheet -->
-    <link rel="stylesheet" href="{{ asset('assets/sdk/ccgame-sdk.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/sdk/ccgame-sdk.css') }}?v=vue4">
     
     <style>
         :root {
@@ -302,6 +302,7 @@
     </div>
     
     <!-- CCGame SDK JavaScript Core -->
-    <script src="{{ asset('assets/sdk/ccgame-sdk.js') }}?v=20260602-sdkpanel7b" defer></script>
+    <script>window.ccgame = { user: "{{ $user ?? '' }}" };</script>
+    <script type="module" src="{{ asset('assets/sdk/ccgame-sdk.js') }}?v=vue4"></script>
 </body>
 </html>

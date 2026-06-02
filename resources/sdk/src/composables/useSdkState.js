@@ -1,0 +1,66 @@
+import { reactive, readonly, computed } from 'vue'
+
+const state = reactive({
+  loaded: false,
+  error: null,
+  server: { id: '', name: '' },
+  player: { id: 0, name: '', level: 0, vip: 0 },
+  wallet: { tom: 0, wcoin: 0, wpoint: 0 },
+  tabs: [],
+  features: [],
+  changelog: [],
+
+  // Lazy ranking
+  rankingLoaded: false,
+  rankingTypes: [],
+  rankingItems: {},
+  rankingActive: '',
+})
+
+export function useSdkState() {
+  async function loadBootstrap() {
+    try {
+      const u = window.ccgame?.user || ''
+      const url = u ? `/api/sdk/bootstrap?u=${encodeURIComponent(u)}` : '/api/sdk/bootstrap'
+      const res = await fetch(url)
+      if (res.status === 401) throw new Error('401')
+      if (!res.ok) throw new Error('500')
+      const d = await res.json()
+      Object.assign(state, {
+        server: d.server || state.server,
+        player: d.player || state.player,
+        wallet: d.wallet || state.wallet,
+        tabs: d.tabs || [],
+        features: d.features || [],
+        changelog: d.changelog || [],
+        loaded: true,
+        error: null,
+      })
+    } catch (e) {
+      state.error = e.message === '401'
+        ? 'Phiên chơi đã hết hạn. Vui lòng đăng nhập lại.'
+        : 'Không tải được dữ liệu. F5 trang hoặc thử lại sau.'
+    }
+  }
+
+  async function loadRanking() {
+    if (state.rankingLoaded) return
+    try {
+      const res = await fetch('/api/sdk/ranking')
+      if (!res.ok) throw new Error('500')
+      const d = await res.json()
+      state.rankingTypes = d.types || []
+      state.rankingItems = d.items || {}
+      state.rankingActive = d.types?.[0]?.key || ''
+      state.rankingLoaded = true
+    } catch {
+      // silently fail, keep stub
+    }
+  }
+
+  return {
+    state: readonly(state),
+    loadBootstrap,
+    loadRanking,
+  }
+}

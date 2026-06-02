@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Announcement;
+use App\Models\Changelog;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class AnnouncementController extends Controller
 {
@@ -16,20 +15,18 @@ class AnnouncementController extends Controller
     public function sdkPayload(): array
     {
         try {
-            return Announcement::query()
-                ->active()
-                ->latest('id')
+            return Changelog::published()
+                ->orderByDesc('version_date')
                 ->limit(5)
                 ->get()
-                ->map(fn (Announcement $announcement): array => [
-                    'id' => $announcement->id,
-                    'title' => $announcement->title,
-                    'content' => $announcement->body,
-                    'body' => $announcement->body,
-                    'type' => $announcement->type,
-                    'icon' => $announcement->icon ?? $this->defaultIcon((string) $announcement->type),
-                    'link' => $announcement->link,
-                    'created_at' => $announcement->created_at?->toDateTimeString(),
+                ->map(fn (Changelog $changelog): array => [
+                    'id' => $changelog->id,
+                    'title' => $changelog->title,
+                    'content' => $changelog->player_notes,
+                    'body' => $changelog->player_notes,
+                    'date' => $changelog->version_date->format('Y-m-d'),
+                    'server' => $changelog->server?->name,
+                    'created_at' => $changelog->created_at?->toDateTimeString(),
                 ])
                 ->values()
                 ->all();
@@ -38,64 +35,5 @@ class AnnouncementController extends Controller
 
             return [];
         }
-    }
-
-    /**
-     * Return the latest active announcement (for polling).
-     */
-    public function latest(Request $request): JsonResponse
-    {
-        $announcement = Announcement::query()
-            ->active()
-            ->latest('id')
-            ->first();
-
-        if (! $announcement) {
-            return response()->json(['id' => 0]);
-        }
-
-        $user = $request->user();
-
-        // Nếu user đã xem thông báo này rồi thì không trả về nữa
-        if ($user && (int) $user->last_seen_announcement_id >= (int) $announcement->id) {
-            return response()->json(['id' => 0]);
-        }
-
-        return response()->json([
-            'id' => $announcement->id,
-            'title' => $announcement->title,
-            'body' => $announcement->body,
-            'type' => $announcement->type,
-            'icon' => $announcement->icon ?? $this->defaultIcon((string) $announcement->type),
-            'link' => $announcement->link,
-        ]);
-    }
-
-    private function defaultIcon(string $type): string
-    {
-        return match ($type) {
-            'success' => '🎉',
-            'warning' => '⚠️',
-            default => '📢',
-        };
-    }
-
-    /**
-     * Acknowledge that the user has seen an announcement.
-     */
-    public function acknowledge(Request $request): JsonResponse
-    {
-        $request->validate([
-            'announcement_id' => 'required|integer|exists:announcements,id',
-        ]);
-
-        $user = $request->user();
-        $announcementId = (int) $request->input('announcement_id');
-
-        if ($user && (int) $user->last_seen_announcement_id < $announcementId) {
-            $user->update(['last_seen_announcement_id' => $announcementId]);
-        }
-
-        return response()->json(['success' => true]);
     }
 }

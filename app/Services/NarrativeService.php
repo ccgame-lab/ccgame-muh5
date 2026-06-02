@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Jobs\ProcessWhaleImpact;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -95,7 +94,6 @@ class NarrativeService
                 // Rule 2: Rivalry Flip Detection
                 $lastTop1 = Cache::get("server_top1_user:{$serverId}");
                 if ($lastTop1 && (int) $lastTop1 !== (int) $userId) {
-                    ProcessWhaleImpact::dispatch('rivalry', $userId, $serverId, ['loser_id' => $lastTop1]);
                     // Auto-arm echo response on current user's session natively
                     Cache::put('sf:echo:'.md5($clientIp), true, 20);
                 }
@@ -168,12 +166,10 @@ class NarrativeService
                 }
             } elseif (! $isReplay && $amount >= 500) {
                 if ($amount >= 10000 && $userId !== null) {
-                    // Rule 1: World Buff Burst Drop (Requires 10k+)
-                    ProcessWhaleImpact::dispatch('burst', $userId, $serverId, ['amount' => $amount]);
+                    // World Buff Burst Drop - disabled (ProcessWhaleImpact removed)
                 }
                 if ($streak >= 3 && $userId !== null) {
-                    // Rule 3: Personal Streak Reward (Keeps the whale trapped in-game)
-                    ProcessWhaleImpact::dispatch('streak', $userId, $serverId, ['streak' => $streak]);
+                    // Personal Streak Reward - disabled (ProcessWhaleImpact removed)
                 }
 
                 if ($amount >= 10000 || $streak >= 2) {
