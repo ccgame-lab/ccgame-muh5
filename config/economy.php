@@ -548,6 +548,39 @@ return [
                 'hours'          => 72,
             ],
         ],
+
+        /*
+        | Legacy power — compensation for old upgrade/ascend/unlock investments.
+        |
+        | Users who had machines/upgrades/ascensions in the old system receive
+        | a permanent rate bonus. This bonus affects rate_per_hour only —
+        | daily_cap is never increased by legacy power.
+        |
+        | Formula:
+        |   legacy_power_bonus = speed_bonus + capacity_bonus + ascension_bonus + machine_bonus
+        |   capped at max_bonus
+        |   legacy_power_multiplier = 1 + legacy_power_bonus
+        |   effective_rate = base_rate × efficiency × boost × legacy_power_multiplier
+        |
+        | Each old DiamondMachine contributes:
+        |   speed_bonus      = (speed_level - 1) × speed_level_bonus
+        |   capacity_bonus   = (storage_level - 1) × capacity_level_bonus
+        |
+        | Ascension bonus (from diamond_wallets.ascension_level):
+        |   ascension_bonus  = ascension_level × ascension_level_bonus
+        |
+        | Machine count bonus (beyond first machine):
+        |   machine_bonus    = (extra_machines) × extra_machine_bonus
+        |
+        */
+        'legacy_power' => [
+            'enabled'                => true,
+            'max_bonus'              => 0.50,
+            'speed_level_bonus'      => 0.03,
+            'capacity_level_bonus'   => 0.01,
+            'ascension_level_bonus'  => 0.05,
+            'extra_machine_bonus'    => 0.05,
+        ],
     ],
 
 ];

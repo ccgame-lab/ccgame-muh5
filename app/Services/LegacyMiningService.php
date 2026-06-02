@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
  * → optional timed boost for supporters.
  *
  * Formula:
- *   effective_rate = base_rate_per_hour × efficiency × boost_multiplier
+ *   effective_rate = base_rate_per_hour × efficiency × boost_multiplier × legacy_power_multiplier
  *   daily_cap      = base_daily_cap × cap_multiplier
  */
 final class LegacyMiningService
@@ -43,6 +43,69 @@ final class LegacyMiningService
         );
     }
 
+    /**
+     * Compute legacy power bonus from old mining investments.
+     *
+     * Scans existing DiamondMachine rows + ascension_level for users who
+     * upgraded/ascended/unlocked before the simplification. Bonus only
+     * affects rate, never daily cap.
+     *
+     * Gracefully returns 0.0 if table/relation is missing.
+     *
+     * @return array{bonus: float, multiplier: float, breakdown: array}
+     */
+    private function computeLegacyPowerBonus(User $user): array
+    {
+        $cfg = config('economy.legacy_mining.legacy_power', []);
+        if (! ($cfg['enabled'] ?? true)) {
+            return ['bonus' => 0.0, 'multiplier' => 1.0, 'breakdown' => []];
+        }
+
+        $maxBonus = (float) ($cfg['max_bonus'] ?? 0.50);
+        $spdBonus = (float) ($cfg['speed_level_bonus'] ?? 0.03);
+        $capBonus = (float) ($cfg['capacity_level_bonus'] ?? 0.01);
+        $ascBonus = (float) ($cfg['ascension_level_bonus'] ?? 0.05);
+        $machBonus = (float) ($cfg['extra_machine_bonus'] ?? 0.05);
+
+        $breakdown = [
+            'speed' => 0.0,
+            'capacity' => 0.0,
+            'ascension' => 0.0,
+            'machines' => 0.0,
+        ];
+
+        try {
+            $machines = $user->machines;
+            $machineCount = $machines->count();
+
+            foreach ($machines as $m) {
+                $breakdown['speed'] += (float) max(0, ($m->speed_level - 1)) * $spdBonus;
+                $breakdown['capacity'] += (float) max(0, ($m->storage_level - 1)) * $capBonus;
+            }
+
+            // Extra machines beyond first
+            if ($machineCount > 1) {
+                $breakdown['machines'] = ($machineCount - 1) * $machBonus;
+            }
+
+            $wallet = $this->getState($user);
+            $ascLevel = (int) ($wallet->ascension_level ?? 0);
+            $breakdown['ascension'] = $ascLevel * $ascBonus;
+        } catch (\Throwable) {
+            // Table/relation missing → bonus = 0, no crash
+            return ['bonus' => 0.0, 'multiplier' => 1.0, 'breakdown' => []];
+        }
+
+        $total = $breakdown['speed'] + $breakdown['capacity'] + $breakdown['ascension'] + $breakdown['machines'];
+        $total = min($total, $maxBonus);
+
+        return [
+            'bonus'      => round($total, 4),
+            'multiplier' => round(1 + $total, 4),
+            'breakdown'  => $breakdown,
+        ];
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Public API
     // ─────────────────────────────────────────────────────────────────────────
@@ -52,7 +115,7 @@ final class LegacyMiningService
      *
      * Read-only. Client never sends rate/amount/multiplier.
      *
-     * @return array{rate_per_hour: int, efficiency: float, boost_multiplier: float, daily_cap: int, cap_multiplier: float, boost_until: ?string, cap_until: ?string, last_maintained_at: ?string}
+     * @return array{rate_per_hour: int, efficiency: float, boost_multiplier: float, daily_cap: int, cap_multiplier: float, legacy_power_bonus: float, legacy_power_multiplier: float, boost_until: ?string, cap_until: ?string, last_maintained_at: ?string}
      */
     public function quote(User $user): array
     {
@@ -61,11 +124,13 @@ final class LegacyMiningService
         $efficiency     = $this->efficiency($state);
         $boost          = $this->activeBoost($state);
         $capMultiplier  = $this->activeCapMultiplier($state);
+        $legacyPower    = $this->computeLegacyPowerBonus($user);
 
         $rate = (int) floor(
             config('economy.legacy_mining.base_rate_per_hour', 20000)
             * $efficiency
             * $boost
+            * $legacyPower['multiplier']
         );
 
         $dailyCap = (int) floor(
@@ -74,14 +139,16 @@ final class LegacyMiningService
         );
 
         return [
-            'rate_per_hour'      => $rate,
-            'efficiency'         => round($efficiency, 3),
-            'boost_multiplier'   => round($boost, 2),
-            'daily_cap'          => $dailyCap,
-            'cap_multiplier'     => round($capMultiplier, 2),
-            'boost_until'        => $state->boost_until?->toIso8601String(),
-            'cap_until'          => $state->cap_until?->toIso8601String(),
-            'last_maintained_at' => $state->last_maintained_at?->toIso8601String(),
+            'rate_per_hour'           => $rate,
+            'efficiency'              => round($efficiency, 3),
+            'boost_multiplier'        => round($boost, 2),
+            'daily_cap'               => $dailyCap,
+            'cap_multiplier'          => round($capMultiplier, 2),
+            'legacy_power_bonus'      => $legacyPower['bonus'],
+            'legacy_power_multiplier' => $legacyPower['multiplier'],
+            'boost_until'             => $state->boost_until?->toIso8601String(),
+            'cap_until'               => $state->cap_until?->toIso8601String(),
+            'last_maintained_at'      => $state->last_maintained_at?->toIso8601String(),
         ];
     }
 
@@ -201,9 +268,11 @@ final class LegacyMiningService
                 'storage_level'        => 1,
                 'efficiency_level'     => 1,
                 'machine_snapshot'     => [
-                    'elapsed_hours'   => round($elapsedHours, 4),
-                    'raw_amount'      => $rawAmount,
-                    'today_claimed'   => $todayClaimed + $amount,
+                    'elapsed_hours'            => round($elapsedHours, 4),
+                    'raw_amount'               => $rawAmount,
+                    'today_claimed'            => $todayClaimed + $amount,
+                    'legacy_power_bonus'       => $q['legacy_power_bonus'],
+                    'legacy_power_multiplier'  => $q['legacy_power_multiplier'],
                 ],
                 'rate_snapshot'        => $q['rate_per_hour'],
                 'cap_snapshot'         => $q['daily_cap'],

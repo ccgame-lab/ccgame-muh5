@@ -136,6 +136,7 @@
 .ccgame-sdk-mining-bar { height: 3px; background: #1a1a2e; border-radius: 2px; margin-bottom: 6px; overflow: hidden; }
 .ccgame-sdk-mining-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
 .ccgame-sdk-mining-boost { font-size: 9px; color: #c9a94e; margin: 4px 0 0; padding: 3px 7px; background: rgba(201,169,78,0.08); border-radius: 4px; display: inline-block; }
+.ccgame-sdk-mining-legacy { font-size: 9px; color: #8a8a6a; margin: 2px 0 0; }
 
 .ccgame-sdk-mining-actions { display: flex; gap: 6px; }
 .ccgame-sdk-mining-btn {

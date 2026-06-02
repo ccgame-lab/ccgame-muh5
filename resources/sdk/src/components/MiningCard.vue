@@ -31,6 +31,9 @@
       <p v-if="quote.boost_multiplier > 1" class="ccgame-sdk-mining-boost">
         Boost x{{ quote.boost_multiplier }} đang chạy
       </p>
+      <p v-if="quote.legacy_power_bonus > 0" class="ccgame-sdk-mining-boost">
+        Gia trì cũ +{{ pct(quote.legacy_power_bonus) }}%
+      </p>
     </div>
 
     <div class="ccgame-sdk-mining-actions">
