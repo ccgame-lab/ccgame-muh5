@@ -14,28 +14,43 @@ class SdkFeatureForm
         return $schema
             ->components([
                 Select::make('key')
+                    ->label('Feature Key')
                     ->options([
-                        'wallet' => 'Wallet',
-                        'giftcode' => 'Giftcode',
-                        'shop' => 'Shop',
-                        'spin' => 'Spin',
-                        'mining' => 'Mining',
-                        'support' => 'Support',
+                        'wallet'   => 'wallet — Nạp / Ví',
+                        'giftcode' => 'giftcode — Giftcode',
+                        'shop'     => 'shop — Cửa hàng',
+                        'spin'     => 'spin — Vòng quay',
+                        'mining'   => 'mining — Đào KC',
+                        'support'  => 'support — Hỗ trợ',
                     ])
                     ->required(),
-                TextInput::make('label')->required(),
+                TextInput::make('label')
+                    ->label('Tên hiển thị (title)')
+                    ->helperText('Hiển thị trên button trong SDK overlay')
+                    ->required(),
                 Select::make('status')
+                    ->label('Trạng thái')
                     ->options([
-                        'active' => 'Active',
-                        'soon' => 'Soon',
-                        'maintenance' => 'Maintenance',
-                        'hidden' => 'Hidden',
+                        'active'      => '✅ Active — có thể click',
+                        'soon'        => '🕐 Soon — chưa mở',
+                        'maintenance' => '🔧 Maintenance — bảo trì',
+                        'hidden'      => '👁 Hidden — ẩn khỏi grid',
                     ])
                     ->required(),
-                TextInput::make('url')->nullable(),
-                TextInput::make('note')->nullable(),
-                Toggle::make('is_active')->default(true),
-                TextInput::make('sort_order')->numeric()->default(0),
+                TextInput::make('url')
+                    ->label('URL (để trống nếu dùng mặc định)')
+                    ->nullable(),
+                TextInput::make('note')
+                    ->label('Note / Sublabel')
+                    ->helperText('Dòng chữ nhỏ bên dưới tên (VD: Sắp mở, Đang bảo trì)')
+                    ->nullable(),
+                Toggle::make('is_active')
+                    ->label('Hiển thị trong SDK')
+                    ->default(true),
+                TextInput::make('sort_order')
+                    ->label('Thứ tự')
+                    ->numeric()
+                    ->default(0),
             ]);
     }
 }

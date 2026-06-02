@@ -23,7 +23,7 @@ Route::get('/', function () {
 
 Route::get('/play', [PlayController::class, 'entry'])->name('play.index');
 
-Route::get('/api/sdk/bootstrap', function () {
+Route::get('/api/sdk/bootstrap', function (\Illuminate\Http\Request $request) {
     $hallOfFame = [
         'servers' => [],
         'rankings' => [],
@@ -47,17 +47,46 @@ Route::get('/api/sdk/bootstrap', function () {
         $features = \App\Models\SdkFeature::where('is_active', true)
             ->orderBy('sort_order')
             ->get(['key', 'label', 'status', 'url', 'note'])
+            ->map(fn ($f) => [
+                'key'    => $f->key,
+                'title'  => $f->label,  // SDK JS reads f.title
+                'label'  => $f->label,  // keep for backward compat
+                'status' => $f->status,
+                'url'    => $f->url ?? '',
+                'note'   => $f->note ?? '',
+            ])
+            ->values()
             ->toArray();
     } catch (Throwable $e) {
         report($e);
     }
 
+    $userArray = [
+        'name' => 'Khách',
+        'username' => 'guest',
+        'wallet' => ['wcoin' => 0, 'wpoint' => 0],
+    ];
+
+    $username = $request->query('u');
+    if (!empty($username)) {
+        $user = \App\Models\User::where('username', $username)->first();
+        if ($user) {
+            $userArray = [
+                'name' => $user->name ?: $user->username,
+                'username' => $user->username,
+                'wallet' => [
+                    'wcoin' => (int) $user->wcoin,
+                    'wpoint' => (int) $user->wpoint,
+                ],
+            ];
+        } else {
+            // Fallback for missing user in DB but passed in URL
+            $userArray['username'] = $username;
+        }
+    }
+
     return response()->json([
-        'user' => [
-            'name' => 'Khách',
-            'username' => 'guest',
-            'wallet' => ['wcoin' => 0, 'wpoint' => 0],
-        ],
+        'user' => $userArray,
         'announcements' => $announcements,
         'transactions' => ['wcoin' => [], 'wpoint' => []],
         'ranking' => $hallOfFame['legends'] ?? [],

@@ -185,8 +185,9 @@
             `;
             body.appendChild(overlay);
 
-            // Fetch API bootstrap từ thư mục tương đối
-            fetch('api/sdk/bootstrap')
+            // Fetch API bootstrap, gửi kèm username để API có thể lookup data
+            const bootstrapUrl = user ? `api/sdk/bootstrap?u=${encodeURIComponent(user)}` : 'api/sdk/bootstrap';
+            fetch(bootstrapUrl)
                 .then(res => {
                     if (res.status === 401) {
                         throw new Error('401');
@@ -232,7 +233,7 @@
             if (headerUserInfo) {
                 const name = data.user && data.user.name ? data.user.name : safeDisplayName;
                 const sId = safeServerId ? 'S' + safeServerId : 'S1';
-                const modeText = safeAuthMode === 'ccgame' ? 'GreenJade' : 'Guest';
+                const modeText = (safeAuthMode === 'greenjade' || safeAuthMode === 'ccgame') ? 'GreenJade' : 'Guest';
                 const wcoin = data.user && data.user.wallet && data.user.wallet.wcoin !== undefined ? data.user.wallet.wcoin : 0;
                 const wpoint = data.user && data.user.wallet && data.user.wallet.wpoint !== undefined ? data.user.wallet.wpoint : 0;
                 headerUserInfo.innerHTML = `
@@ -253,6 +254,88 @@
                 const wcoin = data.user && data.user.wallet && data.user.wallet.wcoin !== undefined ? data.user.wallet.wcoin.toLocaleString() : '0';
                 const wpoint = data.user && data.user.wallet && data.user.wallet.wpoint !== undefined ? data.user.wallet.wpoint.toLocaleString() : '0';
 
+                // --- Features Grid Logic ---
+                const fallbackFeatures = {
+                    wallet: { title: 'Nạp / Ví', status: 'active', url: '', note: '' },
+                    support: { title: 'Hỗ trợ', status: 'active', url: 'https://fb.com/ccgame.org', note: '' },
+                    giftcode: { title: 'Giftcode', status: 'soon', url: '', note: '' },
+                    shop: { title: 'Cửa hàng', status: 'soon', url: '', note: '' },
+                    spin: { title: 'Vòng quay', status: 'soon', url: '', note: '' },
+                    mining: { title: 'Đào KC', status: 'maintenance', url: '', note: '' }
+                };
+                
+                const mergedFeatures = { ...fallbackFeatures };
+                if (data.features && Array.isArray(data.features)) {
+                    data.features.forEach(f => {
+                        if (f.key && mergedFeatures[f.key]) {
+                            if (f.status) mergedFeatures[f.key].status = f.status;
+                            if (f.title) mergedFeatures[f.key].title = f.title;
+                            if (f.url) mergedFeatures[f.key].url = f.url;
+                            if (f.note) mergedFeatures[f.key].note = f.note;
+                        } else if (f.key) {
+                            mergedFeatures[f.key] = {
+                                title: f.title || f.key,
+                                status: f.status || 'active',
+                                url: f.url || '',
+                                note: f.note || ''
+                            };
+                        }
+                    });
+                }
+
+                const featureOrder = ['wallet', 'support', 'giftcode', 'shop', 'spin', 'mining'];
+                Object.keys(mergedFeatures).forEach(k => {
+                    if (!featureOrder.includes(k)) featureOrder.push(k);
+                });
+
+                let featuresHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;">';
+                
+                featureOrder.forEach(key => {
+                    const feat = mergedFeatures[key];
+                    if (feat.status === 'hidden') return;
+                    
+                    if (feat.status === 'active') {
+                        let finalUrl = feat.url;
+                        if (key === 'wallet' && !finalUrl) finalUrl = safeReturnUrl;
+                        if (key === 'support' && !finalUrl) finalUrl = 'https://fb.com/ccgame.org';
+                        if (!finalUrl) finalUrl = 'javascript:void(0)';
+                        
+                        let targetAttr = (key === 'wallet' || finalUrl.startsWith('javascript')) ? '_top' : '_blank';
+                        
+                        let btnStyle = 'text-decoration: none; display: flex; align-items: center; justify-content: center; margin-top: 0; background: #1a1a2a; border: 1px solid #2a2a3d; color: #e2e2f0; font-weight: bold;';
+                        if (key === 'wallet') {
+                            btnStyle = 'text-decoration: none; display: flex; align-items: center; justify-content: center; margin-top: 0; background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; font-weight: bold;';
+                        }
+                        
+                        let innerHtml = escapeHtml(feat.title);
+                        if (feat.note) {
+                            innerHtml = `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;"><span style="margin-bottom: 3px;">${escapeHtml(feat.title)}</span><span style="font-size: 8px; font-weight: normal; color: #8a8aaa;">${escapeHtml(feat.note)}</span></div>`;
+                        }
+                        
+                        featuresHtml += `
+                            <a class="ccgame-sdk-btn" href="${escapeHtml(finalUrl)}" target="${targetAttr}" style="${btnStyle}">
+                                ${innerHtml}
+                            </a>
+                        `;
+                    } else {
+                        let sublabel = feat.note;
+                        if (!sublabel) {
+                            if (feat.status === 'soon') sublabel = 'Sắp mở';
+                            else if (feat.status === 'maintenance') sublabel = 'Bảo trì';
+                            else sublabel = 'Đóng';
+                        }
+                        
+                        featuresHtml += `
+                            <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #7a7a9a; cursor: not-allowed; line-height: 1;">
+                                <span style="margin-bottom: 3px;">${escapeHtml(feat.title)}</span>
+                                <span style="font-size: 8px; font-weight: normal; color: #5a5a7a;">${escapeHtml(sublabel)}</span>
+                            </div>
+                        `;
+                    }
+                });
+                
+                featuresHtml += '</div>';
+
                 paneOverview.innerHTML = `
                     <div style="margin-bottom: 12px; text-align: center;">
                         <div style="font-size: 14px; font-weight: 700; color: #c9a94e; text-transform: uppercase; margin-bottom: 2px;">${escapeHtml(name)}</div>
@@ -265,13 +348,13 @@
                     <div class="ccgame-sdk-row">
                         <span class="ccgame-sdk-label">GreenJade</span>
                         <span class="ccgame-sdk-value">
-                            ${safeAuthMode === 'ccgame'
+                            ${(safeAuthMode === 'greenjade' || safeAuthMode === 'ccgame')
                                 ? '<span class="ccgame-sdk-badge ccgame-sdk-badge--online">Đã liên kết</span>'
                                 : '<span class="ccgame-sdk-badge ccgame-sdk-badge--soon">Chưa bind</span>'}
                         </span>
                     </div>
                     <div class="ccgame-sdk-row">
-                        <span class="ccgame-sdk-label">Cấp VIP</span>
+                        <span class="ccgame-sdk-label">Hạng VIP</span>
                         <span class="ccgame-sdk-value ccgame-sdk-value--gold" style="font-weight:700;">${escapeHtml(vip)}</span>
                     </div>
                     <div class="ccgame-sdk-row">
@@ -289,26 +372,7 @@
                     </div>
                     ` : ''}
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;">
-                        <a class="ccgame-sdk-btn" href="${safeReturnUrl}" target="_top" style="text-decoration: none; display: flex; align-items: center; justify-content: center; margin-top: 0; background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; font-weight: bold;">Nạp / Ví</a>
-                        <a class="ccgame-sdk-btn" href="https://fb.com/ccgame.org" target="_blank" style="text-decoration: none; display: flex; align-items: center; justify-content: center; margin-top: 0; background: #1a1a2a; border: 1px solid #2a2a3d; color: #e2e2f0; font-weight: bold;">Hỗ trợ</a>
-                        <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #7a7a9a; cursor: not-allowed; line-height: 1;">
-                            <span style="margin-bottom: 3px;">Giftcode</span>
-                            <span style="font-size: 8px; font-weight: normal; color: #5a5a7a;">Sắp mở</span>
-                        </div>
-                        <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #7a7a9a; cursor: not-allowed; line-height: 1;">
-                            <span style="margin-bottom: 3px;">Cửa hàng</span>
-                            <span style="font-size: 8px; font-weight: normal; color: #5a5a7a;">Sắp mở</span>
-                        </div>
-                        <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #7a7a9a; cursor: not-allowed; line-height: 1;">
-                            <span style="margin-bottom: 3px;">Vòng quay</span>
-                            <span style="font-size: 8px; font-weight: normal; color: #5a5a7a;">Sắp mở</span>
-                        </div>
-                        <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #7a7a9a; cursor: not-allowed; line-height: 1;">
-                            <span style="margin-bottom: 3px;">Đào KC</span>
-                            <span style="font-size: 8px; font-weight: normal; color: #5a5a7a;">Bảo trì</span>
-                        </div>
-                    </div>
+                    ${featuresHtml}
                 `;
             }
 
