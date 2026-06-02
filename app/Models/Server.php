@@ -1,9 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use Database\Factories\ServerFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
@@ -15,14 +15,13 @@ use Illuminate\Support\Carbon;
  * @property string $db_name
  * @property string|null $db_connection_name
  * @property int $status
- * @property bool $visible
+ * @property int $priority
  * @property Carbon|null $opened_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
 class Server extends Model
 {
-    /** Badge hiển thị trong danh sách server */
     public const STATUS_NORMAL = 0;
 
     public const STATUS_HOT = 1;
@@ -45,11 +44,8 @@ class Server extends Model
         self::STATUS_COMING_SOON => 'Sắp mở',
     ];
 
-    /** @use HasFactory<ServerFactory> */
-    use HasFactory;
-
     /** @var bool */
-    public $incrementing = false; // ID được nhập thủ công từ legacy
+    public $incrementing = false;
 
     /** @var list<string> */
     protected $fillable = [
@@ -60,7 +56,7 @@ class Server extends Model
         'db_name',
         'db_connection_name',
         'status',
-        'visible',
+        'priority',
         'opened_at',
     ];
 
@@ -70,7 +66,7 @@ class Server extends Model
             'id' => 'integer',
             'port' => 'integer',
             'status' => 'integer',
-            'visible' => 'boolean',
+            'priority' => 'integer',
             'opened_at' => 'datetime',
         ];
     }

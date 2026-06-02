@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -36,9 +38,6 @@ class Giftcode extends Model
         return $this->hasMany(GiftcodeRedemption::class);
     }
 
-    /**
-     * Check if this giftcode is still usable (not expired, usage not exceeded).
-     */
     public function isUsable(): bool
     {
         if ($this->expires_at && $this->expires_at->isPast()) {

@@ -8,7 +8,7 @@ use App\Models\Server;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
-class DiamondMiningJob implements ShouldQueue
+class SendGameMailJob implements ShouldQueue
 {
     use Queueable;
 
@@ -19,9 +19,11 @@ class DiamondMiningJob implements ShouldQueue
 
     public function __construct(
         public Server $server,
-        public string $username,
-        public int $amount,
-        public string $actionUuid
+        public string $playerId,
+        public string $title,
+        public string $content,
+        public string $actionUuid,
+        public string $itemPayload = ''
     ) {
         $this->onQueue('gm');
     }
@@ -30,10 +32,12 @@ class DiamondMiningJob implements ShouldQueue
     {
         $gmService = app(\App\Services\Game\GmApiService::class);
 
-        $gmService->executeCommand('add_yuanbao', $this->server, [
-            'username' => $this->username,
-            'amount' => $this->amount,
-            'action_uuid' => $this->actionUuid,
-        ]);
+        $gmService->sendGameMail(
+            $this->server,
+            $this->playerId,
+            $this->title,
+            $this->content,
+            $this->itemPayload
+        );
     }
 }
