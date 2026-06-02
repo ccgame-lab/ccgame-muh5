@@ -396,3 +396,13 @@ Port từng module theo thứ tự ưu tiên:
 - Legacy Laravel (đọc reference, không sửa): `D:\10_Projects\CCGame\muh5.ccgame`
 - Nuxt reference (tham khảo logic, không deploy): `D:\10_Projects\CCGame\ccgame-muh5\reference\legacy`
 - CCGame Web (guest launcher / AI MC): `D:\10_Projects\CCGame\ccgame-web`
+
+---
+
+## 6. Ops Log
+
+### 2026-06-02: MOVEWEB1
+- Live MUH5 web root moved to `/www/wwwroot/ccgame/ccgame-muh5/public`
+- Old rollback path kept at `/www/wwwroot/ccgame-muh5`
+- DB migrations clean
+- `/play` and `/admin/login` HTTP 200
