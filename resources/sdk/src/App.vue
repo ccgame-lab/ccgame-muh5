@@ -42,8 +42,8 @@
     class="ccgame-sdk-fab"
     ref="fabRef"
     :class="{ 'ccgame-sdk-fab--open': open }"
-    @mousedown.prevent="onDragStart"
-    @touchstart.prevent="onDragStart"
+      @mousedown.prevent="onDragStart"
+      @touchstart="onDragStart"
     @click="onFabClick"
   >CC</div>
 </template>
