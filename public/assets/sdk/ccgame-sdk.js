@@ -291,22 +291,22 @@
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;">
                         <a class="ccgame-sdk-btn" href="${safeReturnUrl}" target="_top" style="text-decoration: none; display: flex; align-items: center; justify-content: center; margin-top: 0; background: linear-gradient(135deg, #c9a94e 0%, #a3812d 100%); color: #0d0d14; border: none; font-weight: bold;">Nạp / Ví</a>
-                        <a class="ccgame-sdk-btn" href="https://fb.com/ccgame.org" target="_blank" style="text-decoration: none; display: flex; align-items: center; justify-content: center; margin-top: 0; background: #161624; border-color: #2a2a3d; color: #c9a94e; font-weight: bold;">Hỗ trợ</a>
-                        <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #4a4a6a; cursor: not-allowed; line-height: 1;">
+                        <a class="ccgame-sdk-btn" href="https://fb.com/ccgame.org" target="_blank" style="text-decoration: none; display: flex; align-items: center; justify-content: center; margin-top: 0; background: #1a1a2a; border: 1px solid #2a2a3d; color: #e2e2f0; font-weight: bold;">Hỗ trợ</a>
+                        <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #7a7a9a; cursor: not-allowed; line-height: 1;">
                             <span style="margin-bottom: 3px;">Giftcode</span>
-                            <span style="font-size: 8px; font-weight: normal; color: #8a8aaa;">Sắp mở</span>
+                            <span style="font-size: 8px; font-weight: normal; color: #5a5a7a;">Sắp mở</span>
                         </div>
-                        <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #4a4a6a; cursor: not-allowed; line-height: 1;">
+                        <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #7a7a9a; cursor: not-allowed; line-height: 1;">
                             <span style="margin-bottom: 3px;">Cửa hàng</span>
-                            <span style="font-size: 8px; font-weight: normal; color: #8a8aaa;">Sắp mở</span>
+                            <span style="font-size: 8px; font-weight: normal; color: #5a5a7a;">Sắp mở</span>
                         </div>
-                        <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #4a4a6a; cursor: not-allowed; line-height: 1;">
+                        <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #7a7a9a; cursor: not-allowed; line-height: 1;">
                             <span style="margin-bottom: 3px;">Vòng quay</span>
-                            <span style="font-size: 8px; font-weight: normal; color: #8a8aaa;">Sắp mở</span>
+                            <span style="font-size: 8px; font-weight: normal; color: #5a5a7a;">Sắp mở</span>
                         </div>
-                        <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #4a4a6a; cursor: not-allowed; line-height: 1;">
+                        <div class="ccgame-sdk-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0; background: #0d0d14; border: 1px solid #1a1a2a; color: #7a7a9a; cursor: not-allowed; line-height: 1;">
                             <span style="margin-bottom: 3px;">Đào KC</span>
-                            <span style="font-size: 8px; font-weight: normal; color: #8a8aaa;">Bảo trì</span>
+                            <span style="font-size: 8px; font-weight: normal; color: #5a5a7a;">Bảo trì</span>
                         </div>
                     </div>
                 `;
