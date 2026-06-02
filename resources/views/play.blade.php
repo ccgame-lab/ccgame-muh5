@@ -302,6 +302,6 @@
     </div>
     
     <!-- CCGame SDK JavaScript Core -->
-    <script src="{{ asset('assets/sdk/ccgame-sdk.js') }}" defer></script>
+    <script src="{{ asset('assets/sdk/ccgame-sdk.js') }}?v=20260602-sdkpanel2" defer></script>
 </body>
 </html>
