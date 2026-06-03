@@ -10,6 +10,18 @@
       <div v-if="player.vip > 0" class="ccsdk-vip-badge">VIP {{ player.vip }}</div>
     </div>
 
+    <!-- Stats header + refresh -->
+    <div class="ccsdk-stats-header">
+      <span class="ccsdk-stats-header-label">Ví &amp; Thông tin</span>
+      <button
+        class="ccsdk-refresh-btn"
+        :class="{ 'ccsdk-refresh-btn--spin': refreshing }"
+        :disabled="refreshing"
+        @click="$emit('refresh')"
+        title="Làm mới"
+      >↻</button>
+    </div>
+
     <!-- Stats grid 2x2 -->
     <div class="ccsdk-stats">
       <div class="ccsdk-stat-card ccsdk-stat-card--tom">
@@ -57,9 +69,10 @@ const props = defineProps({
   wallet: { type: Object, default: () => ({ tom: 0, wcoin: 0, wpoint: 0 }) },
   features: { type: Array, default: () => [] },
   checkin: { type: Object, default: () => ({ checked_today: false, streak: 0, week: [] }) },
+  refreshing: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['checkin'])
+const emit = defineEmits(['checkin', 'refresh'])
 
 const avatarText = computed(() => {
   const name = props.player.name || '?'
@@ -185,4 +198,37 @@ function fmt(n) {
 .ccsdk-stat-card--wcoin .ccsdk-stat-value { color: #7c6ff7; }
 .ccsdk-stat-card--wpoint .ccsdk-stat-value { color: #5b8af7; }
 .ccsdk-stat-card--level .ccsdk-stat-value { color: #e8e8f0; }
+
+/* ── Stats header + refresh ── */
+.ccsdk-stats-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.ccsdk-stats-header-label {
+  font-size: 9px;
+  color: #5a5a7a;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+.ccsdk-refresh-btn {
+  background: none;
+  border: none;
+  color: #5a5a7a;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.ccsdk-refresh-btn:hover { color: #c9a94e; }
+.ccsdk-refresh-btn:disabled { cursor: not-allowed; opacity: 0.5; }
+.ccsdk-refresh-btn--spin {
+  animation: ccsdk-spin 0.8s linear infinite;
+}
+@keyframes ccsdk-spin {
+  to { transform: rotate(360deg); }
+}
 </style>

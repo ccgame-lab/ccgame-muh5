@@ -2,6 +2,7 @@ import { reactive, readonly } from 'vue'
 
 const state = reactive({
   loaded: false,
+  refreshing: false,
   error: null,
   server: { id: '', name: '' },
   player: { id: 0, name: '', level: 0, vip: 0 },
@@ -77,6 +78,29 @@ export function useSdkState() {
     }
   }
 
+  let _refreshing = false
+
+  async function refreshWallet() {
+    if (_refreshing) return
+    _refreshing = true
+    state.refreshing = true
+    try {
+      const u = window.ccgame?.user || ''
+      const url = u ? `/api/sdk/bootstrap?u=${encodeURIComponent(u)}` : '/api/sdk/bootstrap'
+      const res = await fetch(url)
+      if (res.status === 401) throw new Error('401')
+      if (!res.ok) throw new Error('500')
+      const d = await res.json()
+      if (d.wallet) state.wallet = d.wallet
+      if (d.player) state.player = d.player
+    } catch {
+      // silent — refresh failures don't disturb UX
+    } finally {
+      state.refreshing = false
+      _refreshing = false
+    }
+  }
+
   function csrf() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''
   }
@@ -86,6 +110,7 @@ export function useSdkState() {
     loadBootstrap,
     loadRanking,
     doCheckin,
+    refreshWallet,
     setRankingActive(key) { state.rankingActive = key },
   }
 }

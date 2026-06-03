@@ -20,28 +20,20 @@
         </ul>
       </div>
 
-      <div class="ccgame-sdk-priv-card">
-        <div class="ccgame-sdk-priv-card-icon">⚡</div>
-        <div class="ccgame-sdk-priv-card-body">
-          <div class="ccgame-sdk-priv-card-title">Thưởng nhận KC</div>
-          <div class="ccgame-sdk-priv-card-desc">Tăng hiệu suất Lò KC trong giới hạn ngày. Không ảnh hưởng sức mạnh chiến đấu.</div>
-        </div>
+      <!-- Dynamic features -->
+      <div v-if="!loaded && filtered.length === 0" class="ccgame-sdk-priv-loading">
+        <div class="ccgame-sdk-spinner"></div>
       </div>
-
-      <div class="ccgame-sdk-priv-card">
-        <div class="ccgame-sdk-priv-card-icon">🎯</div>
-        <div class="ccgame-sdk-priv-card-body">
-          <div class="ccgame-sdk-priv-card-title">Ưu tiên hỗ trợ</div>
-          <div class="ccgame-sdk-priv-card-desc">Ticket của người đã tiếp tế được xử lý trước vì họ đang góp chi phí vận hành.</div>
-        </div>
+      <div v-else-if="filtered.length === 0" class="ccgame-sdk-priv-empty">
+        <span class="ccgame-sdk-priv-empty-icon">🔒</span>
+        <span class="ccgame-sdk-priv-empty-text">Chưa có đặc quyền nào</span>
       </div>
-
-      <div class="ccgame-sdk-priv-card">
-        <div class="ccgame-sdk-priv-card-icon">🎉</div>
-        <div class="ccgame-sdk-priv-card-body">
-          <div class="ccgame-sdk-priv-card-title">Sự kiện & Quà tặng</div>
-          <div class="ccgame-sdk-priv-card-desc">Nhận giftcode định kỳ, không chứa vật phẩm phá cân bằng PvP.</div>
+      <div v-else v-for="f in filtered" :key="f.key" class="ccgame-sdk-priv-feature-card">
+        <div class="ccgame-sdk-priv-feature-card-body">
+          <div class="ccgame-sdk-priv-feature-card-title">{{ f.label }}</div>
+          <div v-if="f.note" class="ccgame-sdk-priv-feature-card-desc">{{ f.note }}</div>
         </div>
+        <a :href="f.href" target="_blank" rel="noopener" class="ccgame-sdk-priv-feature-card-btn">Xem</a>
       </div>
 
       <div class="ccgame-sdk-priv-footnote">
@@ -72,6 +64,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  features: { type: Array, default: () => [] },
+  loaded: { type: Boolean, default: false },
+})
+
+const filtered = computed(() => props.features.filter(f => f.href !== ''))
+
 const history = [
   { label: 'Tiếp tế phổ thông', tom: 200, date: '01/06/2026', status: 'completed' },
   { label: 'Tiếp tế cơ bản', tom: 50, date: '28/05/2026', status: 'completed' },
