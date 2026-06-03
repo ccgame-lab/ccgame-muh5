@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users;
 
-use App\Filament\Resources\Users\Actions\AddPointSilentAction;
 use App\Filament\Resources\Users\Actions\GmBanAction;
 use App\Filament\Resources\Users\Actions\GmKickAction;
 use App\Filament\Resources\Users\Actions\GmLookupAction;
@@ -41,6 +40,10 @@ class UserResource extends Resource
     protected static string|\UnitEnum|null $navigationGroup = 'Quản lý';
 
     protected static ?string $navigationLabel = 'Người dùng';
+
+    protected static ?string $modelLabel = 'Người dùng';
+
+    protected static ?string $pluralModelLabel = 'Người dùng';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
@@ -155,7 +158,6 @@ class UserResource extends Resource
                     ->label('Xem'),
                 GmLookupAction::make(),
                 SendItemMailAction::make(),
-                AddPointSilentAction::make(),
                 GmKickAction::make(),
                 GmBanAction::make(),
             ])

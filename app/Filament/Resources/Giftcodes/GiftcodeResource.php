@@ -7,11 +7,13 @@ namespace App\Filament\Resources\Giftcodes;
 use App\Filament\Resources\Giftcodes\Pages\CreateGiftcode;
 use App\Filament\Resources\Giftcodes\Pages\EditGiftcode;
 use App\Filament\Resources\Giftcodes\Pages\ListGiftcodes;
+use App\Filament\Resources\Giftcodes\Pages\ViewGiftcode;
 use App\Models\Giftcode;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -142,6 +144,7 @@ class GiftcodeResource extends Resource
             ])
             ->filters([])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([
@@ -171,6 +174,7 @@ class GiftcodeResource extends Resource
         return [
             'index' => ListGiftcodes::route('/'),
             'create' => CreateGiftcode::route('/create'),
+            'view' => ViewGiftcode::route('/{record}'),
             'edit' => EditGiftcode::route('/{record}/edit'),
         ];
     }

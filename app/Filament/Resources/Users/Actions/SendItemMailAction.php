@@ -24,9 +24,9 @@ class SendItemMailAction
     public static function make(): Action
     {
         return Action::make('sendItemMail')
-            ->label('Send Mail/Items')
+            ->label('Gửi thư/vật phẩm')
             ->icon('heroicon-o-envelope')
-            ->color('warning')
+            ->color('info')
             ->form([
                 Select::make('server_id')
                     ->label('Máy chủ')

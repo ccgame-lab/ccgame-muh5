@@ -28,12 +28,12 @@ class GmActionLogWidget extends TableWidget
     {
         return $table
             ->heading('GM Action Log')
-            ->description('20 gan nhat -- target: '.$this->targetUsername)
+            ->description('20 gần nhất — target: '.$this->targetUsername)
             ->paginated(false)
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('created_at')
-                    ->label('Thoi gian')
+                    ->label('Thời gian')
                     ->dateTime('H:i d/m/Y')
                     ->sortable(),
                 TextColumn::make('action_type')
