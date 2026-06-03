@@ -26,7 +26,7 @@ class PlayController extends Controller
             return null;
         }
 
-        $secret = env('MUH5_LAUNCH_SECRET') ?: env('CCGAME_LAUNCH_SECRET') ?: config('portal.game_secret');
+        $secret = config('portal.muh5_launch_secret') ?: config('portal.game_secret');
         if (empty($secret) && app()->environment('local', 'testing', 'development')) {
             $secret = 'ccgame-dev-muh5-launch-secret-local-only';
         }
