@@ -391,7 +391,7 @@ class DiamondMiningService
             throw new Exception('Unlock system is sealed. Use LegacyMiningService for the simplified mining loop.');
         }
 
-        $wpointCosts = config('economy.wpoint_machine_costs', []);
+        $wpointCosts = config('economy.point_machine_costs', []);
         if (! isset($wpointCosts[$machineIndex])) {
             throw new Exception('Invalid machine tier.');
         }
@@ -727,9 +727,9 @@ class DiamondMiningService
 
     public function calculateWPointUpgradeCost(string $type, int $newLevel): int
     {
-        $baseCosts = config('economy.wpoint_upgrade_base_costs', []);
+        $baseCosts = config('economy.point_upgrade_base_costs', []);
         $base = $baseCosts[$type] ?? 50;
-        $exponent = config('economy.wpoint_cost_exponent', 1.5);
+        $exponent = config('economy.point_cost_exponent', 1.5);
 
         return (int) ceil($base * pow($newLevel, $exponent));
     }

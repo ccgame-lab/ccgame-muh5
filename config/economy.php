@@ -173,7 +173,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | WPoint Economy Configuration
+    | Point Economy Configuration
     |--------------------------------------------------------------------------
     |
     | WPoint is the portal-layer currency used for upgrades, unlocks, and ascension.
@@ -181,15 +181,15 @@ return [
     |
     */
 
-    'wpoint_upgrade_base_costs' => [
+    'point_upgrade_base_costs' => [
         'speed' => 20,
         'storage' => 24,
         'efficiency' => 36,
     ],
 
-    'wpoint_cost_exponent' => 1.5,
+    'point_cost_exponent' => 1.5,
 
-    'wpoint_machine_costs' => [
+    'point_machine_costs' => [
         1 => ['wp' => 0,   'min_ascension' => 0],
         2 => ['wp' => 200,  'min_ascension' => 1],
         3 => ['wp' => 500,  'min_ascension' => 2],
@@ -207,9 +207,9 @@ return [
     'ascension_upgrade_retention' => 0.5, // Giữ lại 50% upgrade levels sau ascension (ceil)
     'ascension_wp_refund_rate' => 0.2,   // Hoàn 20% WP đã dùng upgrade khi ascend
 
-    'wpoint_checkin_amount' => 100,
-    'wpoint_streak_bonus' => 50,
-    'wpoint_streak_threshold' => 7,
+    'point_checkin_amount' => 100,
+    'point_streak_bonus' => 50,
+    'point_streak_threshold' => 7,
 
     /*
     |--------------------------------------------------------------------------
@@ -244,7 +244,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | WPoint Shop Packages
+    | Point Shop Packages
     |--------------------------------------------------------------------------
     |
     | Portal Coin (Tôm) → WPoint conversion packages.
@@ -253,7 +253,7 @@ return [
     |
     */
 
-    'wpoint_packages' => [
+    'point_packages' => [
         [
             'wp' => 80,
             'label' => '☕ Ủng hộ vận hành',

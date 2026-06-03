@@ -124,9 +124,9 @@ class DashboardController extends Controller
 
         $dayInCycle = $checkedInToday ? (($streak - 1) % 7) + 1 : ($streak % 7) + 1;
 
-        $rewards = config('economy.wpoint_checkin_amount', 100);
-        $streakBonus = config('economy.wpoint_streak_bonus', 50);
-        $streakThreshold = config('economy.wpoint_streak_threshold', 7);
+        $rewards = config('economy.point_checkin_amount', 100);
+        $streakBonus = config('economy.point_streak_bonus', 50);
+        $streakThreshold = config('economy.point_streak_threshold', 7);
 
         $loginStatus = app(DailyLoginService::class)->getStatus($user);
 
