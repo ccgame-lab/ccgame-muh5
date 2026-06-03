@@ -6,8 +6,15 @@
 - **Auth**: GreenJade OAuth PKCE, session-based
 - **DB app**: Eloquent ORM + Laravel migrations
 - **DB game**: `DB::connection(...)->table(...)` (no Eloquent for game DB)
+- **Admin UI**: Filament 3.x, single panel `admin`, guard `admin`, path `/admin`
 - **Frontend**: Not ported. Left to `ccgame-web` (Nuxt 4) later.
 - **Not used**: FlightPHP, Slim 4, PHP custom, Filament, Jetstream, Sanctum, TypeScript app-shell
+
+## Project docs (đọc trước khi làm task liên quan)
+
+- `docs/filament-conventions.md` — convention Filament: inline pattern, naming, thêm resource
+- `docs/deploy-checklist.md` — checklist deploy, verify, rollback
+- `docs/agent-handoff.md` — handoff guide, prompt template, safety boundaries
 
 ## Setup commands
 
@@ -23,6 +30,13 @@ php artisan key:generate
 - PHP return types + parameter types on all methods
 - No over-engineering: flat services, minimal abstraction
 - Follow existing Laravel controller/service patterns
+
+## Filament conventions (tóm tắt)
+
+- **Inline mặc định**: form/table/infolist viết trong Resource, KHÔNG tách Schemas/Tables riêng (trừ GmActions)
+- **Users/Actions/**: static factory `make(): Action`, không extends class
+- **Widgets**: có thể nằm trong subdirectory (VD: `Widgets/Users/`)
+- Chi tiết: xem `docs/filament-conventions.md`
 
 ## Hard boundaries
 
@@ -50,7 +64,7 @@ Needs extra care:
 
 ## Verification
 
-- `php artisan route:list` — route sanity
+- `php artisan route:list --path=admin` — route sanity (expect ~23 routes)
 - `php artisan migrate --pretend` — review SQL before running
 - `composer run pint:dirty` — style check
 - `php artisan test --compact` — test suite
