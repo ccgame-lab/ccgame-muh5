@@ -22,7 +22,7 @@
     </div>
 
     <div class="ccgame-sdk-body" v-show="state.loaded">
-      <OverviewPane v-show="activeTab==='overview'" :player="state.player" :wallet="state.wallet" :features="state.features" />
+      <OverviewPane v-show="activeTab==='overview'" :player="state.player" :wallet="state.wallet" :features="state.features" :checkin="state.checkin" @checkin="doCheckin" />
       <DonatePane v-show="activeTab==='donate'" />
       <RankingPane v-show="activeTab==='ranking'" :types="state.rankingTypes" :items="state.rankingItems" :active="state.rankingActive" @update:active="setRankingActive" />
       <ChangelogPane v-show="activeTab==='changelog'" :entries="state.changelog" />
@@ -57,7 +57,7 @@ import RankingPane from './components/RankingPane.vue'
 import ChangelogPane from './components/ChangelogPane.vue'
 import DonatePane from './components/DonatePane.vue'
 
-const { state, loadBootstrap, loadRanking, setRankingActive } = useSdkState()
+const { state, loadBootstrap, loadRanking, setRankingActive, doCheckin } = useSdkState()
 const open = ref(false)
 const activeTab = ref('overview')
 const booted = ref(false)

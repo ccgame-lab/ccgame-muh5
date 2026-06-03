@@ -9,6 +9,7 @@ const state = reactive({
   tabs: [],
   features: [],
   changelog: [],
+  checkin: { checked_today: false, streak: 0, week: [] },
 
   // Lazy ranking
   rankingLoaded: false,
@@ -33,6 +34,7 @@ export function useSdkState() {
         tabs: d.tabs || [],
         features: d.features || [],
         changelog: d.changelog || [],
+        checkin: d.checkin || { checked_today: false, streak: 0, week: [] },
         loaded: true,
         error: null,
       })
@@ -58,10 +60,32 @@ export function useSdkState() {
     }
   }
 
+  async function doCheckin() {
+    const u = window.ccgame?.user || state.player.name
+    if (!u) return { status: 'error', message: 'Chưa xác thực.' }
+    try {
+      const res = await fetch(`/api/sdk/checkin?u=${encodeURIComponent(u)}`, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrf() },
+      })
+      const data = await res.json()
+      // refresh bootstrap to update checkin state + wallet
+      await loadBootstrap()
+      return data
+    } catch {
+      return { status: 'error', message: 'Lỗi kết nối.' }
+    }
+  }
+
+  function csrf() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''
+  }
+
   return {
     state: readonly(state),
     loadBootstrap,
     loadRanking,
-    setRankingActive(key) { state.rankingActive = key; },
+    doCheckin,
+    setRankingActive(key) { state.rankingActive = key },
   }
 }

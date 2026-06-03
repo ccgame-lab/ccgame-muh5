@@ -1,68 +1,188 @@
 <template>
-  <div class="ccgame-sdk-pane">
-    <div class="ccgame-sdk-player-header">
-      <div class="ccgame-sdk-player-name">{{ player.name }}</div>
+  <div class="ccsdk-pane">
+    <!-- Player row -->
+    <div class="ccsdk-player">
+      <div class="ccsdk-player-avatar">{{ avatarText }}</div>
+      <div class="ccsdk-player-info">
+        <div class="ccsdk-player-name">{{ player.name }}</div>
+        <div class="ccsdk-player-level">Lv.{{ player.level }}</div>
+      </div>
+      <div v-if="player.vip > 0" class="ccsdk-vip-badge">VIP {{ player.vip }}</div>
     </div>
 
-    <div class="ccgame-sdk-row" v-if="player.vip">
-      <span class="ccgame-sdk-label">Hạng VIP</span>
-      <span class="ccgame-sdk-value ccgame-sdk-value--gold">VIP {{ player.vip }}</span>
-    </div>
-    <div class="ccgame-sdk-row">
-      <span class="ccgame-sdk-label">Cấp độ</span>
-      <span class="ccgame-sdk-value ccgame-sdk-value--gold">Lv.{{ player.level }}</span>
-    </div>
-    <div class="ccgame-sdk-row">
-      <span class="ccgame-sdk-label">TÔM</span>
-      <div class="ccgame-sdk-tom-group">
-        <span class="ccgame-sdk-value ccgame-sdk-value--gold">{{ fmt(wallet.tom) }}</span>
-        <a class="ccgame-sdk-tom-plus" :href="suppliesUrl" target="_blank" rel="noopener" title="Tiếp tế qua GreenJade ID">+</a>
+    <!-- Stats grid 2x2 -->
+    <div class="ccsdk-stats">
+      <div class="ccsdk-stat-card ccsdk-stat-card--tom">
+        <span class="ccsdk-stat-label">TOM</span>
+        <span class="ccsdk-stat-value">{{ fmt(wallet.tom) }}</span>
+      </div>
+      <div class="ccsdk-stat-card ccsdk-stat-card--wcoin">
+        <span class="ccsdk-stat-label">WCOIN</span>
+        <span class="ccsdk-stat-value">{{ fmt(wallet.wcoin) }}</span>
+      </div>
+      <div class="ccsdk-stat-card ccsdk-stat-card--wpoint">
+        <span class="ccsdk-stat-label">WPOINT</span>
+        <span class="ccsdk-stat-value">{{ fmt(wallet.wpoint) }}</span>
+      </div>
+      <div class="ccsdk-stat-card ccsdk-stat-card--level">
+        <span class="ccsdk-stat-label">Cấp độ</span>
+        <span class="ccsdk-stat-value">{{ player.level }}</span>
       </div>
     </div>
-    <div class="ccgame-sdk-row">
-      <span class="ccgame-sdk-label">WCoin</span>
-      <span class="ccgame-sdk-value ccgame-sdk-value--gold">{{ fmt(wallet.wcoin) }}</span>
-    </div>
-    <div class="ccgame-sdk-row">
-      <span class="ccgame-sdk-label">WPoint</span>
-      <span class="ccgame-sdk-value ccgame-sdk-value--gold">{{ fmt(wallet.wpoint) }}</span>
-    </div>
 
+    <!-- Mining -->
     <MiningCard />
 
-    <div v-if="quickActions.length" class="ccgame-sdk-feature-grid">
-      <a
-        v-for="a in quickActions"
-        :key="a.key"
-        :href="a.href || '#'"
-        :target="a.href && a.href.startsWith('http') ? '_blank' : '_top'"
-        class="ccgame-sdk-btn"
-      >
-        <span class="ccgame-sdk-btn-label">{{ a.label }}</span>
-        <span v-if="a.note" class="ccgame-sdk-btn-note">{{ a.note }}</span>
-      </a>
-    </div>
+    <!-- Check-in -->
+    <CheckinCard
+      :week="checkinWeek"
+      :streak="checkin.streak"
+      :checked-today="checkin.checked_today"
+      @checkin="onCheckin"
+    />
+
+    <!-- Features -->
+    <FeatureGrid :features="quickActions" />
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import MiningCard from './MiningCard.vue'
+import CheckinCard from './CheckinCard.vue'
+import FeatureGrid from './FeatureGrid.vue'
 
 const props = defineProps({
-  player: { type: Object, default: () => ({ id:0, name:'', level:0, vip:0 }) },
-  wallet: { type: Object, default: () => ({ tom:0, wcoin:0, wpoint:0 }) },
+  player: { type: Object, default: () => ({ id: 0, name: '', level: 0, vip: 0 }) },
+  wallet: { type: Object, default: () => ({ tom: 0, wcoin: 0, wpoint: 0 }) },
   features: { type: Array, default: () => [] },
+  checkin: { type: Object, default: () => ({ checked_today: false, streak: 0, week: [] }) },
+})
+
+const emit = defineEmits(['checkin'])
+
+const avatarText = computed(() => {
+  const name = props.player.name || '?'
+  return name.slice(0, 2).toUpperCase()
 })
 
 const quickActions = computed(() => {
-  return props.features
-    .filter(f => f.active && f.key !== 'topup' && f.key !== 'wallet')
+  return props.features.filter(f => f.active)
 })
 
-const suppliesUrl = 'https://id.greenjade.net/supplies?game=muh5&server=s1&return=' + encodeURIComponent(location.href)
+const checkinWeek = computed(() => {
+  if (!props.checkin.week || !props.checkin.week.length) return []
+  // todayIdx: T2(0) = Mon(getDay=1), ..., CN(6) = Sun(getDay=0)
+  const todayIdx = (new Date().getDay() + 6) % 7
+  return props.checkin.week.map((d, i) => ({
+    ...d,
+    today: i === todayIdx && !d.done,
+  }))
+})
+
+function onCheckin() {
+  emit('checkin')
+}
 
 function fmt(n) {
   return (n || 0).toLocaleString()
 }
 </script>
+
+<style scoped>
+.ccsdk-pane {
+  padding: 14px;
+}
+
+/* ── Player row ── */
+.ccsdk-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.ccsdk-player-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c6ff7, #5b8af7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.ccsdk-player-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ccsdk-player-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e8e8f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ccsdk-player-level {
+  font-size: 10px;
+  color: #8888aa;
+  margin-top: 1px;
+}
+
+.ccsdk-vip-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(240, 192, 96, 0.15);
+  border: 1px solid #f0c060;
+  color: #f0c060;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── Stats grid 2x2 ── */
+.ccsdk-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ccsdk-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #1e1e32;
+  border: 1px solid rgba(120,100,255,0.18);
+}
+
+.ccsdk-stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8888aa;
+}
+
+.ccsdk-stat-value {
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.ccsdk-stat-card--tom .ccsdk-stat-value { color: #f0c060; }
+.ccsdk-stat-card--wcoin .ccsdk-stat-value { color: #7c6ff7; }
+.ccsdk-stat-card--wpoint .ccsdk-stat-value { color: #5b8af7; }
+.ccsdk-stat-card--level .ccsdk-stat-value { color: #e8e8f0; }
+</style>
