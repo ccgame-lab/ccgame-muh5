@@ -158,6 +158,16 @@ class ViewUser extends ViewRecord
         ];
     }
 
+    public function getWidgetData(): array
+    {
+        $record = $this->getRecord();
+
+        return [
+            'userId'         => $record->id,
+            'targetUsername' => $record->username,
+        ];
+    }
+
     // ── Footer widgets (tables) ──
 
     /** @return array<class-string> */
