@@ -11,8 +11,10 @@ use App\Filament\Resources\Users\Actions\GmLookupAction;
 use App\Filament\Resources\Users\Actions\SendItemMailAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Notifications\Notification;
+use Filament\Actions\Action;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -25,12 +27,12 @@ class UsersTable
         return $table
             ->columns([
                 TextColumn::make('portal_uid')
-                    ->searchable(),
+                    ->searchable()
+                    ->copyable()
+                    ->copyMessage('Đã copy portal_uid')
+                    ->copyMessageDuration(1500),
                 TextColumn::make('username')
                     ->searchable(),
-                TextColumn::make('name')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('email')
                     ->label('Email')
                     ->searchable(),
@@ -40,10 +42,33 @@ class UsersTable
                         'vip' => 'warning',
                         default => 'gray',
                     })
-                    ->searchable(),
+                    ->action(
+                        Action::make('toggleTier')
+                            ->requiresConfirmation()
+                            ->modalHeading(fn ($record) => "Chuyển tier: {$record->username}?")
+                            ->modalDescription(fn ($record) => 'Từ '.strtoupper($record->tier).' sang '.($record->tier === 'vip' ? 'FREE' : 'VIP'))
+                            ->modalSubmitActionLabel('Xác nhận')
+                            ->modalCancelActionLabel('Hủy')
+                            ->action(function ($record): void {
+                                $newTier = $record->tier === 'vip' ? 'free' : 'vip';
+                                $record->update(['tier' => $newTier]);
+                                Notification::make()
+                                    ->title('Đã đổi tier')
+                                    ->body(strtoupper($newTier))
+                                    ->success()
+                                    ->send();
+                            })
+                    ),
                 TextColumn::make('points')
-                    ->numeric()
+                    ->formatStateUsing(fn (int $state): string => number_format($state))
                     ->sortable(),
+                TextColumn::make('last_login_at')
+                    ->dateTime()
+                    ->sortable(),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('checkin_boost_expires_at')
                     ->label('Boost hết hạn')
                     ->dateTime()
@@ -51,13 +76,6 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('last_login_ip')
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('last_login_at')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
@@ -77,12 +95,13 @@ class UsersTable
                     }),
             ])
             ->recordActions([
+                ViewAction::make()
+                    ->label('Xem'),
                 GmLookupAction::make(),
                 SendItemMailAction::make(),
                 AddPointSilentAction::make(),
                 GmKickAction::make(),
                 GmBanAction::make(),
-                EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
