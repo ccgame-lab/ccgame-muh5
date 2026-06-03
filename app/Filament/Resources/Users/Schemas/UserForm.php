@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -14,30 +15,38 @@ class UserForm
     {
         return $schema
             ->components([
-                TextInput::make('portal_uid'),
+                TextInput::make('portal_uid')
+                    ->readOnly(),
                 TextInput::make('username')
                     ->required(),
                 TextInput::make('name'),
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label('Email')
                     ->email(),
                 DateTimePicker::make('email_verified_at'),
                 TextInput::make('password')
                     ->password()
-                    ->required(),
-                TextInput::make('tier')
+                    ->hiddenOn('edit')
+                    ->requiredOn('create'),
+                Select::make('tier')
+                    ->options(['free' => 'Free', 'vip' => 'VIP'])
                     ->required()
                     ->default('free'),
                 TextInput::make('wcoin')
                     ->required()
                     ->numeric()
-                    ->default(0),
+                    ->default(0)
+                    ->readOnly(),
                 TextInput::make('wpoint')
                     ->required()
                     ->numeric()
-                    ->default(0),
-                TextInput::make('last_login_ip'),
-                DateTimePicker::make('last_login_at'),
+                    ->default(0)
+                    ->readOnly(),
+                TextInput::make('last_login_ip')
+                    ->readOnly(),
+                DateTimePicker::make('last_login_at')
+                    ->readOnly(),
+                DateTimePicker::make('checkin_boost_expires_at'),
             ]);
-    }
+        }
 }
