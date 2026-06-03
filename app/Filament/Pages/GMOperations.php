@@ -104,18 +104,6 @@ class GMOperations extends Page implements HasForms
                                 ]),
                             ]),
 
-                        Tab::make('Batch WCoin')
-                            ->badge('Đã khóa')
-                            ->badgeColor('gray')
-                            ->icon('heroicon-m-lock-closed')
-                            ->schema([
-                                TextInput::make('sealed_batch')
-                                    ->label('')
-                                    ->default('Currency operations sealed until settlement flow is implemented.')
-                                    ->disabled()
-                                    ->dehydrated(false),
-                            ]),
-
                         Tab::make('Event Reward')
                             ->schema([
                                 Select::make('event_server_id')

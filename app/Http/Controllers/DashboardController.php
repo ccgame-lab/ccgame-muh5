@@ -10,7 +10,6 @@ use App\Models\Server;
 use App\Models\WPointTransaction;
 use App\Services\DailyLoginService;
 use App\Services\DiamondMiningService;
-use App\Services\WCoinService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     /**
-     * Get player dashboard stats: WPoint, WCoin, Diamond, Rank, rate_per_hour, server_online.
+     * Get player dashboard stats: WPoint, Diamond, Rank, rate_per_hour, server_online.
      */
     public function stats(Request $request): JsonResponse
     {
@@ -37,7 +36,6 @@ class DashboardController extends Controller
         }
 
         $wpointBalance = (int) ($freshUser->wpoint ?? 0);
-        $wcoinBalance = app(WCoinService::class)->getBalance($freshUser->id);
 
         $diamondWallet = DiamondWallet::where('user_id', $freshUser->id)->first();
         $lifetimeMined = $diamondWallet ? (int) $diamondWallet->lifetime_mined : 0;
@@ -77,7 +75,6 @@ class DashboardController extends Controller
 
         return response()->json([
             'wpoint_balance' => $wpointBalance,
-            'wcoin_balance' => $wcoinBalance,
             'lifetime_diamond_mined' => $lifetimeMined,
             'unclaimed_diamond' => $unclaimedDiamond,
             'rank' => $rank,
@@ -140,8 +137,8 @@ class DashboardController extends Controller
             'reward_amount' => $rewards,
             'streak_bonus' => $streakBonus,
             'streak_threshold' => $streakThreshold,
-            'wcoin_cycle' => $loginStatus['cycle'],
-            'wcoin_day' => $loginStatus['current_day'],
+            'checkin_cycle' => $loginStatus['cycle'],
+            'checkin_day' => $loginStatus['current_day'],
             'checkin_boost_active' => $user->hasActiveCheckinBoost(),
             'checkin_boost_expires_at' => $user->checkin_boost_expires_at?->toIso8601String(),
         ]);

@@ -32,11 +32,6 @@ class UserForm
                     ->options(['free' => 'Free', 'vip' => 'VIP'])
                     ->required()
                     ->default('free'),
-                TextInput::make('wcoin')
-                    ->required()
-                    ->numeric()
-                    ->default(0)
-                    ->readOnly(),
                 TextInput::make('wpoint')
                     ->required()
                     ->numeric()

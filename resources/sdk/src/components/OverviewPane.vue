@@ -28,10 +28,6 @@
         <span class="ccsdk-stat-label">TOM</span>
         <span class="ccsdk-stat-value">{{ fmt(wallet.tom) }}</span>
       </div>
-      <div class="ccsdk-stat-card ccsdk-stat-card--wcoin">
-        <span class="ccsdk-stat-label">WCOIN</span>
-        <span class="ccsdk-stat-value">{{ fmt(wallet.wcoin) }}</span>
-      </div>
       <div class="ccsdk-stat-card ccsdk-stat-card--wpoint">
         <span class="ccsdk-stat-label">WPOINT</span>
         <span class="ccsdk-stat-value">{{ fmt(wallet.wpoint) }}</span>
@@ -66,7 +62,7 @@ import FeatureGrid from './FeatureGrid.vue'
 
 const props = defineProps({
   player: { type: Object, default: () => ({ id: 0, name: '', level: 0, vip: 0 }) },
-  wallet: { type: Object, default: () => ({ tom: 0, wcoin: 0, wpoint: 0 }) },
+  wallet: { type: Object, default: () => ({ tom: 0, wpoint: 0 }) },
   features: { type: Array, default: () => [] },
   checkin: { type: Object, default: () => ({ checked_today: false, streak: 0, week: [] }) },
   refreshing: { type: Boolean, default: false },
@@ -195,7 +191,6 @@ function fmt(n) {
 }
 
 .ccsdk-stat-card--tom .ccsdk-stat-value { color: #f0c060; }
-.ccsdk-stat-card--wcoin .ccsdk-stat-value { color: #7c6ff7; }
 .ccsdk-stat-card--wpoint .ccsdk-stat-value { color: #5b8af7; }
 .ccsdk-stat-card--level .ccsdk-stat-value { color: #e8e8f0; }
 

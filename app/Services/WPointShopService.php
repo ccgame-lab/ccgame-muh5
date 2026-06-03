@@ -13,14 +13,14 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class WCoinShopService
+class WPointShopService
 {
     public function __construct(
-        protected WCoinService $wcoinService,
+        protected WPointService $wpointService,
     ) {}
 
     /**
-     * Purchase High Fruit with WCoin and deliver via in-game mail.
+     * Purchase High Fruit with WPoint and deliver via in-game mail.
      *
      * @return array{success: bool, spent: int, items: array<int, array{item_id: int, quantity: int}>, balance: int}
      *
@@ -59,11 +59,10 @@ class WCoinShopService
         $actor = $this->findActor($server, $user->username);
 
         return DB::transaction(function () use ($user, $itemId, $quantity, $serverId, $totalCost, $actor): array {
-            $newBalance = $this->wcoinService->debit(
-                $user->id,
+            $newBalance = $this->wpointService->debit(
+                $user,
                 $totalCost,
                 'fruit_purchase',
-                null,
                 ['item_id' => $itemId, 'quantity' => $quantity, 'server_id' => $serverId]
             );
 
@@ -86,8 +85,8 @@ class WCoinShopService
                 'target_user' => $user->username,
                 'payload' => [
                     'player_id' => (string) $actor->actorid,
-                    'title' => 'Cửa hàng WCoin',
-                    'body' => "Bạn đã mua {$quantity}x vật phẩm từ cửa hàng WCoin.",
+                    'title' => 'Cửa hàng',
+                    'body' => "Bạn đã mua {$quantity}x vật phẩm từ cửa hàng.",
                     'item_payload' => $itemPayload,
                 ],
                 'status' => 'pending',

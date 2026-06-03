@@ -12,7 +12,7 @@ use Illuminate\Support\Carbon;
 class DailyLoginService
 {
     public function __construct(
-        protected WCoinService $wcoinService,
+        protected WPointService $wpointService,
     ) {}
 
     /**
@@ -30,7 +30,7 @@ class DailyLoginService
             ->exists();
 
         if ($alreadyClaimed) {
-            throw new Exception('Bạn đã nhận WCoin hôm nay rồi.');
+            throw new Exception('Bạn đã nhận thưởng hôm nay rồi.');
         }
 
         $dayIndex = $this->resolveCurrentDay($user);
@@ -43,7 +43,7 @@ class DailyLoginService
             'day_index' => $dayIndex,
         ]);
 
-        $newBalance = $this->wcoinService->credit($user->id, $amount, 'wcoin_checkin', null, [
+        $newBalance = $this->wpointService->credit($user, $amount, 'wpoint_checkin', null, [
             'date' => $today,
             'day_index' => $dayIndex,
             'checkin_boost' => $multiplier > 1,

@@ -20,7 +20,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $name
  * @property string|null $email
  * @property string $tier
- * @property int $wcoin
  * @property int $wpoint
  * @property Carbon|null $checkin_boost_expires_at
  * @property string|null $last_login_ip
@@ -43,7 +42,6 @@ class User extends Authenticatable
         'name',
         'email',
         'tier',
-        'wcoin',
         'wpoint',
         'last_login_ip',
         'last_login_at',
@@ -69,7 +67,6 @@ class User extends Authenticatable
         return [
             'last_login_at' => 'datetime',
             'checkin_boost_expires_at' => 'datetime',
-            'wcoin' => 'integer',
             'wpoint' => 'integer',
         ];
     }
@@ -152,10 +149,5 @@ class User extends Authenticatable
     public function wpointTransactions(): HasMany
     {
         return $this->hasMany(WPointTransaction::class);
-    }
-
-    public function wcoinTransactions(): HasMany
-    {
-        return $this->hasMany(WCoinTransaction::class);
     }
 }

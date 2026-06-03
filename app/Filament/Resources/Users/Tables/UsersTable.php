@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Tables;
 
-use App\Filament\Resources\Users\Actions\AddCoinAction;
 use App\Filament\Resources\Users\Actions\AddWPointSilentAction;
 use App\Filament\Resources\Users\Actions\GmBanAction;
 use App\Filament\Resources\Users\Actions\GmKickAction;
@@ -42,9 +41,6 @@ class UsersTable
                         default => 'gray',
                     })
                     ->searchable(),
-                TextColumn::make('wcoin')
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('wpoint')
                     ->numeric()
                     ->sortable(),
@@ -83,7 +79,6 @@ class UsersTable
             ->recordActions([
                 GmLookupAction::make(),
                 SendItemMailAction::make(),
-                AddCoinAction::make(),
                 AddWPointSilentAction::make(),
                 GmKickAction::make(),
                 GmBanAction::make(),
