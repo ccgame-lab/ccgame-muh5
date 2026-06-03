@@ -290,6 +290,7 @@
         </div>
     @endif
 
+    @if($playAllowed)
     <!-- CCGame SDK Root Container for Overlay Integrations -->
     <div id="ccgame-sdk-root"
          data-user="{{ $user ?? '' }}"
@@ -304,5 +305,6 @@
     <!-- CCGame SDK JavaScript Core -->
     <script>window.ccgame = { user: "{{ $user ?? '' }}" };</script>
     <script type="module" src="{{ asset('assets/sdk/ccgame-sdk.js') }}?v=1.3.0"></script>
+    @endif
 </body>
 </html>

@@ -54,6 +54,7 @@ const error = ref(null)
 const userId = window.ccgame?.user || ''
 
 async function fetchQuote() {
+  if (!userId) { quote.value = null; return }
   try {
     const res = await fetch(`/api/mining/quote?u=${encodeURIComponent(userId)}`)
     if (!res.ok) throw new Error('failed')
