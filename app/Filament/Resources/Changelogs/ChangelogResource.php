@@ -7,12 +7,14 @@ namespace App\Filament\Resources\Changelogs;
 use App\Filament\Resources\Changelogs\Pages\CreateChangelog;
 use App\Filament\Resources\Changelogs\Pages\EditChangelog;
 use App\Filament\Resources\Changelogs\Pages\ListChangelogs;
+use App\Filament\Resources\Changelogs\Pages\ViewChangelog;
 use App\Models\Changelog;
 use App\Models\Server;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -108,6 +110,7 @@ class ChangelogResource extends Resource
             ->filters([])
             ->defaultSort('version_date', 'desc')
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([
@@ -127,6 +130,7 @@ class ChangelogResource extends Resource
         return [
             'index' => ListChangelogs::route('/'),
             'create' => CreateChangelog::route('/create'),
+            'view' => ViewChangelog::route('/{record}'),
             'edit' => EditChangelog::route('/{record}/edit'),
         ];
     }

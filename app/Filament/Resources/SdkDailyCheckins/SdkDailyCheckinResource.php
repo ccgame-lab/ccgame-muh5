@@ -65,16 +65,16 @@ class SdkDailyCheckinResource extends Resource
                             ->when($data['checked_until'] ?? null, fn ($q, $date) => $q->whereDate('checked_at', '<=', $date));
                     }),
 
-                Filter::make('user_id')
-                    ->label('User ID')
+                Filter::make('username')
+                    ->label('Username')
                     ->form([
-                        TextInput::make('user_id')
-                            ->label('User ID')
-                            ->numeric(),
+                        TextInput::make('username')
+                            ->label('Username người dùng')
+                            ->placeholder('Nhập username...'),
                     ])
                     ->query(fn ($query, array $data) => $query->when(
-                        $data['user_id'] ?? null,
-                        fn ($q, $id) => $q->where('user_id', $id),
+                        $data['username'] ?? null,
+                        fn ($q, $username) => $q->whereHas('user', fn ($uq) => $uq->where('username', 'like', "%{$username}%")),
                     )),
             ])
             ->recordActions([])

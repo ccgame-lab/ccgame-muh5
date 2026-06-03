@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
+use App\Models\Giftcode;
+use App\Models\GiftcodeRedemption;
+use App\Models\GmAction;
 use App\Models\SdkDailyCheckin;
 use App\Models\User;
 use Carbon\Carbon;
@@ -31,6 +34,12 @@ class SdkStatsWidget extends StatsOverviewWidget
             Stat::make('Tổng user', $totalUsers)
                 ->icon('heroicon-o-user-group')
                 ->color('gray'),
+            Stat::make('Giftcode dùng hôm nay', GiftcodeRedemption::whereDate('created_at', today())->count())
+                ->icon('heroicon-o-ticket')
+                ->color('warning'),
+            Stat::make('GM actions thất bại', GmAction::where('status', 'failed')->count())
+                ->icon('heroicon-o-exclamation-triangle')
+                ->color('danger'),
         ];
     }
 }

@@ -13,12 +13,11 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -46,10 +45,10 @@ class ServerResource extends Resource
                 TextInput::make('db_name')
                     ->required(),
                 TextInput::make('db_connection_name'),
-                Toggle::make('status')
-                    ->label('Online')
-                    ->onValue(1)
-                    ->offValue(0)
+                Select::make('status')
+                    ->label('Trạng thái')
+                    ->options(Server::STATUS_LABELS)
+                    ->required()
                     ->default(0),
                 TextInput::make('priority')
                     ->label('Độ ưu tiên (cao hơn = hiển thị trước)')
@@ -79,9 +78,19 @@ class ServerResource extends Resource
                     ->searchable(),
                 TextColumn::make('db_connection_name')
                     ->searchable(),
-                IconColumn::make('status')
-                    ->boolean()
-                    ->label('Online'),
+                TextColumn::make('status')
+                    ->label('Trạng thái')
+                    ->badge()
+                    ->formatStateUsing(fn (int $state): string => Server::STATUS_LABELS[$state] ?? 'N/A')
+                    ->color(fn (int $state): string => match ($state) {
+                        1 => 'warning',
+                        2 => 'success',
+                        3 => 'info',
+                        4 => 'danger',
+                        5 => 'gray',
+                        default => 'gray',
+                    })
+                    ->sortable(),
                 TextColumn::make('priority')
                     ->numeric()
                     ->sortable(),

@@ -5,11 +5,13 @@ namespace App\Filament\Resources\SdkFeatures;
 use App\Filament\Resources\SdkFeatures\Pages\CreateSdkFeature;
 use App\Filament\Resources\SdkFeatures\Pages\EditSdkFeature;
 use App\Filament\Resources\SdkFeatures\Pages\ListSdkFeatures;
+use App\Filament\Resources\SdkFeatures\Pages\ViewSdkFeature;
 use App\Models\SdkFeature;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -97,6 +99,7 @@ class SdkFeatureResource extends Resource
                 //
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([
@@ -119,6 +122,7 @@ class SdkFeatureResource extends Resource
         return [
             'index' => ListSdkFeatures::route('/'),
             'create' => CreateSdkFeature::route('/create'),
+            'view' => ViewSdkFeature::route('/{record}'),
             'edit' => EditSdkFeature::route('/{record}/edit'),
         ];
     }

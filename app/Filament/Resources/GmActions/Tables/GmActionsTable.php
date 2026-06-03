@@ -8,8 +8,11 @@ use App\Jobs\ExecuteGmCommand;
 use App\Models\GmAction;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class GmActionsTable
@@ -59,7 +62,37 @@ class GmActionsTable
                     ->sortable(),
             ])
             ->defaultSort('id', 'desc')
-            ->filters([])
+            ->filters([
+                SelectFilter::make('status')
+                    ->label('Trạng thái')
+                    ->options([
+                        'pending' => 'Pending',
+                        'executing' => 'Executing',
+                        'executed' => 'Executed',
+                        'failed' => 'Failed',
+                    ]),
+                SelectFilter::make('action_type')
+                    ->label('Loại action')
+                    ->options([
+                        'ban' => 'Ban',
+                        'kick' => 'Kick',
+                        'lookup' => 'Lookup',
+                        'send_mail' => 'Send Mail',
+                        'send_global_mail' => 'Global Mail',
+                        'add_point_silent' => 'Add Point',
+                    ]),
+                Filter::make('created_at')
+                    ->label('Thời gian')
+                    ->form([
+                        DatePicker::make('from')->label('Từ ngày')->native(false),
+                        DatePicker::make('until')->label('Đến ngày')->native(false),
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when($data['from'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
+                            ->when($data['until'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
+                    }),
+            ])
             ->recordActions([
                 ViewAction::make(),
                 Action::make('retry')
