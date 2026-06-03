@@ -17,6 +17,7 @@ Route::get('/api/sdk/bootstrap', function (\Illuminate\Http\Request $request) {
 
     $serverName = 'CCGame';
     $serverId = '1';
+    $s = null;
     try {
         $s = \App\Models\Server::find(1);
         if ($s) { $serverName = $s->name; $serverId = (string) $s->id; }
@@ -30,11 +31,19 @@ Route::get('/api/sdk/bootstrap', function (\Illuminate\Http\Request $request) {
     if ($username !== '') {
         $user = \App\Models\User::where('username', $username)->first();
         if ($user) {
+            $level = 0;
+            $vip = 0;
+            try {
+                $actor = app(\App\Services\Game\GmApiService::class)->findActor($s ?? \App\Models\Server::find(1), $username);
+                $level = (int) ($actor['level'] ?? 0);
+                $vip = (int) ($actor['vip_level'] ?? 0);
+            } catch (\Throwable) {}
+
             $player = [
                 'id' => $user->id,
                 'name' => $user->name ?: $user->username,
-                'level' => 0,
-                'vip' => 0,
+                'level' => $level,
+                'vip' => $vip,
             ];
             $wallet = [
                 'points' => (int) $user->points,
