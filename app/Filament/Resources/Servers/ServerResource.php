@@ -14,9 +14,11 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -24,7 +26,11 @@ class ServerResource extends Resource
 {
     protected static ?string $model = Server::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|\UnitEnum|null $navigationGroup = 'Cấu hình';
+
+    protected static ?string $navigationLabel = 'Máy chủ';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedServerStack;
 
     public static function form(Schema $schema): Schema
     {
@@ -40,11 +46,13 @@ class ServerResource extends Resource
                 TextInput::make('db_name')
                     ->required(),
                 TextInput::make('db_connection_name'),
-                TextInput::make('status')
-                    ->required()
-                    ->numeric()
+                Toggle::make('status')
+                    ->label('Online')
+                    ->onValue(1)
+                    ->offValue(0)
                     ->default(0),
                 TextInput::make('priority')
+                    ->label('Độ ưu tiên (cao hơn = hiển thị trước)')
                     ->required()
                     ->numeric()
                     ->default(0),
@@ -71,9 +79,9 @@ class ServerResource extends Resource
                     ->searchable(),
                 TextColumn::make('db_connection_name')
                     ->searchable(),
-                TextColumn::make('status')
-                    ->numeric()
-                    ->sortable(),
+                IconColumn::make('status')
+                    ->boolean()
+                    ->label('Online'),
                 TextColumn::make('priority')
                     ->numeric()
                     ->sortable(),

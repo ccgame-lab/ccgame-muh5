@@ -21,7 +21,9 @@ class GmActionResource extends Resource
 {
     protected static ?string $model = GmAction::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|\UnitEnum|null $navigationGroup = 'Quản lý';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
     protected static ?string $navigationLabel = 'GM Audit Log';
 

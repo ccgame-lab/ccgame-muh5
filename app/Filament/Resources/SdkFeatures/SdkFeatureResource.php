@@ -24,7 +24,11 @@ class SdkFeatureResource extends Resource
 {
     protected static ?string $model = SdkFeature::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|\UnitEnum|null $navigationGroup = 'SDK';
+
+    protected static ?string $navigationLabel = 'Tính năng SDK';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPuzzlePiece;
 
     public static function form(Schema $schema): Schema
     {
@@ -77,7 +81,15 @@ class SdkFeatureResource extends Resource
             ->columns([
                 TextColumn::make('key')->searchable(),
                 TextColumn::make('label')->searchable(),
-                TextColumn::make('status'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'active' => 'success',
+                        'soon' => 'warning',
+                        'maintenance' => 'danger',
+                        'hidden' => 'gray',
+                        default => 'gray',
+                    }),
                 IconColumn::make('is_active')->boolean(),
                 TextColumn::make('sort_order')->sortable(),
             ])

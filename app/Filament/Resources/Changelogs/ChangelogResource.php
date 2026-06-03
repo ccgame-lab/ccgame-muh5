@@ -29,9 +29,11 @@ class ChangelogResource extends Resource
 {
     protected static ?string $model = Changelog::class;
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Game';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
-    protected static ?string $navigationLabel = 'Changelogs';
+    protected static ?string $navigationLabel = 'Changelog';
 
     protected static ?string $label = 'Changelog';
 

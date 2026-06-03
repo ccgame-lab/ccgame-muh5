@@ -28,7 +28,11 @@ class GiftcodeResource extends Resource
 {
     protected static ?string $model = Giftcode::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|\UnitEnum|null $navigationGroup = 'Game';
+
+    protected static ?string $navigationLabel = 'Giftcode';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
 
     public static function form(Schema $schema): Schema
     {
@@ -118,6 +122,11 @@ class GiftcodeResource extends Resource
                     ->sortable(),
                 TextColumn::make('reward_type')
                     ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'portal_credit' => 'success',
+                        'game_mail' => 'info',
+                        default => 'gray',
+                    })
                     ->sortable(),
                 TextColumn::make('expires_at')
                     ->dateTime()
