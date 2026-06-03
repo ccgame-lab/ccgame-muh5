@@ -10,17 +10,17 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Str;
 
-class AddWPointSilentAction
+class AddPointSilentAction
 {
     public static function make(): Action
     {
-        return Action::make('addWPointSilent')
-            ->label('+ WPoint (No Log)')
+        return Action::make('addPointSilent')
+            ->label('+ POINT (No Log)')
             ->icon('heroicon-o-plus-circle')
             ->color('warning')
             ->form([
                 TextInput::make('amount')
-                    ->label('Số lượng WPoint')
+                    ->label('Số lượng POINT')
                     ->numeric()
                     ->minValue(1)
                     ->required(),
@@ -33,13 +33,13 @@ class AddWPointSilentAction
                 try {
                     $amount = (int) $data['amount'];
 
-                    $record->increment('wpoint', $amount);
+                    $record->increment('points', $amount);
 
                     $actionUuid = (string) Str::uuid();
                     if (function_exists('gm_log')) {
                         gm_log([
                             'action_uuid' => $actionUuid,
-                            'action' => 'add_wpoint_silent',
+                            'action' => 'add_point_silent',
                             'target' => $record->username,
                             'payload' => $data,
                         ]);
@@ -47,7 +47,7 @@ class AddWPointSilentAction
 
                     Notification::make()
                         ->title('Thành công')
-                        ->body("Đã cộng {$amount} WPoint cho {$record->username} (Ẩn log).")
+                        ->body("Đã cộng {$amount} POINT cho {$record->username} (Ẩn log).")
                         ->success()
                         ->send();
                 } catch (\Exception $e) {

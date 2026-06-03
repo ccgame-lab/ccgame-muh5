@@ -7,7 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\DiamondMachine;
 use App\Models\DiamondWallet;
 use App\Models\Server;
-use App\Models\WPointTransaction;
+use App\Models\PointTransaction;
 use App\Services\DailyLoginService;
 use App\Services\DiamondMiningService;
 use Carbon\Carbon;
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     /**
-     * Get player dashboard stats: WPoint, Diamond, Rank, rate_per_hour, server_online.
+     * Get player dashboard stats: POINT, Diamond, Rank, rate_per_hour, server_online.
      */
     public function stats(Request $request): JsonResponse
     {
@@ -35,7 +35,7 @@ class DashboardController extends Controller
             return response()->json(['error' => 'User not found'], 404);
         }
 
-        $wpointBalance = (int) ($freshUser->wpoint ?? 0);
+        $pointsBalance = (int) ($freshUser->points ?? 0);
 
         $diamondWallet = DiamondWallet::where('user_id', $freshUser->id)->first();
         $lifetimeMined = $diamondWallet ? (int) $diamondWallet->lifetime_mined : 0;
@@ -74,7 +74,7 @@ class DashboardController extends Controller
         $minedToday = $dailyLog ? (int) $dailyLog->daily_diamond_mined : 0;
 
         return response()->json([
-            'wpoint_balance' => $wpointBalance,
+            'point_balance' => $pointsBalance,
             'lifetime_diamond_mined' => $lifetimeMined,
             'unclaimed_diamond' => $unclaimedDiamond,
             'rank' => $rank,
@@ -98,7 +98,7 @@ class DashboardController extends Controller
 
         $today = now()->toDateString();
 
-        $checkedInToday = WPointTransaction::where('user_id', $user->id)
+        $checkedInToday = PointTransaction::where('user_id', $user->id)
             ->where('type', 'checkin')
             ->whereDate('created_at', $today)
             ->exists();

@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\PointTransaction;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -20,7 +21,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $name
  * @property string|null $email
  * @property string $tier
- * @property int $wpoint
+ * @property int $points
  * @property Carbon|null $checkin_boost_expires_at
  * @property string|null $last_login_ip
  * @property Carbon|null $last_login_at
@@ -42,7 +43,7 @@ class User extends Authenticatable
         'name',
         'email',
         'tier',
-        'wpoint',
+        'points',
         'last_login_ip',
         'last_login_at',
         'checkin_boost_expires_at',
@@ -67,7 +68,7 @@ class User extends Authenticatable
         return [
             'last_login_at' => 'datetime',
             'checkin_boost_expires_at' => 'datetime',
-            'wpoint' => 'integer',
+            'points' => 'integer',
         ];
     }
 
@@ -146,8 +147,8 @@ class User extends Authenticatable
         return $this->hasMany(DiamondBoost::class);
     }
 
-    public function wpointTransactions(): HasMany
+    public function pointTransactions(): HasMany
     {
-        return $this->hasMany(WPointTransaction::class);
+        return $this->hasMany(PointTransaction::class);
     }
 }

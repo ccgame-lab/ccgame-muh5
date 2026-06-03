@@ -26,7 +26,7 @@ class NarrativeService
     // Layer 3: Whale System
     private static array $whaleTop1 = ['đang thống trị BXH', 'giữ vững vị trí Đại Gia', 'bỏ xa phần còn lại', 'duy trì quyền lực tuyệt đối'];
 
-    private static array $whaleNormal = ['đang bám đuổi TOP server', 'sở hữu khối tài sản khổng lồ', 'tiếp tục chi tiêu lượng WPoint'];
+    private static array $whaleNormal = ['đang bám đuổi TOP server', 'sở hữu khối tài sản khổng lồ', 'tiếp tục chi tiêu lượng POINT'];
 
     private static array $whaleSuffixes = [
         '— toàn server đang bị bỏ xa',
@@ -113,7 +113,7 @@ class NarrativeService
             $event['message'] = $verb.$suffix.' với ';
             $event['tone_type'] = 'whale';
             $event['value'] = number_format((float) ($event['metadata']['amount'] ?? 0.0));
-            $event['unit'] = ' WPoint';
+            $event['unit'] = ' POINT';
             $event['valueClass'] = 'text-warning glow-hard';
             $event['isHighlight'] = true;
             $event['priority'] = 999;
@@ -187,7 +187,7 @@ class NarrativeService
             $event['message'] = $verb.$modifier;
             $event['tone_type'] = $isReplay ? 'replay' : 'normal';
             $event['value'] = number_format($amount);
-            $event['unit'] = ' WPoint';
+            $event['unit'] = ' POINT';
             $event['valueClass'] = 'text-warning glow-hard';
             $event['isHighlight'] = $amount >= 200;
 
@@ -215,7 +215,7 @@ class NarrativeService
             $event['message'] = $verb;
             $event['tone_type'] = $isReplay ? 'replay' : 'normal';
             $event['value'] = number_format($amount);
-            $event['unit'] = ' WPoint';
+            $event['unit'] = ' POINT';
             $event['valueClass'] = 'text-warning glow-hard';
             $event['isHighlight'] = $amount >= 1000;
 

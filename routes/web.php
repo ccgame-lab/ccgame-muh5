@@ -25,7 +25,7 @@ Route::get('/api/sdk/bootstrap', function (\Illuminate\Http\Request $request) {
     $username = (string) $request->query('u', '');
     $user = null;
     $player = ['id' => 0, 'name' => 'Khách', 'level' => 0, 'vip' => 0];
-    $wallet = ['wpoint' => 0];
+    $wallet = ['points' => 0];
 
     if ($username !== '') {
         $user = \App\Models\User::where('username', $username)->first();
@@ -37,7 +37,7 @@ Route::get('/api/sdk/bootstrap', function (\Illuminate\Http\Request $request) {
                 'vip' => 0,
             ];
             $wallet = [
-                'wpoint' => (int) $user->wpoint,
+                'points' => (int) $user->points,
             ];
         }
     }
@@ -197,7 +197,7 @@ Route::post('/api/sdk/checkin', function (\Illuminate\Http\Request $request) {
 
     \Illuminate\Support\Facades\DB::transaction(function () use ($userId, $today, $streak, $tomAmount) {
         $lockedUser = \App\Models\User::where('id', $userId)->lockForUpdate()->firstOrFail();
-        $lockedUser->increment('wpoint', $tomAmount);
+        $lockedUser->increment('points', $tomAmount);
 
         \App\Models\SdkDailyCheckin::create([
             'user_id' => $userId,

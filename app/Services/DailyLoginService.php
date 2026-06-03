@@ -6,13 +6,14 @@ namespace App\Services;
 
 use App\Models\CheckinLog;
 use App\Models\User;
+use App\Services\PointService;
 use Exception;
 use Illuminate\Support\Carbon;
 
 class DailyLoginService
 {
     public function __construct(
-        protected WPointService $wpointService,
+        protected PointService $pointService,
     ) {}
 
     /**
@@ -43,7 +44,7 @@ class DailyLoginService
             'day_index' => $dayIndex,
         ]);
 
-        $newBalance = $this->wpointService->credit($user, $amount, 'wpoint_checkin', null, [
+        $newBalance = $this->pointService->credit($user, $amount, 'point_checkin', null, [
             'date' => $today,
             'day_index' => $dayIndex,
             'checkin_boost' => $multiplier > 1,

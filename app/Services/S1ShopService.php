@@ -22,7 +22,7 @@ use Illuminate\Support\Str;
 class S1ShopService
 {
     public function __construct(
-        private WPointService $wpointService,
+        private PointService $pointService,
         private GmApiService $gmApiService,
     ) {}
 
@@ -210,9 +210,9 @@ class S1ShopService
      */
     private function assertSufficientBalance(User $user, Server $server, string $currency, int $price): void
     {
-        if ($currency === 'wpoint') {
-            if ($user->wpoint < $price) {
-                throw new Exception("Không đủ WPoint. Cần {$price} WP, bạn có {$user->wpoint} WP.");
+        if ($currency === 'points') {
+            if ($user->points < $price) {
+                throw new Exception("Không đủ POINT. Cần {$price} POINT, bạn có {$user->points} POINT.");
             }
 
             return;
@@ -244,8 +244,8 @@ class S1ShopService
 
     private function deductCurrency(User $user, Server $server, string $currency, int $price, string $slug, string $reference): void
     {
-        if ($currency === 'wpoint') {
-            $this->wpointService->debit($user, $price, 'legacy_shop_purchase', [
+        if ($currency === 'points') {
+            $this->pointService->debit($user, $price, 'legacy_shop_purchase', [
                 'item_slug' => $slug,
                 'reference' => $reference,
             ]);
@@ -402,9 +402,9 @@ class S1ShopService
      */
     private function getFreshBalance(User $user, string $currency): int|float
     {
-        if ($currency === 'wpoint') {
+        if ($currency === 'points') {
             $freshUser = $user->fresh();
-            return $freshUser ? (int) $freshUser->wpoint : 0;
+            return $freshUser ? (int) $freshUser->points : 0;
         }
 
         // For KC, we don't track portal-side balance — return 0 as sentinel

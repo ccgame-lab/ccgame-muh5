@@ -6,7 +6,7 @@ const state = reactive({
   error: null,
   server: { id: '', name: '' },
   player: { id: 0, name: '', level: 0, vip: 0 },
-  wallet: { tom: 0, wpoint: 0 },
+  wallet: { tom: 0, points: 0 },
   tabs: [],
   features: [],
   changelog: [],

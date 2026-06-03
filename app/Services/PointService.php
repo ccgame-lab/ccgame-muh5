@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\User;
-use App\Models\WPointTransaction;
+use App\Models\PointTransaction;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
-class WPointService
+class PointService
 {
     /**
-     * Credit WPoint to user's balance atomically.
+     * Credit POINT to user's balance atomically.
      */
     public function credit(User $user, int $amount, string $type, ?string $reference = null, array $meta = []): int
     {
@@ -24,11 +24,11 @@ class WPointService
             /** @var User $lockedUser */
             $lockedUser = User::query()->where('id', $user->id)->lockForUpdate()->firstOrFail();
 
-            $lockedUser->increment('wpoint', $amount);
+            $lockedUser->increment('points', $amount);
             $lockedUser->refresh();
-            $newBalance = (int) $lockedUser->wpoint;
+            $newBalance = (int) $lockedUser->points;
 
-            WPointTransaction::create([
+            PointTransaction::create([
                 'user_id' => $lockedUser->id,
                 'type' => $type,
                 'amount' => $amount,
@@ -42,7 +42,7 @@ class WPointService
     }
 
     /**
-     * Debit WPoint from user's balance atomically.
+     * Debit POINT from user's balance atomically.
      *
      * @throws Exception When balance is insufficient
      */
@@ -56,15 +56,15 @@ class WPointService
             /** @var User $lockedUser */
             $lockedUser = User::query()->where('id', $user->id)->lockForUpdate()->firstOrFail();
 
-            if ($lockedUser->wpoint < $amount) {
-                throw new Exception('Not enough WPoint.');
+            if ($lockedUser->points < $amount) {
+                throw new Exception('Not enough POINT.');
             }
 
-            $lockedUser->decrement('wpoint', $amount);
+            $lockedUser->decrement('points', $amount);
             $lockedUser->refresh();
-            $newBalance = (int) $lockedUser->wpoint;
+            $newBalance = (int) $lockedUser->points;
 
-            WPointTransaction::create([
+            PointTransaction::create([
                 'user_id' => $lockedUser->id,
                 'type' => $type,
                 'amount' => -$amount,
@@ -78,10 +78,10 @@ class WPointService
     }
 
     /**
-     * Get fresh WPoint balance for user.
+     * Get fresh POINT balance for user.
      */
     public function getBalance(User $user): int
     {
-        return (int) User::query()->where('id', $user->id)->value('wpoint');
+        return (int) User::query()->where('id', $user->id)->value('points');
     }
 }

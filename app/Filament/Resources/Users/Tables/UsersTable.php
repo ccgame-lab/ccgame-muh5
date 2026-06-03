@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Tables;
 
-use App\Filament\Resources\Users\Actions\AddWPointSilentAction;
+use App\Filament\Resources\Users\Actions\AddPointSilentAction;
 use App\Filament\Resources\Users\Actions\GmBanAction;
 use App\Filament\Resources\Users\Actions\GmKickAction;
 use App\Filament\Resources\Users\Actions\GmLookupAction;
@@ -41,7 +41,7 @@ class UsersTable
                         default => 'gray',
                     })
                     ->searchable(),
-                TextColumn::make('wpoint')
+                TextColumn::make('points')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('checkin_boost_expires_at')
@@ -79,7 +79,7 @@ class UsersTable
             ->recordActions([
                 GmLookupAction::make(),
                 SendItemMailAction::make(),
-                AddWPointSilentAction::make(),
+                AddPointSilentAction::make(),
                 GmKickAction::make(),
                 GmBanAction::make(),
                 EditAction::make(),

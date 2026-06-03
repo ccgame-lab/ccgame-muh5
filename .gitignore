@@ -5,6 +5,7 @@
 !.env.example
 .phpactor.json
 .phpunit.result.cache
+.agents/
 /.codex
 /.cursor/
 /.idea
@@ -14,10 +15,12 @@
 /.zed
 /auth.json
 /node_modules
+/package-lock.json
 /public/build
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
+/skills-lock.json
 /storage/*.key
 /storage/pail
 /vendor
@@ -25,3 +28,5 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+/resources/sdk/node_modules

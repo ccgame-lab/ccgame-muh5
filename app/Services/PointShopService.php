@@ -13,14 +13,14 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class WPointShopService
+class PointShopService
 {
     public function __construct(
-        protected WPointService $wpointService,
+        protected PointService $pointService,
     ) {}
 
     /**
-     * Purchase High Fruit with WPoint and deliver via in-game mail.
+     * Purchase High Fruit with POINT and deliver via in-game mail.
      *
      * @return array{success: bool, spent: int, items: array<int, array{item_id: int, quantity: int}>, balance: int}
      *
@@ -59,7 +59,7 @@ class WPointShopService
         $actor = $this->findActor($server, $user->username);
 
         return DB::transaction(function () use ($user, $itemId, $quantity, $serverId, $totalCost, $actor): array {
-            $newBalance = $this->wpointService->debit(
+            $newBalance = $this->pointService->debit(
                 $user,
                 $totalCost,
                 'fruit_purchase',

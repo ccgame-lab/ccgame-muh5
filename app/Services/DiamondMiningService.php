@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
 class DiamondMiningService
 {
     public function __construct(
-        private WPointService $wpointService
+        private PointService $pointService
     ) {}
 
     /**
@@ -358,7 +358,7 @@ class DiamondMiningService
 
             $cost = $this->calculateWPointUpgradeCost($upgradeType, $currentLevel + 1);
 
-            $this->wpointService->debit($user, $cost, 'upgrade', [
+            $this->pointService->debit($user, $cost, 'upgrade', [
                 'machine_index' => $machineIndex,
                 'upgrade_type' => $upgradeType,
                 'from_level' => $currentLevel,
@@ -419,7 +419,7 @@ class DiamondMiningService
             $cost = $tierConfig['wp'] ?? 0;
 
             if ($cost > 0) {
-                $this->wpointService->debit($user, $cost, 'unlock', [
+                $this->pointService->debit($user, $cost, 'unlock', [
                     'machine_index' => $machineIndex,
                 ]);
             }
@@ -471,7 +471,7 @@ class DiamondMiningService
                 throw new Exception('Chưa đạt mốc khai thác tối thiểu.');
             }
 
-            $this->wpointService->debit($user, $tierConfig['wp'], 'ascend');
+            $this->pointService->debit($user, $tierConfig['wp'], 'ascend');
 
             $wallet->increment('ascension_level');
 
@@ -506,7 +506,7 @@ class DiamondMiningService
             $refundRate = config('economy.ascension_wp_refund_rate', 0.2);
             $refundAmount = (int) floor($totalWpSpentOnUpgrades * $refundRate);
             if ($refundAmount > 0) {
-                $user->increment('wpoint', $refundAmount);
+                $user->increment('points', $refundAmount);
             }
 
             $newMultiplier = $this->getAscensionMultiplier($nextLevel);
@@ -541,7 +541,7 @@ class DiamondMiningService
      * a single atomic transaction BEFORE the DiamondBoost row is created.
      * This ensures the boost multiplier only applies to time elapsed after activation.
      *
-     * @throws Exception When tier is invalid, slots full, or insufficient WPoint
+     * @throws Exception When tier is invalid, slots full, or insufficient POINT
      */
     public function applyBoost(User $user, int $tierIndex): DiamondBoost
     {
@@ -570,8 +570,8 @@ class DiamondMiningService
                 throw new Exception('Đã đạt giới hạn boost đang hoạt động.');
             }
 
-            // 2. Debit WPoint — fail fast before touching machine state
-            $this->wpointService->debit($user, $tier['wp_cost'], 'boost', [
+            // 2. Debit POINT — fail fast before touching machine state
+            $this->pointService->debit($user, $tier['wp_cost'], 'boost', [
                 'tier_index' => $tierIndex,
                 'label' => $tier['label'],
             ]);

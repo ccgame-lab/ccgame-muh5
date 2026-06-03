@@ -32,7 +32,7 @@ class UserForm
                     ->options(['free' => 'Free', 'vip' => 'VIP'])
                     ->required()
                     ->default('free'),
-                TextInput::make('wpoint')
+                TextInput::make('points')
                     ->required()
                     ->numeric()
                     ->default(0)

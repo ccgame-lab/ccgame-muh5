@@ -7,9 +7,9 @@ namespace App\Services;
 use App\Jobs\ExecuteGmCommand;
 use App\Models\GmAction;
 use App\Models\Server;
+use App\Models\PointTransaction;
 use App\Models\SpinLog;
 use App\Models\User;
-use App\Models\WPointTransaction;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 class SpinService
 {
     public function __construct(
-        protected WPointService $wpointService,
+        protected PointService $pointService,
     ) {}
 
     /**
@@ -28,9 +28,9 @@ class SpinService
      *   1. Daily spin limit (hard cap)
      *   2. Diminishing cost after threshold (soft anti-grind)
      *   3. Extra turn chain limit (prevents lucky streaks)
-     *   4. WPoint daily cap (absolute ceiling on WPoint from spin rewards)
+     *   4. POINT daily cap (absolute ceiling on POINT from spin rewards)
      *
-     * @return array{success: bool, prize_index: int, prize_type: string, prize_value: int, label: string, wpoint_balance: int, extra_spin: bool, free_spin: bool, spins_today: int, spins_remaining: int, milestone_bonus: ?int}
+     * @return array{success: bool, prize_index: int, prize_type: string, prize_value: int, label: string, point_balance: int, extra_spin: bool, free_spin: bool, spins_today: int, spins_remaining: int, milestone_bonus: ?int}
      */
     public function spin(User $user, ?int $serverId = null): array
     {
@@ -61,7 +61,7 @@ class SpinService
                 $wallet = $user->webWallet;
                 $balance = $wallet ? (int) $wallet->balance : 0;
             } else {
-                $balance = $this->wpointService->debit($user, $actualCost, 'spin', [
+                $balance = $this->pointService->debit($user, $actualCost, 'spin', [
                     'spin_number' => $spinsToday + 1,
                 ]);
             }
@@ -84,7 +84,7 @@ class SpinService
                 case 'wcoin':
                     $value = $this->clampWCoinReward($user->id, $value, $today);
                     if ($value > 0) {
-                        $balance = $this->wpointService->credit($user, $value, 'spin_reward', null, [
+                        $balance = $this->pointService->credit($user, $value, 'spin_reward', null, [
                             'prize_index' => $prizeIndex,
                         ]);
                     }
@@ -143,7 +143,7 @@ class SpinService
 
             $milestoneBonus = $this->checkMilestoneBonus($user->id, $newSpinsToday, $today);
             if ($milestoneBonus > 0) {
-                $balance = $this->wpointService->credit($user, $milestoneBonus, 'spin_milestone', null, [
+                $balance = $this->pointService->credit($user, $milestoneBonus, 'spin_milestone', null, [
                     'spins_today' => $newSpinsToday,
                 ]);
             }
@@ -154,7 +154,7 @@ class SpinService
                 'prize_type' => $type,
                 'prize_value' => $value,
                 'label' => (string) $prize['label'],
-                'wpoint_balance' => $balance,
+                'point_balance' => $balance,
                 'extra_spin' => $extraSpin,
                 'free_spin' => $isFree,
                 'spins_today' => $newSpinsToday,
@@ -184,14 +184,14 @@ class SpinService
     /**
      * Clamp WCoin reward based on spin-specific daily cap.
      *
-     * Tracks WPoint earned today from spin_reward + spin_milestone transactions.
+     * Tracks POINT earned today from spin_reward + spin_milestone transactions.
      * Returns clamped value (may be 0 if cap reached).
      */
     private function clampWCoinReward(int $userId, int $value, string $today): int
     {
         $spinCap = (int) config('economy.wcoin_spin_reward_cap', 55);
 
-        $earnedToday = (int) WPointTransaction::where('user_id', $userId)
+        $earnedToday = (int) PointTransaction::where('user_id', $userId)
             ->whereIn('type', ['spin_reward', 'spin_milestone'])
             ->whereDate('created_at', $today)
             ->sum('amount');
@@ -219,7 +219,7 @@ class SpinService
         $bonus = random_int((int) $range[0], (int) $range[1]);
 
         $spinCap = (int) config('economy.wcoin_spin_reward_cap', 55);
-        $earnedToday = (int) WPointTransaction::where('user_id', $userId)
+        $earnedToday = (int) PointTransaction::where('user_id', $userId)
             ->whereIn('type', ['spin_reward', 'spin_milestone'])
             ->whereDate('created_at', $today)
             ->sum('amount');

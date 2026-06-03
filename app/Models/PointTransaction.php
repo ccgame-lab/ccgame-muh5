@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
-class WPointTransaction extends Model
+class PointTransaction extends Model
 {
-    protected $table = 'wpoint_transactions';
+    protected $table = 'point_transactions';
 
     protected $fillable = [
         'user_id',

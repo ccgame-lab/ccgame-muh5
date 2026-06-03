@@ -42,9 +42,9 @@ class GiftcodeForm
                 Select::make('reward_currency')
                     ->label('Loại tiền thưởng')
                     ->options([
-                        'wpoint' => 'WPoint',
+                        'points' => 'POINT',
                     ])
-                    ->default('wpoint')
+                    ->default('points')
                     ->visible(fn (Get $get): bool => $get('reward_type') === 'portal_credit'),
                 TextInput::make('reward_amount')
                     ->label('Số lượng')
