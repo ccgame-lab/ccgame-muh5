@@ -5,172 +5,172 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
-use App\Models\GmAction;
-use App\Models\User;
+use App\Filament\Widgets\Users\GmActionLogWidget;
+use App\Filament\Widgets\Users\PointTransactionWidget;
 use App\Services\PointService;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
-use Filament\Resources\Pages\Page;
-use Illuminate\Support\Collection;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\EmbeddedSchema;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 
-class ViewUser extends Page
+class ViewUser extends ViewRecord
 {
     protected static string $resource = UserResource::class;
 
-    public static function canAccess(array $parameters = []): bool
+    public function getMaxContentWidth(): Width|string|null
     {
-        return true;
+        return Width::Full;
     }
 
-    protected string $view = 'filament.resources.users.pages.view-user';
+    // ── Section A: User Identity (read-only) ──
 
-    public User $record;
-
-    /** @var array<string, mixed> */
-    public array $pointForm = [
-        'amount' => 0,
-        'reason' => '',
-    ];
-
-    public function mount(User|int|string $record): void
+    public function infolist(Schema $schema): Schema
     {
-        $this->record = $record instanceof User ? $record : User::findOrFail((int) $record);
+        return $schema
+            ->columns(6)
+            ->schema([
+                TextEntry::make('username'),
+                TextEntry::make('portal_uid')->label('Portal UID'),
+                TextEntry::make('email')->placeholder('—'),
+                TextEntry::make('tier')
+                    ->badge()
+                    ->color(fn (string $state): string => $state === 'vip' ? 'warning' : 'gray'),
+                TextEntry::make('last_login_at')
+                    ->label('Đăng nhập cuối')
+                    ->dateTime()
+                    ->placeholder('—'),
+                TextEntry::make('last_login_ip')
+                    ->label('IP cuối')
+                    ->placeholder('—'),
+            ]);
     }
 
-    public function getPointTransactions(): Collection
+    // ── Layout: infolist + footer widgets ──
+
+    public function content(Schema $schema): Schema
     {
-        return $this->record->pointTransactions()
-            ->latest()
-            ->take(50)
-            ->get();
+        return $schema
+            ->components([
+                $this->hasInfolist()
+                    ? $this->getInfolistContentComponent()
+                    : $this->getFormContentComponent(),
+                EmbeddedSchema::make('footerWidgets'),
+            ]);
     }
 
-    public function getGmActions(): Collection
-    {
-        return GmAction::query()
-            ->where('target_user', $this->record->username)
-            ->latest()
-            ->take(20)
-            ->get();
-    }
-
-    public function updateTier(string $tier): void
-    {
-        $this->record->update(['tier' => $tier]);
-        $this->record->refresh();
-
-        Notification::make()
-            ->title('Đã cập nhật tier')
-            ->body('Tier hiện tại: '.strtoupper($tier))
-            ->success()
-            ->send();
-    }
-
-    public function updateCheckinBoost(?string $value): void
-    {
-        $this->record->update([
-            'checkin_boost_expires_at' => $value ?: null,
-        ]);
-        $this->record->refresh();
-
-        Notification::make()
-            ->title('Đã cập nhật')
-            ->body('Check-in boost đã được cập nhật.')
-            ->success()
-            ->send();
-    }
-
-    public function creditPoints(): void
-    {
-        $amount = (int) ($this->pointForm['amount'] ?? 0);
-        $reason = trim($this->pointForm['reason'] ?? '');
-
-        if ($amount <= 0) {
-            Notification::make()
-                ->title('Lỗi')
-                ->body('Số lượng phải lớn hơn 0.')
-                ->danger()
-                ->send();
-
-            return;
-        }
-
-        try {
-            $service = app(PointService::class);
-            $newBalance = $service->credit(
-                $this->record,
-                $amount,
-                'gm_credit',
-                $reason ?: 'GM cộng điểm',
-                ['gm_reason' => $reason, 'actor_id' => auth()->id()]
-            );
-
-            $this->record->refresh();
-            $this->pointForm = ['amount' => 0, 'reason' => ''];
-
-            Notification::make()
-                ->title('Đã cộng điểm')
-                ->body('+'.number_format($amount).' POINT — Số dư mới: '.number_format($newBalance))
-                ->success()
-                ->send();
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title('Lỗi')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-        }
-    }
-
-    public function debitPoints(): void
-    {
-        $amount = (int) ($this->pointForm['amount'] ?? 0);
-        $reason = trim($this->pointForm['reason'] ?? '');
-
-        if ($amount <= 0) {
-            Notification::make()
-                ->title('Lỗi')
-                ->body('Số lượng phải lớn hơn 0.')
-                ->danger()
-                ->send();
-
-            return;
-        }
-
-        try {
-            $service = app(PointService::class);
-            $newBalance = $service->debit(
-                $this->record,
-                $amount,
-                'gm_debit',
-                ['gm_reason' => $reason, 'actor_id' => auth()->id()]
-            );
-
-            $this->record->refresh();
-            $this->pointForm = ['amount' => 0, 'reason' => ''];
-
-            Notification::make()
-                ->title('Đã trừ điểm')
-                ->body('-'.number_format($amount).' POINT — Số dư mới: '.number_format($newBalance))
-                ->success()
-                ->send();
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title('Lỗi')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-        }
-    }
+    // ── Header actions: all inline operations ──
 
     protected function getHeaderActions(): array
     {
+        $user = $this->getRecord();
+
         return [
+
+            Action::make('updateTier')
+                ->label('Tier: '.strtoupper((string) $user->tier))
+                ->icon('heroicon-o-arrow-path')
+                ->color('gray')
+                ->form([
+                    Select::make('tier')
+                        ->label('Tier')
+                        ->options(['free' => 'Free', 'vip' => 'VIP'])
+                        ->default($user->tier)
+                        ->required(),
+                ])
+                ->action(function (array $data): void {
+                    $this->getRecord()->update(['tier' => $data['tier']]);
+                    $this->getRecord()->refresh();
+                    Notification::make()->title('Đã cập nhật')->body('Tier: '.strtoupper($data['tier']))->success()->send();
+                }),
+
+            Action::make('checkinBoost')
+                ->label('Boost')
+                ->icon('heroicon-o-clock')
+                ->color('gray')
+                ->form([
+                    DateTimePicker::make('checkin_boost_expires_at')
+                        ->label('Hết hạn')
+                        ->default($user->checkin_boost_expires_at),
+                ])
+                ->action(function (array $data): void {
+                    $this->getRecord()->update(['checkin_boost_expires_at' => $data['checkin_boost_expires_at'] ?? null]);
+                    $this->getRecord()->refresh();
+                    Notification::make()->title('Đã cập nhật')->body('Boost updated.')->success()->send();
+                }),
+
+            Action::make('creditPoints')
+                ->label('Cộng POINT')
+                ->color('success')
+                ->icon('heroicon-m-plus')
+                ->form([
+                    TextInput::make('amount')
+                        ->label('Số lượng')->numeric()->minValue(1)->required(),
+                    TextInput::make('reason')
+                        ->label('Lý do')->maxLength(255),
+                ])
+                ->action(function (array $data): void {
+                    $amount = (int) $data['amount'];
+                    $reason = trim($data['reason'] ?? '');
+                    try {
+                        $s = app(PointService::class);
+                        $nb = $s->credit($this->getRecord(), $amount, 'gm_credit', $reason ?: 'GM cộng điểm', ['gm_reason' => $reason, 'actor_id' => auth()->id()]);
+                        $this->getRecord()->refresh();
+                        Notification::make()->title('Đã cộng')->body('+'.number_format($amount).' POINT (SD: '.number_format($nb).')')->success()->send();
+                    } catch (\Exception $e) {
+                        Notification::make()->title('Lỗi')->body($e->getMessage())->danger()->send();
+                    }
+                }),
+
+            Action::make('debitPoints')
+                ->label('Trừ POINT')
+                ->color('danger')
+                ->icon('heroicon-m-minus')
+                ->form([
+                    TextInput::make('amount')
+                        ->label('Số lượng')->numeric()->minValue(1)->required(),
+                    TextInput::make('reason')
+                        ->label('Lý do')->maxLength(255),
+                ])
+                ->action(function (array $data): void {
+                    $amount = (int) $data['amount'];
+                    $reason = trim($data['reason'] ?? '');
+                    try {
+                        $s = app(PointService::class);
+                        $nb = $s->debit($this->getRecord(), $amount, 'gm_debit', ['gm_reason' => $reason, 'actor_id' => auth()->id()]);
+                        $this->getRecord()->refresh();
+                        Notification::make()->title('Đã trừ')->body('-'.number_format($amount).' POINT (SD: '.number_format($nb).')')->success()->send();
+                    } catch (\Exception $e) {
+                        Notification::make()->title('Lỗi')->body($e->getMessage())->danger()->send();
+                    }
+                }),
+
             Action::make('edit')
                 ->label('Sửa thông tin')
                 ->icon('heroicon-o-pencil-square')
                 ->color('gray')
-                ->url(fn (): string => UserResource::getUrl('edit', ['record' => $this->record])),
+                ->url(fn (): string => UserResource::getUrl('edit', ['record' => $this->getRecord()])),
         ];
+    }
+
+    // ── Footer widgets (tables) ──
+
+    /** @return array<class-string> */
+    protected function getFooterWidgets(): array
+    {
+        return [
+            PointTransactionWidget::class,
+            GmActionLogWidget::class,
+        ];
+    }
+
+    public function getFooterWidgetsColumns(): int|array
+    {
+        return 1;
     }
 }
