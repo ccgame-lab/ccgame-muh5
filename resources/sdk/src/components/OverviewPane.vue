@@ -24,9 +24,9 @@
 
     <!-- Stats grid 2x2 -->
     <div class="ccsdk-stats">
-      <div class="ccsdk-stat-card ccsdk-stat-card--tom">
-        <span class="ccsdk-stat-label">TOM</span>
-        <span class="ccsdk-stat-value">{{ fmt(wallet.tom) }}</span>
+      <div class="ccsdk-stat-card ccsdk-stat-card--coin">
+        <span class="ccsdk-stat-label">XU</span>
+        <span class="ccsdk-stat-value">{{ fmt(wallet.coin) }}</span>
       </div>
       <div class="ccsdk-stat-card ccsdk-stat-card--points">
         <span class="ccsdk-stat-label">POINT</span>
@@ -62,7 +62,7 @@ import FeatureGrid from './FeatureGrid.vue'
 
 const props = defineProps({
   player: { type: Object, default: () => ({ id: 0, name: '', level: 0, vip: 0 }) },
-  wallet: { type: Object, default: () => ({ tom: 0, points: 0 }) },
+  wallet: { type: Object, default: () => ({ coin: 0, points: 0 }) },
   features: { type: Array, default: () => [] },
   checkin: { type: Object, default: () => ({ checked_today: false, streak: 0, week: [] }) },
   refreshing: { type: Boolean, default: false },
@@ -190,7 +190,7 @@ function fmt(n) {
   font-variant-numeric: tabular-nums;
 }
 
-.ccsdk-stat-card--tom .ccsdk-stat-value { color: #f0c060; }
+.ccsdk-stat-card--coin .ccsdk-stat-value { color: #f0c060; }
 .ccsdk-stat-card--points .ccsdk-stat-value { color: #5b8af7; }
 .ccsdk-stat-card--level .ccsdk-stat-value { color: #e8e8f0; }
 

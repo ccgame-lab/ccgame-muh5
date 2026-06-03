@@ -6,7 +6,7 @@ const state = reactive({
   error: null,
   server: { id: '', name: '' },
   player: { id: 0, name: '', level: 0, vip: 0 },
-  wallet: { tom: 0, points: 0 },
+  wallet: { coin: 0, points: 0 },
   tabs: [],
   features: [],
   changelog: [],
@@ -14,6 +14,8 @@ const state = reactive({
 
   // Lazy ranking
   rankingLoaded: false,
+  rankingLoading: false,
+  rankingError: null,
   rankingTypes: [],
   rankingItems: {},
   rankingActive: '',
@@ -48,6 +50,8 @@ export function useSdkState() {
 
   async function loadRanking() {
     if (state.rankingLoaded) return
+    state.rankingLoading = true
+    state.rankingError = null
     try {
       const res = await fetch('/api/sdk/ranking')
       if (!res.ok) throw new Error('500')
@@ -57,7 +61,9 @@ export function useSdkState() {
       state.rankingActive = d.types?.[0]?.key || ''
       state.rankingLoaded = true
     } catch {
-      // silently fail, keep stub
+      state.rankingError = 'Không tải được bảng xếp hạng. Thử lại sau.'
+    } finally {
+      state.rankingLoading = false
     }
   }
 

@@ -47,6 +47,7 @@ Route::get('/api/sdk/bootstrap', function (\Illuminate\Http\Request $request) {
             ];
             $wallet = [
                 'points' => (int) $user->points,
+                'coin' => (int) ($user->webWallet?->balance ?? 0),
             ];
         }
     }

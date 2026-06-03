@@ -24,7 +24,7 @@
     <div class="ccgame-sdk-body" v-show="state.loaded">
       <OverviewPane v-show="activeTab==='overview'" :player="state.player" :wallet="state.wallet" :features="state.features" :checkin="state.checkin" :refreshing="state.refreshing" @checkin="doCheckin" @refresh="refreshWallet" />
       <DonatePane v-show="activeTab==='donate'" :features="state.features" :loaded="state.loaded" />
-      <RankingPane v-show="activeTab==='ranking'" :types="state.rankingTypes" :items="state.rankingItems" :active="state.rankingActive" @update:active="setRankingActive" />
+      <RankingPane v-show="activeTab==='ranking'" :types="state.rankingTypes" :items="state.rankingItems" :active="state.rankingActive" :loading="state.rankingLoading" :error="state.rankingError" @update:active="setRankingActive" />
       <ChangelogPane v-show="activeTab==='changelog'" :entries="state.changelog" />
     </div>
 
