@@ -34,10 +34,7 @@ class SendItemMailAction
                     ->required()
                     ->native(false)
                     ->live()
-                    ->afterStateUpdated(function (Get $get, Set $set, \Livewire\Component $livewire, ?string $state): void {
-                        /** @var \App\Models\User $record */
-                        $record = $livewire->record;
-
+                    ->afterStateUpdated(function (Get $get, Set $set, User $record, ?string $state): void {
                         if (! $state) {
                             $set('character_info', null);
 

@@ -261,7 +261,8 @@ Route::get('/api/sdk/giftcode/validate', function (\Illuminate\Http\Request $req
         return response()->json(['valid' => false, 'message' => 'Bạn đã sử dụng mã này rồi.', 'reward' => null]);
     }
 
-    $rewardAmount = (int) ($giftcode->reward_data['reward_amount'] ?? $giftcode->reward_data['amount'] ?? 0);
+    $rewardData = $giftcode->reward_data ?? [];
+    $rewardAmount = (int) ($rewardData['reward_amount'] ?? $rewardData['amount'] ?? 0);
 
     return response()->json([
         'valid' => true,
@@ -276,7 +277,7 @@ Route::get('/api/sdk/giftcode/validate', function (\Illuminate\Http\Request $req
 // ─── SDK Giftcode Redeem ─────────────────────────────────────────────────
 Route::post('/api/sdk/giftcode/redeem', function (\Illuminate\Http\Request $request) {
     $code = (string) $request->input('code', '');
-    $username = (string) $request->input('u', '');
+    $username = (string) $request->input('u', $request->input('token', ''));
 
     if ($code === '') {
         return response()->json(['success' => false, 'message' => 'Thiếu mã giftcode.'], 400);
@@ -309,12 +310,83 @@ Route::post('/api/sdk/giftcode/redeem', function (\Illuminate\Http\Request $requ
         return response()->json(['success' => false, 'message' => 'Bạn đã sử dụng mã này rồi.'], 409);
     }
 
-    // Only allow portal_credit reward type
-    if ($giftcode->reward_type !== 'portal_credit') {
-        return response()->json(['success' => false, 'message' => 'Mã giftcode không thể sử dụng trong SDK.'], 400);
+    // Handle game_mail reward type
+    if ($giftcode->reward_type === 'game_mail') {
+        $rewardData = $giftcode->reward_data ?? [];
+        $mailTitle   = (string) ($rewardData['title']   ?? 'Quà tặng từ GM');
+        $mailContent = (string) ($rewardData['content'] ?? 'Chúc mừng bạn nhận được quà tặng!');
+        $items       = $rewardData['items'] ?? [];
+
+        // Resolve server: use giftcode.server_id if set, else server 1
+        $serverId = $giftcode->server_id ?? 1;
+        $server   = \App\Models\Server::find($serverId);
+        if (! $server) {
+            return response()->json(['success' => false, 'message' => 'Máy chủ game không tồn tại.'], 500);
+        }
+
+        // Lookup player on game server
+        try {
+            $actor    = app(\App\Services\Game\GmApiService::class)->findActor($server, $user->username);
+            $playerId = (string) $actor['actorid'];
+        } catch (\Throwable) {
+            return response()->json(['success' => false, 'message' => 'Không tìm thấy nhân vật của bạn trên máy chủ. Hãy đăng nhập vào game ít nhất một lần.'], 400);
+        }
+
+        // Build itemPayload: "1,{id},{count};..."
+        $parts = [];
+        foreach ($items as $item) {
+            $itemId    = (string) ($item['id']    ?? '');
+            $itemCount = (int)    ($item['count'] ?? 1);
+            if ($itemId !== '') {
+                $parts[] = "1,{$itemId},{$itemCount}";
+            }
+        }
+        $itemPayload = implode(';', $parts);
+
+        $actionUuid = (string) \Illuminate\Support\Str::uuid();
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $giftcode, $actionUuid) {
+            $lockedGiftcode = \App\Models\Giftcode::where('id', $giftcode->id)->lockForUpdate()->firstOrFail();
+
+            if (! $lockedGiftcode->isUsable()) {
+                if ($lockedGiftcode->expires_at && $lockedGiftcode->expires_at->isPast()) {
+                    throw new \Exception('Mã giftcode đã hết hạn.');
+                }
+                throw new \Exception('Mã giftcode đã hết lượt sử dụng.');
+            }
+
+            $alreadyRedeemed = \App\Models\GiftcodeRedemption::where('giftcode_id', $lockedGiftcode->id)
+                ->where('user_id', $user->id)
+                ->exists();
+
+            if ($alreadyRedeemed) {
+                throw new \Exception('Bạn đã sử dụng mã này rồi.');
+            }
+
+            $lockedGiftcode->increment('used_count');
+
+            \App\Models\GiftcodeRedemption::create([
+                'giftcode_id' => $lockedGiftcode->id,
+                'user_id'     => $user->id,
+            ]);
+        });
+
+        \App\Jobs\SendGameMailJob::dispatch($server, $playerId, $mailTitle, $mailContent, $actionUuid, $itemPayload);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã gửi quà qua mail game! Kiểm tra hộp thư trong game để nhận vật phẩm.',
+            'reward'  => ['type' => 'game_mail'],
+        ]);
     }
 
-    $rewardAmount = (int) ($giftcode->reward_data['reward_amount'] ?? $giftcode->reward_data['amount'] ?? 0);
+    // Only allow portal_credit reward type otherwise
+    if ($giftcode->reward_type !== 'portal_credit') {
+        return response()->json(['success' => false, 'message' => 'Loại giftcode này không hỗ trợ đổi qua SDK.'], 400);
+    }
+
+    $rewardData = $giftcode->reward_data ?? [];
+    $rewardAmount = (int) ($rewardData['reward_amount'] ?? $rewardData['amount'] ?? 0);
 
     if ($rewardAmount <= 0) {
         return response()->json(['success' => false, 'message' => 'Mã giftcode không có phần thưởng hợp lệ.'], 400);
