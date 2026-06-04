@@ -49,6 +49,9 @@
       @checkin="onCheckin"
     />
 
+    <!-- Giftcode -->
+    <GiftcodeCard />
+
     <!-- Features -->
     <FeatureGrid :features="quickActions" />
   </div>
@@ -58,6 +61,7 @@
 import { computed } from 'vue'
 import MiningCard from './MiningCard.vue'
 import CheckinCard from './CheckinCard.vue'
+import GiftcodeCard from './GiftcodeCard.vue'
 import FeatureGrid from './FeatureGrid.vue'
 
 const props = defineProps({

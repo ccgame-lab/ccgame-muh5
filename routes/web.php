@@ -272,3 +272,97 @@ Route::get('/api/sdk/giftcode/validate', function (\Illuminate\Http\Request $req
         ],
     ]);
 })->name('sdk.giftcode.validate');
+
+// ─── SDK Giftcode Redeem ─────────────────────────────────────────────────
+Route::post('/api/sdk/giftcode/redeem', function (\Illuminate\Http\Request $request) {
+    $code = (string) $request->input('code', '');
+    $username = (string) $request->input('u', '');
+
+    if ($code === '') {
+        return response()->json(['success' => false, 'message' => 'Thiếu mã giftcode.'], 400);
+    }
+
+    $user = \App\Models\User::where('username', $username)->first();
+    if (! $user) {
+        return response()->json(['success' => false, 'message' => 'Phiên chơi chưa xác thực, hãy tải lại trang.'], 401);
+    }
+
+    $giftcode = \App\Models\Giftcode::where('code', $code)->first();
+
+    if (! $giftcode) {
+        return response()->json(['success' => false, 'message' => 'Mã giftcode không tồn tại.'], 404);
+    }
+
+    if (! $giftcode->isUsable()) {
+        if ($giftcode->expires_at && $giftcode->expires_at->isPast()) {
+            return response()->json(['success' => false, 'message' => 'Mã giftcode đã hết hạn.'], 410);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Mã giftcode đã hết lượt sử dụng.'], 409);
+    }
+
+    $alreadyRedeemed = \App\Models\GiftcodeRedemption::where('giftcode_id', $giftcode->id)
+        ->where('user_id', $user->id)
+        ->exists();
+
+    if ($alreadyRedeemed) {
+        return response()->json(['success' => false, 'message' => 'Bạn đã sử dụng mã này rồi.'], 409);
+    }
+
+    // Only allow portal_credit reward type
+    if ($giftcode->reward_type !== 'portal_credit') {
+        return response()->json(['success' => false, 'message' => 'Mã giftcode không thể sử dụng trong SDK.'], 400);
+    }
+
+    $rewardAmount = (int) ($giftcode->reward_data['reward_amount'] ?? $giftcode->reward_data['amount'] ?? 0);
+
+    if ($rewardAmount <= 0) {
+        return response()->json(['success' => false, 'message' => 'Mã giftcode không có phần thưởng hợp lệ.'], 400);
+    }
+
+    \Illuminate\Support\Facades\DB::transaction(function () use ($user, $giftcode, $rewardAmount) {
+        // Lock user and giftcode to prevent race conditions
+        $lockedUser = \App\Models\User::where('id', $user->id)->lockForUpdate()->firstOrFail();
+        $lockedGiftcode = \App\Models\Giftcode::where('id', $giftcode->id)->lockForUpdate()->firstOrFail();
+
+        // Double-check usability after locking
+        if (! $lockedGiftcode->isUsable()) {
+            if ($lockedGiftcode->expires_at && $lockedGiftcode->expires_at->isPast()) {
+                throw new \Exception('Mã giftcode đã hết hạn.');
+            }
+
+            throw new \Exception('Mã giftcode đã hết lượt sử dụng.');
+        }
+
+        // Double-check if already redeemed
+        $alreadyRedeemed = \App\Models\GiftcodeRedemption::where('giftcode_id', $lockedGiftcode->id)
+            ->where('user_id', $lockedUser->id)
+            ->exists();
+
+        if ($alreadyRedeemed) {
+            throw new \Exception('Bạn đã sử dụng mã này rồi.');
+        }
+
+        // Award points to user
+        $lockedUser->increment('points', $rewardAmount);
+
+        // Update giftcode usage
+        $lockedGiftcode->increment('used_count');
+
+        // Create redemption record
+        \App\Models\GiftcodeRedemption::create([
+            'giftcode_id' => $lockedGiftcode->id,
+            'user_id' => $lockedUser->id,
+        ]);
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Đã sử dụng mã giftcode thành công!',
+        'reward' => [
+            'type' => $giftcode->reward_type,
+            'amount' => $rewardAmount,
+        ],
+        'new_points' => $user->fresh()->points,
+    ]);
+})->name('sdk.giftcode.redeem');

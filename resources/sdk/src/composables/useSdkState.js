@@ -67,22 +67,31 @@ export function useSdkState() {
     }
   }
 
-  async function doCheckin() {
-    const u = window.ccgame?.user || state.player.name
-    if (!u) return { status: 'error', message: 'Chưa xác thực.' }
-    try {
-      const res = await fetch(`/api/sdk/checkin?u=${encodeURIComponent(u)}`, {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': csrf() },
-      })
-      const data = await res.json()
-      // refresh bootstrap to update checkin state + wallet
-      await loadBootstrap()
-      return data
-    } catch {
-      return { status: 'error', message: 'Lỗi kết nối.' }
-    }
-  }
+   async function doCheckin() {
+     const u = window.ccgame?.user || state.player.name
+     if (!u) return { status: 'error', message: 'Chưa xác thực.' }
+     try {
+       const res = await fetch(`/api/sdk/checkin?u=${encodeURIComponent(u)}`, {
+         method: 'POST',
+         headers: { 'X-CSRF-TOKEN': csrf() },
+       })
+       const data = await res.json()
+       if (data.status === 'ok') {
+         // Update wallet points
+         state.wallet.points += data.reward.tom
+         // Update checkin state
+         state.checkin.checked_today = true
+         state.checkin.streak = data.streak
+       }
+       return data
+     } catch {
+       return { status: 'error', message: 'Lỗi kết nối.' }
+     }
+   }
+
+   async function applyPointsReward(points) {
+     state.wallet.points += points
+   }
 
   let _refreshing = false
 
@@ -111,12 +120,13 @@ export function useSdkState() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''
   }
 
-  return {
-    state: readonly(state),
-    loadBootstrap,
-    loadRanking,
-    doCheckin,
-    refreshWallet,
-    setRankingActive(key) { state.rankingActive = key },
-  }
+   return {
+     state: readonly(state),
+     loadBootstrap,
+     loadRanking,
+     doCheckin,
+     applyPointsReward,
+     refreshWallet,
+     setRankingActive(key) { state.rankingActive = key },
+   }
 }

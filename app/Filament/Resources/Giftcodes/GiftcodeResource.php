@@ -36,6 +36,8 @@ class GiftcodeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
 
+    protected static bool $shouldSkipAuthorization = true;
+
     public static function form(Schema $schema): Schema
     {
         return $schema

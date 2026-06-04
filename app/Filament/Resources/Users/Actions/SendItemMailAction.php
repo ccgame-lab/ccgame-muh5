@@ -34,7 +34,10 @@ class SendItemMailAction
                     ->required()
                     ->native(false)
                     ->live()
-                    ->afterStateUpdated(function (Get $get, Set $set, User $record, ?string $state): void {
+                    ->afterStateUpdated(function (Get $get, Set $set, \Livewire\Component $livewire, ?string $state): void {
+                        /** @var \App\Models\User $record */
+                        $record = $livewire->record;
+
                         if (! $state) {
                             $set('character_info', null);
 
@@ -51,7 +54,7 @@ class SendItemMailAction
                             $actor = $gmService->findActor($server, $record->username);
                             $set('character_info', "✅ {$actor['actorname']} (Lv.{$actor['level']}) — ID #{$actor['actorid']}");
                             $set('player_id', (string) $actor['actorid']);
-                        } catch (\Exception) {
+                        } catch (\Throwable) {
                             $set('character_info', '⚠️ KHÔNG TÌM THẤY NHÂN VẬT');
                             $set('player_id', null);
                         }
@@ -61,8 +64,12 @@ class SendItemMailAction
                     ->placeholder('Chọn máy chủ để kiểm tra...')
                     ->disabled()
                     ->dehydrated(false),
-                Hidden::make('player_id')
-                    ->required(),
+                Hidden::make('player_id'),
+                \Filament\Forms\Components\Placeholder::make('player_id_error')
+                    ->content(fn (Get $get) => ! $get('player_id') && $get('server_id')
+                        ? '⚠️ Không tìm thấy nhân vật — không thể gửi thư.'
+                        : '')
+                    ->visible(fn (Get $get) => ! $get('player_id') && $get('server_id')),
                 TextInput::make('title')
                     ->label('Tiêu đề thư')
                     ->required()
@@ -91,6 +98,11 @@ class SendItemMailAction
                     ->maxItems(5),
             ])
             ->action(function (User $record, array $data): void {
+                if (empty($data['player_id'])) {
+                    Notification::make()->title('Lỗi')->body('Chưa xác định nhân vật.')->danger()->send();
+                    return;
+                }
+
                 $server = Server::findOrFail($data['server_id']);
 
                 try {
@@ -127,7 +139,7 @@ class SendItemMailAction
                         ->body('Mail job đã được dispatch.')
                         ->success()
                         ->send();
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     Notification::make()
                         ->title('Lỗi')
                         ->body($e->getMessage())
