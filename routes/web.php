@@ -116,8 +116,11 @@ Route::get('/api/sdk/bootstrap', function (Request $request) {
         report($e);
     }
 
-    // Lối tiếp tế Tôm: chỉ là URL điều hướng sang GreenJade, SDK không xử lý ví/thanh toán.
-    $suppliesUrl = rtrim((string) (config('services.greenjade.id_url') ?: 'https://id.greenjade.net'), '/').'/supplies';
+    // Lối tiếp tế Tôm: chỉ là URL điều hướng sang GreenJade ID, SDK không xử lý ví/thanh toán.
+    // ?source=<service_code> để GreenJade hiện nút "Về game" + gắn attribution vào intent.
+    $gjIdBase = rtrim((string) (config('services.greenjade_id.base_url') ?: 'https://id.greenjade.net'), '/');
+    $gjSource = (string) (config('services.greenjade.service_code') ?: 'muh5');
+    $suppliesUrl = $gjIdBase.'/supplies?source='.urlencode($gjSource);
 
     return response()->json([
         'server' => ['id' => $serverId, 'name' => $serverName],
