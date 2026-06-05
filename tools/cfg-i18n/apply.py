@@ -36,11 +36,14 @@ GLOSS = Path("D:/10_Projects/CCGame/ccgame-muh5/tools/cfg-i18n/glossary.json")
 REPORT = Path("D:/10_Projects/CCGame/ccgame-muh5/tools/cfg-i18n/_applied_report.txt")
 
 D = Path("D:/10_Projects/CCGame/ccgame-muh5/tools/cfg-i18n")
-GEAR, BATCH2, BATCH3 = D / "gear_strings.json", D / "batch2_strings.json", D / "batch3_strings.json"
+GEAR, BATCH2, BATCH3, BATCH4 = (
+    D / "gear_strings.json", D / "batch2_strings.json",
+    D / "batch3_strings.json", D / "batch4_strings.json",
+)
 ref = json.load(open(REF, encoding="utf-8"))
 cur = json.load(open(CUR, encoding="utf-8"))
 strings = dict(json.load(open(GLOSS, encoding="utf-8"))["strings"])
-for extra in (GEAR, BATCH2, BATCH3):
+for extra in (GEAR, BATCH2, BATCH3, BATCH4):
     if extra.exists():
         strings.update(json.load(open(extra, encoding="utf-8")))
 

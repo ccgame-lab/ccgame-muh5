@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+"""Generate batch4_strings.json — quality improvement pass (cải thiện chất lượng dịch).
+
+Các nhóm:
+  - NewRoleConfig desc     : câu mô tả mở nghề mới (5 entries giống nhau)
+  - SecretskillConfig desc : kỹ năng bí mật (4 entries)
+  - SkillsConfig desc      : kỹ năng class DK/MG/EM 101-307 (template patterns)
+  - SkillsConfig 9001-9012 : BOSS Thánh Điện Tuyệt Vọng (Title Case)
+  - SkillsConfig 9022-9029 : Thử Luyện (lowercase fix + Frozen Knight)
+  - SkillsConfig 10003/10005/10008 : boss name sai
+  - MainTaskConfig name/desc: nhiều entry garbled
+  - NPCConfig desc          : 2 entry garbled
+"""
+import json
+from pathlib import Path
+
+OUT = Path(__file__).parent / "batch4_strings.json"
+
+strings = {
+
+    # ============================================================
+    # NewRoleConfig — "open new class" prompt (5 identical rows)
+    # ============================================================
+    "提升等级或者充值成为VIP，即可开启新职业！":
+        "Nâng cấp hoặc nạp thẻ VIP để mở nghề mới!",
+
+    # ============================================================
+    # SecretskillConfig desc (4 skills: 易伤/破甲/减速/中毒)
+    # ============================================================
+    "触发时，使敌方受到伤害提高25%，持续5秒":
+        "Khi kích hoạt: địch nhận thêm 25% sát thương, duy trì 5 giây.",
+    "触发时，使敌方防御力降低30%，持续5秒":
+        "Khi kích hoạt: phòng thủ địch giảm 30%, duy trì 5 giây.",
+    "触发时，使敌方攻击速度降低100%，持续5秒":
+        "Khi kích hoạt: tốc độ tấn công địch giảm 100%, duy trì 5 giây.",
+    "触发时，每秒减少敌方当前生命的6%，持续5秒":
+        "Khi kích hoạt: mỗi giây trừ 6% HP hiện tại của địch, duy trì 5 giây.",
+
+    # ============================================================
+    # SkillsConfig desc — DK class skills (101-107)
+    # ============================================================
+    "单攻，对前方1个敌人造成{a}伤害，冷却：0.3S":
+        "Đơn công: Gây {a} sát thương cho 1 địch phía trước. Hồi chiêu: 0.3s",
+    "群攻，对前方5个敌人造成{a}伤害，冷却：0.3S":
+        "Diện công: Gây {a} sát thương cho 5 địch phía trước. Hồi chiêu: 0.3s",
+    "群攻，对周围7个敌人造成{a}伤害，冷却：2S":
+        "Diện công: Gây {a} sát thương cho 7 địch xung quanh. Hồi chiêu: 2s",
+    "群攻，对周围7个敌人造成{a}伤害，冷却：6S":
+        "Diện công: Gây {a} sát thương cho 7 địch xung quanh. Hồi chiêu: 6s",
+    "群攻，对前方5个敌人造成{a}伤害，冷却：4S":
+        "Diện công: Gây {a} sát thương cho 5 địch phía trước. Hồi chiêu: 4s",
+    "增益效果，提升自身及队友生命{c}，持续时间30S":
+        "Buff: Tăng HP bản thân và đồng đội {c}. Duy trì 30s.",
+    "对前方6个敌人造成{a}伤害，冷却：8S":
+        "Gây {a} sát thương cho 6 địch phía trước. Hồi chiêu: 8s",
+    # MG class skills (201-207)
+    "群攻，对前方4个敌人造成{a}伤害，冷却：0.3S":
+        "Diện công: Gây {a} sát thương cho 4 địch phía trước. Hồi chiêu: 0.3s",
+    "群攻，对周围6个敌人造成{a}伤害，冷却：2S":
+        "Diện công: Gây {a} sát thương cho 6 địch xung quanh. Hồi chiêu: 2s",
+    "群攻，对周围6个敌人造成{a}伤害，冷却：6S":
+        "Diện công: Gây {a} sát thương cho 6 địch xung quanh. Hồi chiêu: 6s",
+    "群攻，对前方4个敌人造成{a}伤害，冷却：4S":
+        "Diện công: Gây {a} sát thương cho 4 địch phía trước. Hồi chiêu: 4s",
+    "增益效果，使自身及队友受到伤害减少{c}，持续时间30S":
+        "Buff: Giảm sát thương nhận vào {c} cho bản thân và đồng đội. Duy trì 30s.",
+    # EM class skills (301-307)
+    "群攻，对前方6个敌人造成{a}伤害，冷却：2S":
+        "Diện công: Gây {a} sát thương cho 6 địch phía trước. Hồi chiêu: 2s",
+    "群攻，对前方6个敌人造成{a}伤害，冷却：6S":
+        "Diện công: Gây {a} sát thương cho 6 địch phía trước. Hồi chiêu: 6s",
+    "增益效果，提升自身及队友攻防{c}，持续时间30S":
+        "Buff: Tăng công phòng bản thân và đồng đội {c}. Duy trì 30s.",
+
+    # ============================================================
+    # SkillsConfig 9001-9012 — Thánh Điện Tuyệt Vọng BOSS skills
+    # ============================================================
+    "绝望神殿1BOSS技能":  "Kỹ năng BOSS Thánh Điện Tuyệt Vọng 1",
+    "绝望神殿2BOSS技能":  "Kỹ năng BOSS Thánh Điện Tuyệt Vọng 2",
+    "绝望神殿3BOSS技能":  "Kỹ năng BOSS Thánh Điện Tuyệt Vọng 3",
+    "绝望神殿4BOSS技能":  "Kỹ năng BOSS Thánh Điện Tuyệt Vọng 4",
+    "绝望神殿5BOSS技能":  "Kỹ năng BOSS Thánh Điện Tuyệt Vọng 5",
+    "绝望神殿6BOSS技能":  "Kỹ năng BOSS Thánh Điện Tuyệt Vọng 6",
+    "绝望神殿7BOSS技能":  "Kỹ năng BOSS Thánh Điện Tuyệt Vọng 7",
+    "绝望神殿8BOSS技能":  "Kỹ năng BOSS Thánh Điện Tuyệt Vọng 8",
+    "绝望神殿9BOSS技能":  "Kỹ năng BOSS Thánh Điện Tuyệt Vọng 9",
+    "绝望神殿10BOSS技能": "Kỹ năng BOSS Thánh Điện Tuyệt Vọng 10",
+    "绝望神殿11BOSS技能": "Kỹ năng BOSS Thánh Điện Tuyệt Vọng 11",
+    "绝望神殿12BOSS技能": "Kỹ năng BOSS Thánh Điện Tuyệt Vọng 12",
+
+    # ============================================================
+    # SkillsConfig 9022-9029 — Thử Luyện BOSS skills (Title Case + name fix)
+    # ============================================================
+    "试炼1-1杀戮骑士": "Thử Luyện 1-1 Dark Knight",
+    "试炼1-2灭魂幽灵": "Thử Luyện 1-2 Poison Shadow",
+    "试炼2-2丛林收割者": "Thử Luyện 2-2 Death Rider",
+    "试炼2-4地狱之手": "Thử Luyện 2-4 Hand Of Maya",
+    "试炼3-1冰雪猛犸": "Thử Luyện 3-1 Giant Mammoth",
+    "试炼3-4冰封骑士": "Thử Luyện 3-4 Frozen Knight",
+
+    # ============================================================
+    # SkillsConfig 10003/10005/10008 — Devil Island boss names sai
+    # ============================================================
+    "恶魔岛戈登":  "Ác Ma Đảo Gordon",       # 戈登 = Gordon (phonetic)
+    "恶魔岛希特拉": "Ác Ma Đảo Hitla",        # 希特拉 = Hitla (custom boss)
+    "恶魔岛召唤者": "Ác Ma Đảo Summoner",     # 召唤者 = Summoner
+
+    # ============================================================
+    # MainTaskConfig — garbled entries (quần áo nón nảy / hoán địa đồ)
+    # Note: entries with current VN containing Blood Castle / Reset are
+    # blocked by MU_KEYWORDS in apply.py → excluded here.
+    # ============================================================
+    "穿戴1件卓越武器":       "Trang bị 1 Vũ Khí Xuất Sắc",
+    "进行1次推荐加点":       "Phân phối điểm theo gợi ý 1 lần",
+    "换地图击杀蛮牛怪":      "Đổi Map Diệt Elite Bull Fighter",
+    "换地图击杀蛮牛怪3只":   "Đổi map, Diệt Elite Bull Fighter 3 chích",
+    "穿戴6件1级以上装备":    "Trang bị 6 món cấp 1 trở lên",
+    "从奇迹之路领取技能石":  "Nhận Đá Kỹ Năng từ Con Đường Kỳ Tích",
+    "换地图击杀树妖":        "Đổi Map Diệt Forest Monster",
+    "激活图鉴-树妖精魄":     "Kích Hoạt Bộ Sưu Tập - Forest Monster",
+    "换地图击杀勾尾蝎":      "Đổi Map Diệt Chain Scorpion",
+    "换地图击杀蓝魔怪":      "Đổi Map Diệt Hoummerd",
+    "换地图击杀蓝魔怪15只":  "Đổi map, Diệt Hoummerd 15 chích",
+    "武器强化+7，流光效果":  "Cường Hóa Vũ Khí +7 (hiệu ứng rực sáng)",
+    "换地图击杀雪人20只":    "Đổi map, Diệt Yeti 20 chích",
+    "换地图击杀雪人王":      "Đổi Map Diệt Elite Yeti",
+    "换地图击杀雪人王20只":  "Đổi map, Diệt Elite Yeti 20 chích",
+    "换地图击杀雪虫20只":    "Đổi map, Diệt Worm 20 chích",
+    "完成1次加点":           "Phân phối điểm 1 lần",
+    "装备出战精灵":          "Trang bị Tinh Linh chiến đấu",
+    "炼取1次元素":           "Luyện lấy Nguyên Tố 1 lần",
+    "穿戴1个元素":           "Trang bị 1 Nguyên Tố",
+
+    # ============================================================
+    # NPCConfig desc — garbled navigation descriptions
+    # ============================================================
+    "打黑暗深渊":    "Đến Vực Hắc Ám",
+    "打血色交任务":  "Nhận nhiệm vụ Blood Castle",
+}
+
+with open(OUT, "w", encoding="utf-8") as f:
+    json.dump(strings, f, ensure_ascii=False, indent=2)
+
+print(f"batch4_strings.json: {len(strings)} entries -> {OUT}")
