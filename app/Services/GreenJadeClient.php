@@ -42,7 +42,7 @@ class GreenJadeClient
 
             $body = $response->json() ?? [];
 
-            return isset($body['data']['balance']) ? (int) $body['data']['balance'] : null;
+            return isset($body['data']['tom_balance']) ? (int) $body['data']['tom_balance'] : null;
         } catch (\Throwable) {
             return null;
         }
