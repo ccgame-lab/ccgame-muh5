@@ -25,7 +25,7 @@
       <OverviewPane v-show="activeTab==='overview'" :player="state.player" :wallet="state.wallet" :features="state.features" :checkin="state.checkin" :refreshing="state.refreshing" @checkin="doCheckin" @refresh="refreshWallet" />
       <TransactionsPane v-show="activeTab==='transactions'" />
       <RankingPane v-show="activeTab==='ranking'" :types="state.rankingTypes" :items="state.rankingItems" :active="state.rankingActive" :loading="state.rankingLoading" :error="state.rankingError" @update:active="setRankingActive" />
-      <ChangelogPane v-show="activeTab==='notifications'" :entries="state.changelog" />
+      <NotificationsPane v-show="activeTab==='notifications'" />
     </div>
 
     <div class="ccgame-sdk-body" v-show="!state.loaded && !state.error">
@@ -54,7 +54,7 @@ import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useSdkState } from './composables/useSdkState.js'
 import OverviewPane from './components/OverviewPane.vue'
 import RankingPane from './components/RankingPane.vue'
-import ChangelogPane from './components/ChangelogPane.vue'
+import NotificationsPane from './components/NotificationsPane.vue'
 import TransactionsPane from './components/TransactionsPane.vue'
 
 const { state, loadBootstrap, loadRanking, setRankingActive, doCheckin, refreshWallet, loadTransactions } = useSdkState()
