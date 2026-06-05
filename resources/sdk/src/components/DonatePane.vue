@@ -47,8 +47,8 @@
       >{{ feedback.message }}</div>
     </div>
 
-    <!-- Section: Đặc quyền -->
-    <div class="ccgame-sdk-priv-section">
+    <!-- Section: Đặc quyền (hidden in compact/inline mode) -->
+    <div v-if="!compact" class="ccgame-sdk-priv-section">
       <div class="ccgame-sdk-priv-section-title">Đặc quyền hỗ trợ</div>
       <div class="ccgame-sdk-priv-note">
         Người tiếp tế góp chi phí duy trì máy chủ, công cụ và thời gian vận hành.<br>
@@ -100,6 +100,7 @@ const props = defineProps({
   itemsLoading: { type: Boolean, default: false },
   itemsError: { type: String, default: null },
   buy: { type: Function, default: null },
+  compact: { type: Boolean, default: false },
 })
 
 const filtered = computed(() => props.features.filter(f => f.href !== ''))
