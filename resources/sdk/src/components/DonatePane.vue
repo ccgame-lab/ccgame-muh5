@@ -7,7 +7,7 @@
       <div class="ccgame-sdk-priv-note">
         Góp chi phí duy trì máy chủ và công cụ vận hành. Tiếp tế quy đổi thành Tôm (1.000đ = 1 Tôm) trong ví GreenJade, dùng để đổi đặc quyền bên dưới.
       </div>
-      <div class="ccgame-sdk-support-tiers">
+      <div v-if="supportTiers.length" class="ccgame-sdk-support-tiers">
         <div
           v-for="t in supportTiers"
           :key="t.id"
@@ -24,6 +24,7 @@
           <a :href="tierUrl(t)" target="_blank" rel="noopener" class="ccgame-sdk-support-btn">Tiếp tế</a>
         </div>
       </div>
+      <a v-else :href="suppliesUrl" target="_blank" rel="noopener" class="ccgame-sdk-support-btn">Tiếp tế GreenJade</a>
       <div class="ccgame-sdk-support-foot">
         Xử lý thủ công qua VietQR tại GreenJade. SDK không giữ ví, không thu tiền.
       </div>
@@ -130,15 +131,10 @@ const props = defineProps({
   buy: { type: Function, default: null },
   compact: { type: Boolean, default: false },
   suppliesUrl: { type: String, default: 'https://id.greenjade.net/supplies' },
+  // Mức tiếp tế lấy từ bootstrap (config/economy.php support_tiers). Nguồn sự thật phía muh5,
+  // SDK chỉ hiển thị + điều hướng sang ví GreenJade, không xử lý tiền.
+  supportTiers: { type: Array, default: () => [] },
 })
-
-// 3 mức tiếp tế (chỉ hiển thị + điều hướng sang GreenJade supplies; SDK không xử lý tiền/ví).
-// Quy đổi theo hệ GreenJade: 1.000đ = 1 Tôm, +1 OXY mỗi 10.000đ.
-const supportTiers = [
-  { id: 'small',  emoji: '☕', name: 'Ủng hộ Nhỏ', vnd: '50.000đ',  amount: 50000,  reward: '50 Tôm · +5 OXY',   tag: '',            popular: false },
-  { id: 'medium', emoji: '🍜', name: 'Ủng hộ Vừa', vnd: '200.000đ', amount: 200000, reward: '200 Tôm · +20 OXY', tag: 'Phổ biến',    popular: true },
-  { id: 'large',  emoji: '🖥️', name: 'Ủng hộ Lớn', vnd: '500.000đ', amount: 500000, reward: '500 Tôm · +50 OXY', tag: 'Ý nghĩa nhất', popular: false },
-]
 
 // Link tiếp tế của từng gói: gắn ?amount để trang GreenJade điền sẵn số tiền gói đã chọn.
 function tierUrl(t) {

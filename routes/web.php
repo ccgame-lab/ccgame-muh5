@@ -7,21 +7,21 @@ use App\Http\Controllers\HallOfFameController;
 use App\Http\Controllers\PlayController;
 use App\Http\Controllers\PointShopController;
 use App\Jobs\SendGameMailJob;
+use App\Models\DiamondClaimLog;
 use App\Models\Giftcode;
-use App\Models\SocialEvent;
-use App\Services\SocialEventService;
 use App\Models\GiftcodeRedemption;
 use App\Models\PointTransaction;
 use App\Models\SdkDailyCheckin;
 use App\Models\SdkFeature;
-use App\Models\DiamondClaimLog;
 use App\Models\Server;
+use App\Models\SocialEvent;
 use App\Models\SpinLog;
 use App\Models\User;
 use App\Services\Game\GmApiService;
 use App\Services\GameRankingService;
 use App\Services\GreenJadeClient;
 use App\Services\LegacyMiningService;
+use App\Services\SocialEventService;
 use App\Services\SpinService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -127,6 +127,7 @@ Route::get('/api/sdk/bootstrap', function (Request $request) {
         'player' => $player,
         'wallet' => $wallet,
         'supplies_url' => $suppliesUrl,
+        'support_tiers' => config('economy.support_tiers', []),
         'tabs' => [
             ['key' => 'overview',      'label' => 'Tổng quan'],
             ['key' => 'transactions',  'label' => 'Giao dịch'],
@@ -324,10 +325,10 @@ Route::post('/api/sdk/checkin', function (Request $request) {
 
         PointTransaction::create([
             'user_id' => $userId,
-            'type'    => 'checkin',
-            'amount'  => $pointAmount,
+            'type' => 'checkin',
+            'amount' => $pointAmount,
             'balance_after' => $lockedUser->points,
-            'meta'    => ['streak' => $streak],
+            'meta' => ['streak' => $streak],
         ]);
 
         SdkDailyCheckin::create([
@@ -540,12 +541,12 @@ Route::post('/api/sdk/giftcode/redeem', function (Request $request) {
         $lockedUser->increment('points', $rewardAmount);
 
         PointTransaction::create([
-            'user_id'      => $lockedUser->id,
-            'type'         => 'giftcode',
-            'amount'       => $rewardAmount,
+            'user_id' => $lockedUser->id,
+            'type' => 'giftcode',
+            'amount' => $rewardAmount,
             'balance_after' => $lockedUser->points,
-            'reference'    => $lockedGiftcode->code,
-            'meta'         => ['giftcode_id' => $lockedGiftcode->id],
+            'reference' => $lockedGiftcode->code,
+            'meta' => ['giftcode_id' => $lockedGiftcode->id],
         ]);
 
         // Update giftcode usage
@@ -580,10 +581,14 @@ Route::get('/api/sdk/spin/status', function (Request $request) {
     ]);
 
     $username = (string) $request->query('u', '');
-    if ($username === '') return $defaults();
+    if ($username === '') {
+        return $defaults();
+    }
 
     $user = User::where('username', $username)->first();
-    if (! $user) return $defaults();
+    if (! $user) {
+        return $defaults();
+    }
 
     $today = now()->toDateString();
     $baseCost = (int) config('economy.spin_cost', 10);
@@ -637,7 +642,7 @@ Route::post('/api/sdk/spin', function (Request $request) {
         );
 
         return response()->json(array_merge($result, ['next_cost' => $nextCost]));
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
     }
 })->name('sdk.spin');
@@ -666,7 +671,7 @@ Route::get('/api/sdk/feed', function () {
                 'events' => array_map(fn (string $j) => $format(json_decode($j, true) ?? []), $raw),
             ]);
         }
-    } catch (\Throwable) {
+    } catch (Throwable) {
         // Redis unavailable (e.g. phpredis ext missing → Error not Exception) — fall through to DB
     }
 
@@ -703,9 +708,9 @@ Route::get('/api/sdk/missions', function (Request $request) {
     }
 
     $checkinDone = SdkDailyCheckin::todayFor($user->id)->exists();
-    $spinsToday  = SpinLog::where('user_id', $user->id)->whereDate('created_at', $today)->count();
-    $miningDone  = DiamondClaimLog::where('user_id', $user->id)->whereDate('created_at', $today)->exists();
-    $allDone     = $checkinDone && $spinsToday >= 5 && $miningDone;
+    $spinsToday = SpinLog::where('user_id', $user->id)->whereDate('created_at', $today)->count();
+    $miningDone = DiamondClaimLog::where('user_id', $user->id)->whereDate('created_at', $today)->exists();
+    $allDone = $checkinDone && $spinsToday >= 5 && $miningDone;
     $bonusClaimed = Cache::has("missions_bonus_{$user->id}_{$today}");
 
     return response()->json([
@@ -714,7 +719,7 @@ Route::get('/api/sdk/missions', function (Request $request) {
             ['key' => 'spin5',   'label' => 'Quay 5 lần',         'done' => $spinsToday >= 5, 'progress' => min($spinsToday, 5), 'target' => 5],
             ['key' => 'mining',  'label' => 'Đào KC 1 lần',       'done' => $miningDone],
         ],
-        'all_done'     => $allDone,
+        'all_done' => $allDone,
         'bonus_claimed' => $bonusClaimed,
         'bonus_points' => $bonusPoints,
     ]);
@@ -736,7 +741,7 @@ Route::post('/api/sdk/missions/claim-bonus', function (Request $request) {
 
     $spinsToday = SpinLog::where('user_id', $user->id)->whereDate('created_at', $today)->count();
     $checkinDone = SdkDailyCheckin::todayFor($user->id)->exists();
-    $miningDone  = DiamondClaimLog::where('user_id', $user->id)->whereDate('created_at', $today)->exists();
+    $miningDone = DiamondClaimLog::where('user_id', $user->id)->whereDate('created_at', $today)->exists();
 
     if (! ($checkinDone && $spinsToday >= 5 && $miningDone)) {
         return response()->json(['success' => false, 'message' => 'Chưa hoàn thành tất cả nhiệm vụ.']);
@@ -749,21 +754,21 @@ Route::post('/api/sdk/missions/claim-bonus', function (Request $request) {
         $lockedUser->increment('points', $bonusPoints);
 
         PointTransaction::create([
-            'user_id'      => $lockedUser->id,
-            'type'         => 'missions_bonus',
-            'amount'       => $bonusPoints,
+            'user_id' => $lockedUser->id,
+            'type' => 'missions_bonus',
+            'amount' => $bonusPoints,
             'balance_after' => $lockedUser->points,
-            'meta'         => [],
+            'meta' => [],
         ]);
     });
 
     Cache::put($cacheKey, true, now()->endOfDay());
 
     return response()->json([
-        'success'      => true,
+        'success' => true,
         'bonus_points' => $bonusPoints,
-        'new_points'   => $user->fresh()->points,
-        'message'      => "+{$bonusPoints} POINT, hoàn thành nhiệm vụ ngày!",
+        'new_points' => $user->fresh()->points,
+        'message' => "+{$bonusPoints} POINT, hoàn thành nhiệm vụ ngày!",
     ]);
 })->name('sdk.missions.claim_bonus');
 
@@ -784,16 +789,16 @@ Route::get('/api/sdk/transactions', function (Request $request) {
             'source' => 'point',
             'type' => $r->type,
             'label' => match ($r->type) {
-                'checkin'   => 'Điểm danh hàng ngày',
-                'giftcode'  => 'Đổi giftcode',
-                'spin_win'  => 'Vòng quay thắng',
-                'missions'  => 'Nhiệm vụ ngày',
-                'buy_tom'   => 'Mua bằng Tôm',
-                default     => $r->type,
+                'checkin' => 'Điểm danh hàng ngày',
+                'giftcode' => 'Đổi giftcode',
+                'spin_win' => 'Vòng quay thắng',
+                'missions' => 'Nhiệm vụ ngày',
+                'buy_tom' => 'Mua bằng Tôm',
+                default => $r->type,
             },
-            'amount'       => (int) $r->amount,
+            'amount' => (int) $r->amount,
             'balance_after' => (int) $r->balance_after,
-            'created_at'   => $r->created_at,
+            'created_at' => $r->created_at,
         ]);
 
     $spinLogs = SpinLog::where('user_id', $user->id)
@@ -802,16 +807,16 @@ Route::get('/api/sdk/transactions', function (Request $request) {
         ->get()
         ->map(fn ($r) => [
             'source' => 'spin',
-            'type'   => $r->prize_type,
-            'label'  => match ($r->prize_type) {
+            'type' => $r->prize_type,
+            'label' => match ($r->prize_type) {
                 'wcoin', 'wcoin_prize' => "+{$r->prize_value} POINT từ vòng quay",
-                'yuanbao' => '+' . number_format($r->prize_value) . 'K KC từ vòng quay',
+                'yuanbao' => '+'.number_format($r->prize_value).'K KC từ vòng quay',
                 'extra_turn' => 'Vòng quay: +1 lượt thêm',
-                'lose_turn'  => 'Vòng quay: Trật',
-                default      => 'Vòng quay',
+                'lose_turn' => 'Vòng quay: Trật',
+                default => 'Vòng quay',
             },
-            'amount'     => in_array($r->prize_type, ['wcoin', 'wcoin_prize']) ? (int) $r->prize_value : null,
-            'cost'       => (int) $r->wcoin_cost,
+            'amount' => in_array($r->prize_type, ['wcoin', 'wcoin_prize']) ? (int) $r->prize_value : null,
+            'cost' => (int) $r->wcoin_cost,
             'created_at' => $r->created_at,
         ]);
 

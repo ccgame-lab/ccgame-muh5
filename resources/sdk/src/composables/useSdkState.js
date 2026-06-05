@@ -11,6 +11,7 @@ const state = reactive({
   features: [],
   changelog: [],
   suppliesUrl: 'https://id.greenjade.net/supplies',
+  supportTiers: [],
   checkin: { checked_today: false, streak: 0, week: [] },
   modules: [],
 
@@ -69,6 +70,7 @@ export function useSdkState() {
         features: d.features || [],
         changelog: d.changelog || [],
         suppliesUrl: d.supplies_url || state.suppliesUrl,
+        supportTiers: d.support_tiers || state.supportTiers,
         checkin: d.checkin || { checked_today: false, streak: 0, week: [] },
         loaded: true,
         error: null,

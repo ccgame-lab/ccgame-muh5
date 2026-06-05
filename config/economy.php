@@ -248,36 +248,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Point Shop Packages
+    | Support Tiers (Tiếp tế GreenJade)
     |--------------------------------------------------------------------------
     |
-    | Portal Coin (Tôm) → WPoint conversion packages.
-    | 1 Tôm = 1 WP = 1,000 VND.
-    | Purchase flow via PortalClient::spend() (not yet implemented).
+    | NGUỒN SỰ THẬT DUY NHẤT cho các mức tiếp tế hiển thị trong SDK (DonatePane).
+    | Mỗi game tự sở hữu gói của mình; muh5 chỉ ĐIỀU HƯỚNG sang ví GreenJade
+    | (deep-link ?amount), KHÔNG xử lý tiền. Quy đổi do GreenJade quyết (1.000đ = 1 Tôm).
+    | Bootstrap trả mảng này ra field support_tiers cho SDK render.
     |
     */
 
-    'point_packages' => [
-        [
-            'wp' => 80,
-            'label' => '☕ Ủng hộ vận hành',
-            'tom_cost' => 50,
-            'price_vnd' => 50000,
-        ],
-        [
-            'wp' => 350,
-            'label' => '🍜 Hỗ trợ phát triển',
-            'tom_cost' => 200,
-            'price_vnd' => 200000,
-            'tag' => 'Phổ biến',
-        ],
-        [
-            'wp' => 1000,
-            'label' => '🖥️ Duy trì Server hoạt động',
-            'tom_cost' => 500,
-            'price_vnd' => 500000,
-            'tag' => 'Siêu tiết kiệm',
-        ],
+    'support_tiers' => [
+        ['id' => 'small', 'emoji' => '☕', 'name' => 'Ủng hộ Nhỏ', 'vnd' => '50.000đ', 'amount' => 50000, 'reward' => '50 Tôm · +5 OXY', 'tag' => '', 'popular' => false],
+        ['id' => 'medium', 'emoji' => '🍜', 'name' => 'Ủng hộ Vừa', 'vnd' => '200.000đ', 'amount' => 200000, 'reward' => '200 Tôm · +20 OXY', 'tag' => 'Phổ biến', 'popular' => true],
+        ['id' => 'large', 'emoji' => '🖥️', 'name' => 'Ủng hộ Lớn', 'vnd' => '500.000đ', 'amount' => 500000, 'reward' => '500 Tôm · +50 OXY', 'tag' => 'Ý nghĩa nhất', 'popular' => false],
     ],
 
     'first_purchase_bonus' => 2.0, // x2 WP cho lần mua đầu tiên
