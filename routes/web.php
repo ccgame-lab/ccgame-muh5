@@ -33,6 +33,9 @@ use Illuminate\Support\Str;
 Route::get('/', fn () => redirect('/play'));
 Route::get('/play', [PlayController::class, 'entry'])->name('play.index');
 
+// Egret engine analytics no-op — swallow /report?appv=... calls (no 404 noise)
+Route::get('/report', fn () => response()->noContent())->name('egret.report');
+
 // SDK bootstrap — lightweight, no ranking
 Route::get('/api/sdk/bootstrap', function (Request $request) {
     $announcements = [];
@@ -634,8 +637,8 @@ Route::get('/api/sdk/feed', function () {
                 'events' => array_map(fn (string $j) => $format(json_decode($j, true) ?? []), $raw),
             ]);
         }
-    } catch (\Exception) {
-        // Redis unavailable — fall through to DB
+    } catch (\Throwable) {
+        // Redis unavailable (e.g. phpredis ext missing → Error not Exception) — fall through to DB
     }
 
     $events = SocialEvent::latest()->limit(10)->get()
