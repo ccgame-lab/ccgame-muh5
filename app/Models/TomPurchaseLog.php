@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $idempotency_key
  * @property string|null $greenjade_exchange_id
  * @property int|null $remaining_tom
- * @property string $status  pending|spent|delivered|failed|delivery_failed
+ * @property string $status pending|spent|dispatched|delivered|failed|delivery_failed
  * @property string|null $failure_reason
  * @property array|null $meta
  */

@@ -28,7 +28,7 @@ class PointShopController extends Controller
         $purchasedByItem = [];
         if ($user) {
             $purchasedByItem = TomPurchaseLog::where('user_id', $user->id)
-                ->whereIn('status', ['spent', 'delivered'])
+                ->whereIn('status', ['spent', 'dispatched', 'delivered', 'delivery_failed'])
                 ->selectRaw('item_id, count(*) as cnt')
                 ->groupBy('item_id')
                 ->pluck('cnt', 'item_id')
