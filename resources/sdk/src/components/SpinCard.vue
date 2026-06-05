@@ -113,9 +113,9 @@ function initWheel(prizes) {
     innerRadius: 0.12,
     pointerAngle: 0,
     isInteractive: false,
-    itemLabelFont: 'Arial',
-    itemLabelFontSizeMax: 13,
-    itemLabelRadius: 0.82,
+    itemLabelFont: 'Arial Bold',
+    itemLabelFontSizeMax: 18,
+    itemLabelRadius: 0.78,
     overlayImage: buildCenterOverlay(),
   })
 }
@@ -246,8 +246,8 @@ onBeforeUnmount(() => {
 /* ── Wheel ── */
 .ccsdk-wheel-wrap {
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 240px;
+  height: 240px;
   margin: 0 auto 10px;
   filter: drop-shadow(0 0 14px rgba(250, 204, 21, 0.12));
 }
@@ -267,8 +267,8 @@ onBeforeUnmount(() => {
 }
 
 .ccsdk-wheel-canvas {
-  width: 200px;
-  height: 200px;
+  width: 240px;
+  height: 240px;
   border-radius: 50%;
   overflow: hidden;
 }

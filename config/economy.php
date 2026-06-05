@@ -336,15 +336,15 @@ return [
     'spin_extra_turn_max_chain' => 2,
 
     'spin_prizes' => [
-        ['type' => 'wcoin',      'value' => 1,      'weight' => 40, 'label' => '1 WCoin'],
-        ['type' => 'wcoin',      'value' => 3,      'weight' => 30, 'label' => '3 WCoin'],
-        ['type' => 'wcoin',      'value' => 7,      'weight' => 20, 'label' => '7 WCoin'],
-        ['type' => 'wcoin',      'value' => 20,     'weight' => 4,  'label' => '20 WCoin'],
+        ['type' => 'wcoin',      'value' => 1,      'weight' => 40, 'label' => '1 PT'],
+        ['type' => 'wcoin',      'value' => 3,      'weight' => 30, 'label' => '3 PT'],
+        ['type' => 'wcoin',      'value' => 7,      'weight' => 20, 'label' => '7 PT'],
+        ['type' => 'wcoin',      'value' => 20,     'weight' => 4,  'label' => '20 PT'],
         ['type' => 'yuanbao',    'value' => 30,     'weight' => 60, 'label' => '30K KC'],
         ['type' => 'yuanbao',    'value' => 80,     'weight' => 15, 'label' => '80K KC'],
         ['type' => 'yuanbao',    'value' => 300,    'weight' => 2,  'label' => '300K KC'],
-        ['type' => 'lose_turn',  'value' => 0,      'weight' => 25, 'label' => 'Mất lượt'],
-        ['type' => 'extra_turn', 'value' => 0,      'weight' => 12, 'label' => 'Thêm lượt'],
+        ['type' => 'lose_turn',  'value' => 0,      'weight' => 25, 'label' => 'Trật'],
+        ['type' => 'extra_turn', 'value' => 0,      'weight' => 12, 'label' => '+Lượt'],
     ],
 
     'gm_alert_threshold' => env('ECONOMY_GM_ALERT_THRESHOLD', 500000),
