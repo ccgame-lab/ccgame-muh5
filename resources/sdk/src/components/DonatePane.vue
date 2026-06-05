@@ -21,7 +21,7 @@
           </div>
           <div class="ccgame-sdk-support-amount">{{ t.vnd }}</div>
           <div class="ccgame-sdk-support-reward">{{ t.reward }}</div>
-          <a :href="suppliesUrl" target="_blank" rel="noopener" class="ccgame-sdk-support-btn">Tiếp tế</a>
+          <a :href="tierUrl(t)" target="_blank" rel="noopener" class="ccgame-sdk-support-btn">Tiếp tế</a>
         </div>
       </div>
       <div class="ccgame-sdk-support-foot">
@@ -135,10 +135,16 @@ const props = defineProps({
 // 3 mức tiếp tế (chỉ hiển thị + điều hướng sang GreenJade supplies; SDK không xử lý tiền/ví).
 // Quy đổi theo hệ GreenJade: 1.000đ = 1 Tôm, +1 OXY mỗi 10.000đ.
 const supportTiers = [
-  { id: 'small',  emoji: '☕', name: 'Ủng hộ Nhỏ', vnd: '50.000đ',  reward: '50 Tôm · +5 OXY',   tag: '',            popular: false },
-  { id: 'medium', emoji: '🍜', name: 'Ủng hộ Vừa', vnd: '200.000đ', reward: '200 Tôm · +20 OXY', tag: 'Phổ biến',    popular: true },
-  { id: 'large',  emoji: '🖥️', name: 'Ủng hộ Lớn', vnd: '500.000đ', reward: '500 Tôm · +50 OXY', tag: 'Ý nghĩa nhất', popular: false },
+  { id: 'small',  emoji: '☕', name: 'Ủng hộ Nhỏ', vnd: '50.000đ',  amount: 50000,  reward: '50 Tôm · +5 OXY',   tag: '',            popular: false },
+  { id: 'medium', emoji: '🍜', name: 'Ủng hộ Vừa', vnd: '200.000đ', amount: 200000, reward: '200 Tôm · +20 OXY', tag: 'Phổ biến',    popular: true },
+  { id: 'large',  emoji: '🖥️', name: 'Ủng hộ Lớn', vnd: '500.000đ', amount: 500000, reward: '500 Tôm · +50 OXY', tag: 'Ý nghĩa nhất', popular: false },
 ]
+
+// Link tiếp tế của từng gói: gắn ?amount để trang GreenJade điền sẵn số tiền gói đã chọn.
+function tierUrl(t) {
+  const sep = props.suppliesUrl.includes('?') ? '&' : '?'
+  return `${props.suppliesUrl}${sep}amount=${t.amount}`
+}
 
 const filtered = computed(() => props.features.filter(f => f.href !== ''))
 
