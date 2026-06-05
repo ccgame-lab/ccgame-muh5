@@ -27,6 +27,11 @@ const state = reactive({
   rankingItems: {},
   rankingActive: '',
 
+  // Transactions tab
+  transactions: [],
+  transactionsLoaded: false,
+  transactionsLoading: false,
+
   // Daily missions
   missions: [],
   missionsLoaded: false,
@@ -236,6 +241,23 @@ export function useSdkState() {
     }
   }
 
+  async function loadTransactions() {
+    if (state.transactionsLoaded || state.transactionsLoading) return
+    state.transactionsLoading = true
+    try {
+      const u = window.ccgame?.user || state.player.name || ''
+      const res = await fetch(`/api/sdk/transactions?u=${encodeURIComponent(u)}`)
+      if (!res.ok) throw new Error()
+      const d = await res.json()
+      state.transactions = d.transactions || []
+      state.transactionsLoaded = true
+    } catch {
+      // silent
+    } finally {
+      state.transactionsLoading = false
+    }
+  }
+
   async function loadMissions() {
     const u = window.ccgame?.user || state.player.name || ''
     try {
@@ -338,6 +360,7 @@ export function useSdkState() {
      loadModules,
      equipModule,
      unequipModule,
+     loadTransactions,
      loadMissions,
      claimMissionsBonus,
      loadFeed,

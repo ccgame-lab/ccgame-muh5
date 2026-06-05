@@ -49,37 +49,58 @@
     <!-- Daily missions -->
     <MissionsCard />
 
-    <!-- Mining -->
-    <MiningCard />
+    <!-- Compact utility grid -->
+    <CompactUtilityGrid :active-panel="activePanel" @toggle-panel="togglePanel" />
 
-    <!-- Spin -->
-    <SpinCard />
+    <!-- Expandable panels -->
+    <transition name="ccsdk-panel-slide">
+      <div v-if="activePanel === 'wallet'" class="ccsdk-expand-panel">
+        <div class="ccsdk-expand-title">Ví POINT</div>
+        <div class="ccsdk-wallet-info">
+          <div class="ccsdk-wi-row"><span>POINT hiện có</span><strong>{{ fmt(wallet.points) }}</strong></div>
+          <div class="ccsdk-wi-row" v-if="wallet.coin"><span>Xu</span><strong>{{ fmt(wallet.coin) }}</strong></div>
+          <div class="ccsdk-wi-row" v-if="wallet.tom != null"><span>Tôm</span><strong class="ccsdk-tom-val">{{ fmt(wallet.tom) }} 🦐</strong></div>
+        </div>
+      </div>
+    </transition>
 
-    <!-- Check-in -->
+    <transition name="ccsdk-panel-slide">
+      <GiftcodeCard v-if="activePanel === 'giftcode'" />
+    </transition>
+
+    <transition name="ccsdk-panel-slide">
+      <DonatePanel v-if="activePanel === 'shop'" :items="pshopItems" :items-loading="pshopLoading" :items-error="pshopError" :buy="buyWithTom" />
+    </transition>
+
+    <transition name="ccsdk-panel-slide">
+      <SpinCard v-if="activePanel === 'spin'" />
+    </transition>
+
+    <transition name="ccsdk-panel-slide">
+      <MiningCard v-if="activePanel === 'mining'" />
+    </transition>
+
+    <!-- Checkin always visible (compact, no extra click needed) -->
     <CheckinCard
       :week="checkinWeek"
       :streak="checkin.streak"
       :checked-today="checkin.checked_today"
       @checkin="onCheckin"
     />
-
-    <!-- Giftcode -->
-    <GiftcodeCard />
-
-    <!-- Features -->
-    <FeatureGrid :features="quickActions" />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import LiveFeedTicker from './LiveFeedTicker.vue'
 import MissionsCard from './MissionsCard.vue'
-import MiningCard from './MiningCard.vue'
-import SpinCard from './SpinCard.vue'
-import CheckinCard from './CheckinCard.vue'
+import CompactUtilityGrid from './CompactUtilityGrid.vue'
 import GiftcodeCard from './GiftcodeCard.vue'
-import FeatureGrid from './FeatureGrid.vue'
+import SpinCard from './SpinCard.vue'
+import MiningCard from './MiningCard.vue'
+import CheckinCard from './CheckinCard.vue'
+import DonatePanel from './DonatePane.vue'
+import { useSdkState } from '../composables/useSdkState.js'
 
 const props = defineProps({
   player: { type: Object, default: () => ({ id: 0, name: '', level: 0, vip: 0 }) },
@@ -91,18 +112,32 @@ const props = defineProps({
 
 const emit = defineEmits(['checkin', 'refresh'])
 
+const { state, loadPshopItems, buyWithTom } = useSdkState()
+
+const pshopItems = computed(() => state.pshopItems)
+const pshopLoading = computed(() => state.pshopLoading)
+const pshopError = computed(() => state.pshopError)
+
+const activePanel = ref(null)
+
+function togglePanel(key) {
+  if (activePanel.value === key) {
+    activePanel.value = null
+    return
+  }
+  activePanel.value = key
+  if (key === 'shop' && !state.pshopLoaded) {
+    loadPshopItems()
+  }
+}
+
 const avatarText = computed(() => {
   const name = props.player.name || '?'
   return name.slice(0, 2).toUpperCase()
 })
 
-const quickActions = computed(() => {
-  return props.features.filter(f => f.active)
-})
-
 const checkinWeek = computed(() => {
   if (!props.checkin.week || !props.checkin.week.length) return []
-  // todayIdx: T2(0) = Mon(getDay=1), ..., CN(6) = Sun(getDay=0)
   const todayIdx = (new Date().getDay() + 6) % 7
   return props.checkin.week.map((d, i) => ({
     ...d,
@@ -215,7 +250,7 @@ function fmt(n) {
 .ccsdk-stat-card--points .ccsdk-stat-value { color: #5b8af7; }
 .ccsdk-stat-card--level .ccsdk-stat-value { color: #e8e8f0; }
 
-/* ── TÔM card — GreenJade premium currency ── */
+/* ── TÔM card ── */
 .ccsdk-stat-card--tom {
   position: relative;
   overflow: hidden;
@@ -239,7 +274,6 @@ function fmt(n) {
   font-weight: 700;
 }
 
-/* shimmer sweep */
 .ccsdk-tom-shimmer {
   position: absolute;
   inset: 0;
@@ -295,5 +329,62 @@ function fmt(n) {
 }
 @keyframes ccsdk-spin {
   to { transform: rotate(360deg); }
+}
+
+/* ── Expandable panels ── */
+.ccsdk-expand-panel {
+  background: #12121d;
+  border: 1px solid #1e1e32;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.ccsdk-expand-title {
+  font-size: 9px;
+  font-weight: 700;
+  color: #5a5a7a;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.ccsdk-wallet-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ccsdk-wi-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #8888aa;
+}
+
+.ccsdk-wi-row strong {
+  color: #e2e2f0;
+  font-variant-numeric: tabular-nums;
+}
+
+.ccsdk-tom-val {
+  color: #ffd54f !important;
+}
+
+/* ── Panel slide transition ── */
+.ccsdk-panel-slide-enter-active {
+  animation: ccsdk-slide-in 0.2s ease;
+}
+.ccsdk-panel-slide-leave-active {
+  animation: ccsdk-slide-out 0.15s ease;
+}
+@keyframes ccsdk-slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ccsdk-slide-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }
 </style>

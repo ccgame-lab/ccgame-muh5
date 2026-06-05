@@ -113,10 +113,10 @@ Route::get('/api/sdk/bootstrap', function (Request $request) {
         'player' => $player,
         'wallet' => $wallet,
         'tabs' => [
-            ['key' => 'overview', 'label' => 'Tổng quan'],
-            ['key' => 'donate', 'label' => 'Đặc quyền'],
-            ['key' => 'ranking', 'label' => 'BXH'],
-            ['key' => 'changelog', 'label' => 'Cập nhật'],
+            ['key' => 'overview',      'label' => 'Tổng quan'],
+            ['key' => 'transactions',  'label' => 'Giao dịch'],
+            ['key' => 'ranking',       'label' => 'BXH'],
+            ['key' => 'notifications', 'label' => 'Thông báo'],
         ],
         'features' => $features,
         'checkin' => (function () use ($user) {
@@ -725,3 +725,60 @@ Route::post('/api/sdk/missions/claim-bonus', function (Request $request) {
         'message'      => "+{$bonusPoints} POINT — hoàn thành nhiệm vụ ngày!",
     ]);
 })->name('sdk.missions.claim_bonus');
+
+// ─── SDK Transactions (Giao dịch tab) ────────────────────────────────────────
+Route::get('/api/sdk/transactions', function (Request $request) {
+    $username = (string) $request->query('u', '');
+    $user = $username !== '' ? User::where('username', $username)->first() : null;
+    if (! $user) {
+        return response()->json(['transactions' => []]);
+    }
+
+    $ptxns = DB::table('point_transactions')
+        ->where('user_id', $user->id)
+        ->latest()
+        ->limit(15)
+        ->get()
+        ->map(fn ($r) => [
+            'source' => 'point',
+            'type' => $r->type,
+            'label' => match ($r->type) {
+                'checkin'   => 'Điểm danh hàng ngày',
+                'giftcode'  => 'Đổi giftcode',
+                'spin_win'  => 'Vòng quay thắng',
+                'missions'  => 'Nhiệm vụ ngày',
+                'buy_tom'   => 'Mua bằng Tôm',
+                default     => $r->type,
+            },
+            'amount'       => (int) $r->amount,
+            'balance_after' => (int) $r->balance_after,
+            'created_at'   => $r->created_at,
+        ]);
+
+    $spinLogs = SpinLog::where('user_id', $user->id)
+        ->latest()
+        ->limit(10)
+        ->get()
+        ->map(fn ($r) => [
+            'source' => 'spin',
+            'type'   => $r->prize_type,
+            'label'  => match ($r->prize_type) {
+                'wcoin', 'wcoin_prize' => "+{$r->prize_value} POINT từ vòng quay",
+                'yuanbao' => '+' . number_format($r->prize_value) . 'K KC từ vòng quay',
+                'extra_turn' => 'Vòng quay: +1 lượt thêm',
+                'lose_turn'  => 'Vòng quay: Trật',
+                default      => 'Vòng quay',
+            },
+            'amount'     => in_array($r->prize_type, ['wcoin', 'wcoin_prize']) ? (int) $r->prize_value : null,
+            'cost'       => (int) $r->wcoin_cost,
+            'created_at' => $r->created_at,
+        ]);
+
+    $transactions = $ptxns->concat($spinLogs)
+        ->sortByDesc('created_at')
+        ->take(20)
+        ->values()
+        ->toArray();
+
+    return response()->json(['transactions' => $transactions]);
+})->name('sdk.transactions');
