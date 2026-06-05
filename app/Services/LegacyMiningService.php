@@ -246,6 +246,11 @@ final class LegacyMiningService
             'modules' => $equippedModules->toArray(),
             'today_claimed' => $todayClaimed,
             'pending_amount' => $pendingAmount,
+            'mining_status' => [
+                'next_reset_at' => now()->addDay()->startOfDay()->toIso8601String(),
+                'claim_ready_at' => $this->claimReadyAt($state, $rate),
+                'efficiency_pct' => (int) round($efficiency * 100),
+            ],
         ];
     }
 
@@ -453,6 +458,19 @@ final class LegacyMiningService
     // ─────────────────────────────────────────────────────────────────────────
     // Internal helpers
     // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * When will pending KC reach a meaningful level to claim (1 hour of production).
+     */
+    private function claimReadyAt(DiamondWallet $state, int $rate): string
+    {
+        if (! $state->last_claimed_at || $rate <= 0) {
+            return now()->toIso8601String();
+        }
+        $readyAt = $state->last_claimed_at->copy()->addHour();
+
+        return $readyAt->isPast() ? now()->toIso8601String() : $readyAt->toIso8601String();
+    }
 
     /**
      * Calculate current efficiency based on time since last maintenance.

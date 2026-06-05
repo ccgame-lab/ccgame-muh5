@@ -48,6 +48,13 @@
         </div>
       </div>
     </div>
+    <!-- Countdown / ready indicator -->
+    <div v-if="quote.mining_status" class="mc-timer-row">
+      <span class="mc-timer-label">Sẵn sàng thu hoạch</span>
+      <span v-if="claimReady" class="mc-timer-ready" :class="{ 'mc-timer-pulse': claimReady }">SẴN SÀNG ✦</span>
+      <span v-else class="mc-timer-countdown">{{ countdown }}</span>
+    </div>
+
     <div class="mc-actions-wrap">
       <div class="mc-pending"><span>Tích lũy KC</span><strong>{{ fmt(quote.pending_amount) }} 💎</strong></div>
       <div class="mc-btns">
@@ -64,7 +71,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useSdkState } from '../composables/useSdkState'
 
 const { state, refreshWallet, loadModules, equipModule, unequipModule } = useSdkState()
@@ -152,13 +159,37 @@ async function doMaintain() {
 function csrf() { return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '' }
 
 const maintainGain = computed(() => Math.round((1 - (quote.value?.efficiency ?? 0.35)) * 100))
-const effColor = computed(() => { const e = quote.value?.efficiency ?? 0.35; return e >= 0.9 ? '#4caf50' : e >= 0.6 ? '#c9a94e' : '#e6543a' })
+const effColor = computed(() => { const e = quote.value?.efficiency ?? 0.35; return e >= 0.7 ? '#4caf50' : e >= 0.4 ? '#c9a94e' : '#e6543a' })
 const claimBtnClass = computed(() => (quote.value?.efficiency ?? 0) >= 0.7 ? 'mc-btn--primary' : '')
 const maintainBtnClass = computed(() => (quote.value?.efficiency ?? 1) < 0.7 ? 'mc-btn--primary' : '')
 function fmt(n) { return ((n || 0) * 10).toLocaleString() }
 function pct(n) { return Math.round((n || 0) * 100) }
 
-onMounted(async () => { await Promise.all([fetchQuote(), loadModules()]) })
+// Countdown to claim_ready_at
+const countdown = ref('')
+const claimReady = ref(false)
+let countdownTimer = null
+
+function updateCountdown() {
+  const readyAt = quote.value?.mining_status?.claim_ready_at
+  if (!readyAt) { countdown.value = ''; claimReady.value = false; return }
+  const diff = new Date(readyAt).getTime() - Date.now()
+  if (diff <= 0) { claimReady.value = true; countdown.value = ''; return }
+  claimReady.value = false
+  const h = Math.floor(diff / 3600000)
+  const m = Math.floor((diff % 3600000) / 60000)
+  const s = Math.floor((diff % 60000) / 1000)
+  countdown.value = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+}
+
+watch(() => quote.value?.mining_status, () => updateCountdown(), { immediate: true })
+
+onMounted(async () => {
+  await Promise.all([fetchQuote(), loadModules()])
+  countdownTimer = setInterval(updateCountdown, 1000)
+})
+
+onUnmounted(() => { if (countdownTimer) clearInterval(countdownTimer) })
 </script>
 
 <style scoped>
@@ -214,6 +245,12 @@ onMounted(async () => { await Promise.all([fetchQuote(), loadModules()]) })
 .mc-flash-leave-active { animation: flash-out 0.3s ease; }
 @keyframes flash-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes flash-out { from { opacity: 1; } to { opacity: 0; } }
+.mc-timer-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0 8px; border-top: 1px solid #1a1a2e; margin-top: 2px; }
+.mc-timer-label { font-size: 9px; color: #5a5a7a; text-transform: uppercase; letter-spacing: 0.06em; }
+.mc-timer-countdown { font-size: 11px; font-weight: 700; color: #8888aa; font-variant-numeric: tabular-nums; }
+.mc-timer-ready { font-size: 10px; font-weight: 800; color: #4caf50; letter-spacing: 0.06em; }
+.mc-timer-pulse { animation: mc-ready-pulse 1.2s ease-in-out infinite; }
+@keyframes mc-ready-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 .mc-msg { font-size: 10px; text-align: center; margin-top: 6px; font-weight: 600; }
 .mc-msg--muted { color: #5a5a7a; font-weight: 500; }
 .mc-msg--err { color: #f44336; font-size: 9px; }
