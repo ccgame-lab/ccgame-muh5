@@ -1,6 +1,34 @@
 <template>
   <div class="ccgame-sdk-pane">
 
+    <!-- Section: Tiếp tế GreenJade (lối có thêm Tôm, SDK chỉ điều hướng, không xử lý ví) -->
+    <div class="ccgame-sdk-priv-section">
+      <div class="ccgame-sdk-priv-section-title">Tiếp tế GreenJade</div>
+      <div class="ccgame-sdk-priv-note">
+        Góp chi phí duy trì máy chủ và công cụ vận hành. Tiếp tế quy đổi thành Tôm (1.000đ = 1 Tôm) trong ví GreenJade, dùng để đổi đặc quyền bên dưới.
+      </div>
+      <div class="ccgame-sdk-support-tiers">
+        <div
+          v-for="t in supportTiers"
+          :key="t.id"
+          class="ccgame-sdk-support-card"
+          :class="{ 'ccgame-sdk-support-card--pop': t.popular }"
+        >
+          <span v-if="t.tag" class="ccgame-sdk-support-tag">{{ t.tag }}</span>
+          <div class="ccgame-sdk-support-head">
+            <span class="ccgame-sdk-support-emoji">{{ t.emoji }}</span>
+            <span class="ccgame-sdk-support-name">{{ t.name }}</span>
+          </div>
+          <div class="ccgame-sdk-support-amount">{{ t.vnd }}</div>
+          <div class="ccgame-sdk-support-reward">{{ t.reward }}</div>
+          <a :href="suppliesUrl" target="_blank" rel="noopener" class="ccgame-sdk-support-btn">Tiếp tế</a>
+        </div>
+      </div>
+      <div class="ccgame-sdk-support-foot">
+        Xử lý thủ công qua VietQR tại GreenJade. SDK không giữ ví, không thu tiền.
+      </div>
+    </div>
+
     <!-- Section: Cửa hàng Tôm -->
     <div class="ccgame-sdk-priv-section">
       <div class="ccgame-sdk-priv-section-title">Cửa hàng Tôm</div>
@@ -101,7 +129,16 @@ const props = defineProps({
   itemsError: { type: String, default: null },
   buy: { type: Function, default: null },
   compact: { type: Boolean, default: false },
+  suppliesUrl: { type: String, default: 'https://id.greenjade.net/supplies' },
 })
+
+// 3 mức tiếp tế (chỉ hiển thị + điều hướng sang GreenJade supplies; SDK không xử lý tiền/ví).
+// Quy đổi theo hệ GreenJade: 1.000đ = 1 Tôm, +1 OXY mỗi 10.000đ.
+const supportTiers = [
+  { id: 'small',  emoji: '☕', name: 'Ủng hộ Nhỏ', vnd: '10.000đ',  reward: '10 Tôm',          tag: '',            popular: false },
+  { id: 'medium', emoji: '🍜', name: 'Ủng hộ Vừa', vnd: '50.000đ',  reward: '50 Tôm · +5 OXY',  tag: 'Phổ biến',    popular: true },
+  { id: 'large',  emoji: '🖥️', name: 'Ủng hộ Lớn', vnd: '100.000đ', reward: '100 Tôm · +10 OXY', tag: 'Ý nghĩa nhất', popular: false },
+]
 
 const filtered = computed(() => props.features.filter(f => f.href !== ''))
 
@@ -188,5 +225,85 @@ async function onBuy(it) {
   color: #f4685e;
   background: rgba(244, 104, 94, 0.1);
   border: 1px solid rgba(244, 104, 94, 0.3);
+}
+
+/* ── Tiếp tế GreenJade (3 gói ủng hộ) ── */
+.ccgame-sdk-support-tiers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+.ccgame-sdk-support-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 11px 6px 8px;
+  background: #12121d;
+  border: 1px solid #1e1e32;
+  border-radius: 8px;
+  text-align: center;
+}
+.ccgame-sdk-support-card--pop {
+  border-color: rgba(46, 196, 182, 0.55);
+  box-shadow: 0 0 0 1px rgba(46, 196, 182, 0.22);
+}
+.ccgame-sdk-support-tag {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 8px;
+  font-weight: 700;
+  color: #04201d;
+  background: #2ec4b6;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.ccgame-sdk-support-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 2px;
+}
+.ccgame-sdk-support-emoji { font-size: 18px; line-height: 1; }
+.ccgame-sdk-support-name { font-size: 10px; font-weight: 600; color: #c8c8e0; }
+.ccgame-sdk-support-amount {
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffd54f;
+  font-variant-numeric: tabular-nums;
+}
+.ccgame-sdk-support-reward {
+  font-size: 9px;
+  color: #8a8aaa;
+  line-height: 1.3;
+  min-height: 24px;
+}
+.ccgame-sdk-support-btn {
+  margin-top: 4px;
+  width: 100%;
+  padding: 6px 0;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #2ec4b6, #21a99d);
+  color: #04201d;
+  font-size: 10px;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ccgame-sdk-support-btn:hover { filter: brightness(1.08); }
+.ccgame-sdk-support-foot {
+  margin-top: 8px;
+  font-size: 9px;
+  color: #5a5a7a;
+  line-height: 1.4;
+  text-align: center;
 }
 </style>

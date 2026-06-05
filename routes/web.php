@@ -116,10 +116,14 @@ Route::get('/api/sdk/bootstrap', function (Request $request) {
         report($e);
     }
 
+    // Lối tiếp tế Tôm: chỉ là URL điều hướng sang GreenJade, SDK không xử lý ví/thanh toán.
+    $suppliesUrl = rtrim((string) (config('services.greenjade.id_url') ?: 'https://id.greenjade.net'), '/').'/supplies';
+
     return response()->json([
         'server' => ['id' => $serverId, 'name' => $serverName],
         'player' => $player,
         'wallet' => $wallet,
+        'supplies_url' => $suppliesUrl,
         'tabs' => [
             ['key' => 'overview',      'label' => 'Tổng quan'],
             ['key' => 'transactions',  'label' => 'Giao dịch'],

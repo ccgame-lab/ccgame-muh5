@@ -69,7 +69,7 @@
     </transition>
 
     <transition name="ccsdk-panel-slide">
-      <DonatePanel v-if="activePanel === 'shop'" :items="pshopItems" :items-loading="pshopLoading" :items-error="pshopError" :buy="buyWithTom" :compact="true" />
+      <DonatePanel v-if="activePanel === 'shop'" :items="pshopItems" :items-loading="pshopLoading" :items-error="pshopError" :buy="buyWithTom" :compact="true" :supplies-url="suppliesUrl" />
     </transition>
 
     <transition name="ccsdk-panel-slide">
@@ -117,6 +117,7 @@ const { state, loadPshopItems, buyWithTom } = useSdkState()
 const pshopItems = computed(() => state.pshopItems)
 const pshopLoading = computed(() => state.pshopLoading)
 const pshopError = computed(() => state.pshopError)
+const suppliesUrl = computed(() => state.suppliesUrl)
 
 const activePanel = ref(null)
 

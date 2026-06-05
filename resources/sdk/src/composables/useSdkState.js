@@ -10,6 +10,7 @@ const state = reactive({
   tabs: [],
   features: [],
   changelog: [],
+  suppliesUrl: 'https://id.greenjade.net/supplies',
   checkin: { checked_today: false, streak: 0, week: [] },
   modules: [],
 
@@ -67,6 +68,7 @@ export function useSdkState() {
         tabs: d.tabs || [],
         features: d.features || [],
         changelog: d.changelog || [],
+        suppliesUrl: d.supplies_url || state.suppliesUrl,
         checkin: d.checkin || { checked_today: false, streak: 0, week: [] },
         loaded: true,
         error: null,
