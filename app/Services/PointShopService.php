@@ -10,6 +10,7 @@ use App\Models\GmAction;
 use App\Models\Server;
 use App\Models\TomPurchaseLog;
 use App\Models\User;
+use App\Support\TelegramAlert;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -187,13 +188,13 @@ class PointShopService
     }
 
     /**
-     * @param array<string, mixed> $item
+     * @param  array<string, mixed>  $item
      */
     protected function deliverTomItem(User $user, array $item, int $serverId, TomPurchaseLog $log): void
     {
         $server = Server::find($serverId);
         if (! $server || ! $server->db_connection_name) {
-            $log->update(['status' => 'delivery_failed', 'failure_reason' => 'Server không hợp lệ.']);
+            $this->markDeliveryFailed($log, $user, 'Server không hợp lệ.');
             throw new Exception('Server không hợp lệ. Tom đã bị trừ — liên hệ hỗ trợ với mã: '.$log->id);
         }
 
@@ -203,7 +204,7 @@ class PointShopService
             ->first(['actorid']);
 
         if (! $actor) {
-            $log->update(['status' => 'delivery_failed', 'failure_reason' => 'Nhân vật không tồn tại trên server.']);
+            $this->markDeliveryFailed($log, $user, 'Nhân vật không tồn tại trên server.');
             throw new Exception('Bạn chưa có nhân vật trên server này. Tom đã bị trừ — liên hệ hỗ trợ với mã: '.$log->id);
         }
 
@@ -234,7 +235,7 @@ class PointShopService
                 'item_payload' => '1,'.$gameItemId.',1',
             ];
         } else {
-            $log->update(['status' => 'delivery_failed', 'failure_reason' => 'Item config thiếu delivery method.']);
+            $this->markDeliveryFailed($log, $user, 'Item config thiếu delivery method.');
             throw new Exception('Lỗi cấu hình vật phẩm. Tom đã bị trừ — liên hệ hỗ trợ với mã: '.$log->id);
         }
 
@@ -251,6 +252,29 @@ class PointShopService
         ExecuteGmCommand::dispatch($gmAction->id);
 
         $log->update(['status' => 'delivered', 'meta' => array_merge((array) $log->meta, ['gm_action_id' => $gmAction->id])]);
+    }
+
+    /**
+     * Mark a Tom purchase as delivery_failed and alert ops.
+     *
+     * Tom is already deducted at this point but the item never reached the
+     * player. GreenJade has no refund endpoint, so each failure must page ops
+     * for a manual refund.
+     */
+    protected function markDeliveryFailed(TomPurchaseLog $log, User $user, string $reason): void
+    {
+        $log->update(['status' => 'delivery_failed', 'failure_reason' => $reason]);
+
+        $itemName = $log->meta['item_name'] ?? $log->item_id;
+
+        TelegramAlert::send(implode("\n", [
+            '🚨 muh5 pshop — GIAO HÀNG THẤT BẠI (cần refund tay)',
+            "Người chơi: {$user->username} (portal_uid: {$user->portal_uid})",
+            "Vật phẩm: {$itemName} ({$log->item_id})",
+            "Đã trừ: {$log->tom_spent} Tôm — GreenJade exchange: {$log->greenjade_exchange_id}",
+            "Lý do: {$reason}",
+            "Mã log: {$log->id}",
+        ]));
     }
 
     /**

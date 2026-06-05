@@ -13,6 +13,12 @@ const state = reactive({
   checkin: { checked_today: false, streak: 0, week: [] },
   modules: [],
 
+  // Lazy pshop (Tom items)
+  pshopItems: [],
+  pshopLoaded: false,
+  pshopLoading: false,
+  pshopError: null,
+
   // Lazy ranking
   rankingLoaded: false,
   rankingLoading: false,
@@ -121,6 +127,48 @@ export function useSdkState() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''
   }
 
+  async function loadPshopItems() {
+    if (state.pshopLoaded || state.pshopLoading) return
+    state.pshopLoading = true
+    state.pshopError = null
+    try {
+      const u = window.ccgame?.user || state.player.name || ''
+      const sid = state.server.id || ''
+      const res = await fetch(`/api/pshop/items?u=${encodeURIComponent(u)}&server_id=${encodeURIComponent(sid)}`)
+      if (!res.ok) throw new Error()
+      const d = await res.json()
+      state.pshopItems = d.items || []
+      state.pshopLoaded = true
+    } catch {
+      state.pshopError = 'Không tải được cửa hàng Tôm, thử lại sau.'
+    } finally {
+      state.pshopLoading = false
+    }
+  }
+
+  async function buyWithTom(itemId) {
+    const u = window.ccgame?.user || state.player.name
+    if (!u) return { success: false, message: 'Phiên chơi chưa xác thực, hãy tải lại trang.' }
+    try {
+      const res = await fetch('/api/pshop/buy-tom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf() },
+        body: JSON.stringify({ u, item_id: itemId, server_id: state.server.id || 1 }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        // Refresh purchased/limit state and wallet after a successful buy.
+        state.pshopLoaded = false
+        await loadPshopItems()
+        await refreshWallet()
+        return { success: true, message: data.message || 'Đổi Tôm thành công!', remaining_tom: data.remaining_tom }
+      }
+      return { success: false, message: data.error || 'Đổi Tôm thất bại, thử lại sau.' }
+    } catch {
+      return { success: false, message: 'Lỗi kết nối, thử lại sau.' }
+    }
+  }
+
   async function loadModules() {
     const u = window.ccgame?.user || state.player.name
     if (!u) return
@@ -175,6 +223,8 @@ export function useSdkState() {
      loadModules,
      equipModule,
      unequipModule,
+     loadPshopItems,
+     buyWithTom,
      setRankingActive(key) { state.rankingActive = key },
    }
 }

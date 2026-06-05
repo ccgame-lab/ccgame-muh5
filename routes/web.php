@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\HallOfFameController;
 use App\Http\Controllers\PlayController;
+use App\Http\Controllers\PointShopController;
 use App\Jobs\SendGameMailJob;
 use App\Models\Giftcode;
 use App\Models\GiftcodeRedemption;
@@ -152,6 +153,14 @@ Route::get('/api/sdk/ranking', function () {
 
     return response()->json(['types' => $types, 'items' => $items]);
 });
+
+// ─── Point Shop (Tom / GreenJade wallet) ─────────────────────────────────────
+
+// Items — lazy list of Tom-priced items, fetched when "Đặc quyền" tab opens
+Route::get('/api/pshop/items', [PointShopController::class, 'items'])->name('pshop.items');
+
+// Buy — deduct Tom via GreenJade, deliver via GM mail
+Route::post('/api/pshop/buy-tom', [PointShopController::class, 'buyWithTom'])->name('pshop.buy_tom');
 
 // ─── Legacy Mining API (simplified maintenance-based idle faucet) ─────────────
 

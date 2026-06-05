@@ -36,8 +36,8 @@ return [
     ],
 
     'greenjade' => [
-        'base_url'       => env('GREENJADE_BASE_URL'),
-        'service_code'   => env('GREENJADE_SERVICE_CODE', 'muh5'),
+        'base_url' => env('GREENJADE_BASE_URL'),
+        'service_code' => env('GREENJADE_SERVICE_CODE', 'muh5'),
         'service_secret' => env('GREENJADE_SERVICE_SECRET'),
     ],
 
@@ -46,6 +46,11 @@ return [
         'client_id' => env('GREENJADE_ID_CLIENT_ID'),
         'client_secret' => env('GREENJADE_ID_CLIENT_SECRET'),
         'redirect_uri' => env('GREENJADE_ID_REDIRECT_URI'),
+    ],
+
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'ops_chat_id' => env('TELEGRAM_OPS_CHAT_ID'),
     ],
 
 ];

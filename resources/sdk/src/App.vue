@@ -23,7 +23,7 @@
 
     <div class="ccgame-sdk-body" v-show="state.loaded">
       <OverviewPane v-show="activeTab==='overview'" :player="state.player" :wallet="state.wallet" :features="state.features" :checkin="state.checkin" :refreshing="state.refreshing" @checkin="doCheckin" @refresh="refreshWallet" />
-      <DonatePane v-show="activeTab==='donate'" :features="state.features" :loaded="state.loaded" />
+      <DonatePane v-show="activeTab==='donate'" :features="state.features" :loaded="state.loaded" :items="state.pshopItems" :items-loading="state.pshopLoading" :items-error="state.pshopError" :buy="buyWithTom" />
       <RankingPane v-show="activeTab==='ranking'" :types="state.rankingTypes" :items="state.rankingItems" :active="state.rankingActive" :loading="state.rankingLoading" :error="state.rankingError" @update:active="setRankingActive" />
       <ChangelogPane v-show="activeTab==='changelog'" :entries="state.changelog" />
     </div>
@@ -57,7 +57,7 @@ import RankingPane from './components/RankingPane.vue'
 import ChangelogPane from './components/ChangelogPane.vue'
 import DonatePane from './components/DonatePane.vue'
 
-const { state, loadBootstrap, loadRanking, setRankingActive, doCheckin, refreshWallet } = useSdkState()
+const { state, loadBootstrap, loadRanking, setRankingActive, doCheckin, refreshWallet, loadPshopItems, buyWithTom } = useSdkState()
 const open = ref(false)
 const activeTab = ref('overview')
 const booted = ref(false)
@@ -75,6 +75,9 @@ function switchTab(key) {
   activeTab.value = key
   if (key === 'ranking' && !state.rankingLoaded) {
     loadRanking()
+  }
+  if (key === 'donate' && !state.pshopLoaded) {
+    loadPshopItems()
   }
 }
 

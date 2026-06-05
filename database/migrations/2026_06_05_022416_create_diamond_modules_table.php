@@ -22,24 +22,27 @@ return new class extends Migration
             $table->index(['user_id', 'slot_index']);
         });
 
-        // Seeder for legacy data
-        DB::table('diamond_wallets')
-            ->join('diamond_machines', 'diamond_machines.user_id', '=', 'diamond_wallets.user_id')
-            ->select(
-                'diamond_wallets.user_id',
-                DB::raw('FLOOR(MAX(diamond_machines.speed_level) / 2) as ml'),
-                DB::raw('diamond_wallets.ascension_level * 5 as lb')
-            )
-            ->groupBy('diamond_wallets.user_id', 'diamond_wallets.ascension_level')
-            ->orderBy('diamond_wallets.user_id')
-            ->chunk(100, function ($rows) {
-                foreach ($rows as $row) {
-                    DB::table('diamond_wallets')->where('user_id', $row->user_id)->update([
-                        'machine_level' => max(1, min(3, (int) $row->ml)),
-                        'legacy_bonus' => $row->lb,
-                    ]);
-                }
-            });
+        // Seeder for legacy data. MySQL-only (raw FLOOR); on a fresh sqlite test
+        // DB the source tables are empty so this backfill is a no-op anyway.
+        if (DB::getDriverName() === 'mysql') {
+            DB::table('diamond_wallets')
+                ->join('diamond_machines', 'diamond_machines.user_id', '=', 'diamond_wallets.user_id')
+                ->select(
+                    'diamond_wallets.user_id',
+                    DB::raw('FLOOR(MAX(diamond_machines.speed_level) / 2) as ml'),
+                    DB::raw('diamond_wallets.ascension_level * 5 as lb')
+                )
+                ->groupBy('diamond_wallets.user_id', 'diamond_wallets.ascension_level')
+                ->orderBy('diamond_wallets.user_id')
+                ->chunk(100, function ($rows) {
+                    foreach ($rows as $row) {
+                        DB::table('diamond_wallets')->where('user_id', $row->user_id)->update([
+                            'machine_level' => max(1, min(3, (int) $row->ml)),
+                            'legacy_bonus' => $row->lb,
+                        ]);
+                    }
+                });
+        }
     }
 
     /**
