@@ -35,6 +35,12 @@ return [
         ],
     ],
 
+    'greenjade' => [
+        'base_url'       => env('GREENJADE_BASE_URL'),
+        'service_code'   => env('GREENJADE_SERVICE_CODE', 'muh5'),
+        'service_secret' => env('GREENJADE_SERVICE_SECRET'),
+    ],
+
     'greenjade_id' => [
         'base_url' => env('GREENJADE_ID_BASE_URL'),
         'client_id' => env('GREENJADE_ID_CLIENT_ID'),

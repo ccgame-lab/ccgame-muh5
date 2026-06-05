@@ -8,6 +8,7 @@ use App\Jobs\ExecuteGmCommand;
 use App\Models\FruitPurchaseLog;
 use App\Models\GmAction;
 use App\Models\Server;
+use App\Models\TomPurchaseLog;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,7 @@ class PointShopService
 {
     public function __construct(
         protected PointService $pointService,
+        protected GreenJadeClient $greenJadeClient,
     ) {}
 
     /**
@@ -55,7 +57,6 @@ class PointShopService
 
         $unitPrice = (int) $prices[$itemId];
         $totalCost = $unitPrice * $quantity;
-
         $actor = $this->findActor($server, $user->username);
 
         return DB::transaction(function () use ($user, $itemId, $quantity, $serverId, $totalCost, $actor): array {
@@ -104,6 +105,78 @@ class PointShopService
     }
 
     /**
+     * Purchase a pshop item priced in Tom (GreenJade wallet).
+     * Flow: deduct Tom via GreenJade API then deliver via GM command.
+     * No auto-rollback: GM job retries. Manual GJ admin refund if exhausted.
+     *
+     * @return array{success: bool, exchange_id: string, tom_spent: int, remaining_tom: int}
+     *
+     * @throws InsufficientTomException
+     * @throws Exception
+     */
+    public function buyWithTom(User $user, string $itemId, int $serverId): array
+    {
+        $item = config("pshop.items.{$itemId}");
+        if (! $item || empty($item['price_tom'])) {
+            throw new Exception('Vật phẩm không hợp lệ hoặc không bán bằng Tôm.');
+        }
+
+        if (! $user->portal_uid) {
+            throw new Exception('Tài khoản chưa liên kết GreenJade. Vui lòng đăng nhập lại.');
+        }
+
+        $tomCost = (int) $item['price_tom'];
+
+        $limit = $item['limit_per_user'] ?? null;
+        if ($limit !== null) {
+            $purchased = TomPurchaseLog::where('user_id', $user->id)
+                ->where('item_id', $itemId)
+                ->whereIn('status', ['spent', 'delivered'])
+                ->count();
+            if ($purchased >= $limit) {
+                throw new Exception('Bạn đã đạt giới hạn mua vật phẩm này.');
+            }
+        }
+
+        $idempotencyKey = 'muh5-pshop-'.Str::ulid();
+        $logId = (string) Str::uuid();
+
+        $log = TomPurchaseLog::create([
+            'id' => $logId,
+            'user_id' => $user->id,
+            'item_id' => $itemId,
+            'server_id' => $serverId,
+            'tom_spent' => $tomCost,
+            'idempotency_key' => $idempotencyKey,
+            'status' => 'pending',
+            'meta' => ['item_name' => $item['name'] ?? $itemId],
+        ]);
+
+        $spendResult = $this->greenJadeClient->spend(
+            portalUid: $user->portal_uid,
+            tomAmount: $tomCost,
+            idempotencyKey: $idempotencyKey,
+            reason: 'Mua '.($item['name'] ?? $itemId).' tại muh5',
+            metadata: ['server_id' => $serverId, 'item_id' => $itemId],
+        );
+
+        $log->update([
+            'status' => 'spent',
+            'greenjade_exchange_id' => $spendResult['exchange_id'],
+            'remaining_tom' => $spendResult['remaining_tom'],
+        ]);
+
+        $this->deliverTomItem($user, $item, $serverId, $log);
+
+        return [
+            'success' => true,
+            'exchange_id' => $spendResult['exchange_id'],
+            'tom_spent' => $tomCost,
+            'remaining_tom' => $spendResult['remaining_tom'],
+        ];
+    }
+
+    /**
      * Get total fruit quantity purchased this week (all item_ids combined).
      */
     public function getWeeklyPurchased(User $user): int
@@ -114,9 +187,73 @@ class PointShopService
     }
 
     /**
-     * Find actor by account name in the game DB.
-     *
-     *
+     * @param array<string, mixed> $item
+     */
+    protected function deliverTomItem(User $user, array $item, int $serverId, TomPurchaseLog $log): void
+    {
+        $server = Server::find($serverId);
+        if (! $server || ! $server->db_connection_name) {
+            $log->update(['status' => 'delivery_failed', 'failure_reason' => 'Server không hợp lệ.']);
+            throw new Exception('Server không hợp lệ. Tom đã bị trừ — liên hệ hỗ trợ với mã: '.$log->id);
+        }
+
+        $actor = DB::connection($server->db_connection_name)
+            ->table('actors')
+            ->where('accountname', $user->username)
+            ->first(['actorid']);
+
+        if (! $actor) {
+            $log->update(['status' => 'delivery_failed', 'failure_reason' => 'Nhân vật không tồn tại trên server.']);
+            throw new Exception('Bạn chưa có nhân vật trên server này. Tom đã bị trừ — liên hệ hỗ trợ với mã: '.$log->id);
+        }
+
+        $kcYield = (int) ($item['base_kc_yield'] ?? 0);
+        $gameItemId = $item['game_item_id'] ?? null;
+        $isLifetimeCard = ! empty($item['is_lifetime_card']);
+        $itemId = $item['id'];
+
+        if ($isLifetimeCard) {
+            $actionPayload = [
+                'player_id' => (string) $actor->actorid,
+                'title' => 'Đặc Quyền Trọn Đời',
+                'body' => 'Bạn đã kích hoạt Đặc Quyền Trọn Đời.',
+                'item_payload' => '1,'.($item['feecallback_item_id'] ?? 88899).',1',
+            ];
+        } elseif ($kcYield > 0) {
+            $actionPayload = [
+                'player_id' => (string) $actor->actorid,
+                'title' => 'Cửa hàng Tôm',
+                'body' => 'Bạn đã đổi Tôm lấy '.number_format($kcYield).' Kim Cương.',
+                'item_payload' => '2,'.$kcYield,
+            ];
+        } elseif ($gameItemId) {
+            $actionPayload = [
+                'player_id' => (string) $actor->actorid,
+                'title' => 'Cửa hàng Tôm',
+                'body' => 'Bạn đã mua '.($item['name'] ?? $itemId).' bằng Tôm.',
+                'item_payload' => '1,'.$gameItemId.',1',
+            ];
+        } else {
+            $log->update(['status' => 'delivery_failed', 'failure_reason' => 'Item config thiếu delivery method.']);
+            throw new Exception('Lỗi cấu hình vật phẩm. Tom đã bị trừ — liên hệ hỗ trợ với mã: '.$log->id);
+        }
+
+        $gmAction = GmAction::create([
+            'action_uuid' => Str::uuid()->toString(),
+            'admin_id' => null,
+            'server_id' => $serverId,
+            'action_type' => 'send_mail',
+            'target_user' => $user->username,
+            'payload' => $actionPayload,
+            'status' => 'pending',
+        ]);
+
+        ExecuteGmCommand::dispatch($gmAction->id);
+
+        $log->update(['status' => 'delivered', 'meta' => array_merge((array) $log->meta, ['gm_action_id' => $gmAction->id])]);
+    }
+
+    /**
      * @throws Exception
      */
     protected function findActor(Server $server, string $username): object
