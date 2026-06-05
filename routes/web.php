@@ -271,7 +271,10 @@ Route::post('/api/sdk/checkin', function (Request $request) {
         ->first();
 
     $streak = $yesterdayRecord ? $yesterdayRecord->streak + 1 : 1;
-    $tomAmount = $streak >= 7 ? 200 : 50;
+    $base = (int) config('economy.point_checkin_amount', 3);
+    $weekBonus = $streak >= (int) config('economy.point_streak_threshold', 7) ? (int) config('economy.point_streak_bonus', 10) : 0;
+    $monthBonus = $streak >= (int) config('economy.point_streak_monthly_threshold', 30) ? (int) config('economy.point_streak_monthly_bonus', 30) : 0;
+    $tomAmount = $base + $weekBonus + $monthBonus;
 
     $userId = $user->id;
 
