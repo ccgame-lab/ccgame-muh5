@@ -1,0 +1,6 @@
+# Pulled R2 assets (scratch space for editing) — never commit
+work/
+# Python cache + analysis scratch
+__pycache__/
+*.pyc
+_*
