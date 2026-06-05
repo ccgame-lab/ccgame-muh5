@@ -15,9 +15,11 @@ use App\Models\Server;
 use App\Models\User;
 use App\Services\Game\GmApiService;
 use App\Services\GameRankingService;
+use App\Services\GreenJadeClient;
 use App\Services\LegacyMiningService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -49,7 +51,7 @@ Route::get('/api/sdk/bootstrap', function (Request $request) {
     $username = (string) $request->query('u', '');
     $user = null;
     $player = ['id' => 0, 'name' => 'Khách', 'level' => 0, 'vip' => 0];
-    $wallet = ['points' => 0];
+    $wallet = ['points' => 0, 'coin' => 0, 'tom' => null];
 
     if ($username !== '') {
         $user = User::where('username', $username)->first();
@@ -63,6 +65,13 @@ Route::get('/api/sdk/bootstrap', function (Request $request) {
             } catch (Throwable) {
             }
 
+            $tomBalance = null;
+            if ($user->portal_uid) {
+                $tomBalance = Cache::remember("gj_bal_{$user->portal_uid}", 60, function () use ($user) {
+                    return app(GreenJadeClient::class)->getBalance((string) $user->portal_uid);
+                });
+            }
+
             $player = [
                 'id' => $user->id,
                 'name' => $user->name ?: $user->username,
@@ -72,6 +81,7 @@ Route::get('/api/sdk/bootstrap', function (Request $request) {
             $wallet = [
                 'points' => (int) $user->points,
                 'coin' => (int) ($user->webWallet?->balance ?? 0),
+                'tom' => $tomBalance,
             ];
         }
     }
@@ -283,13 +293,13 @@ Route::post('/api/sdk/checkin', function (Request $request) {
     $base = (int) config('economy.point_checkin_amount', 3);
     $weekBonus = $streak >= (int) config('economy.point_streak_threshold', 7) ? (int) config('economy.point_streak_bonus', 10) : 0;
     $monthBonus = $streak >= (int) config('economy.point_streak_monthly_threshold', 30) ? (int) config('economy.point_streak_monthly_bonus', 30) : 0;
-    $tomAmount = $base + $weekBonus + $monthBonus;
+    $pointAmount = $base + $weekBonus + $monthBonus;
 
     $userId = $user->id;
 
-    DB::transaction(function () use ($userId, $today, $streak, $tomAmount) {
+    DB::transaction(function () use ($userId, $today, $streak, $pointAmount) {
         $lockedUser = User::where('id', $userId)->lockForUpdate()->firstOrFail();
-        $lockedUser->increment('points', $tomAmount);
+        $lockedUser->increment('points', $pointAmount);
 
         SdkDailyCheckin::create([
             'user_id' => $userId,
@@ -302,8 +312,8 @@ Route::post('/api/sdk/checkin', function (Request $request) {
     return response()->json([
         'status' => 'ok',
         'streak' => $streak,
-        'reward' => ['tom' => $tomAmount],
-        'message' => "Điểm danh thành công! +{$tomAmount} TOM",
+        'reward' => ['points' => $pointAmount],
+        'message' => "Điểm danh thành công! +{$pointAmount} POINT",
     ]);
 })->name('sdk.checkin');
 

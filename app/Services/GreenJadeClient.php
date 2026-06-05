@@ -24,6 +24,31 @@ class GreenJadeClient
     }
 
     /**
+     * Read Tom balance from GreenJade wallet. Returns null on any failure.
+     */
+    public function getBalance(string $portalUid): ?int
+    {
+        try {
+            $response = Http::withHeaders([
+                'X-Service-Secret' => $this->serviceSecret,
+                'Accept' => 'application/json',
+            ])->get("{$this->baseUrl}/api/internal/services/{$this->serviceCode}/wallet-balance", [
+                'user_id' => $portalUid,
+            ]);
+
+            if (! $response->successful()) {
+                return null;
+            }
+
+            $body = $response->json() ?? [];
+
+            return isset($body['data']['balance']) ? (int) $body['data']['balance'] : null;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
      * Deduct Tom from user's GreenJade wallet.
      *
      * @return array{exchange_id: string, tom_spent: int, remaining_tom: int}

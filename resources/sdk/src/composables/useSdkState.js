@@ -85,7 +85,7 @@ export function useSdkState() {
        const data = await res.json()
        if (data.status === 'ok') {
          // Update wallet points
-         state.wallet.points += data.reward.tom
+         state.wallet.points += data.reward.points ?? data.reward.tom ?? 0
          // Update checkin state
          state.checkin.checked_today = true
          state.checkin.streak = data.streak

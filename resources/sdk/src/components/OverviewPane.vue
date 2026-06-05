@@ -36,6 +36,11 @@
         <span class="ccsdk-stat-label">Cấp độ</span>
         <span class="ccsdk-stat-value">{{ player.level }}</span>
       </div>
+      <div v-if="wallet.tom != null" class="ccsdk-stat-card ccsdk-stat-card--tom">
+        <span class="ccsdk-stat-label">TÔM</span>
+        <span class="ccsdk-stat-value ccsdk-tom-value">{{ fmt(wallet.tom) }}</span>
+        <span class="ccsdk-tom-shimmer"></span>
+      </div>
     </div>
 
     <!-- Mining -->
@@ -197,6 +202,55 @@ function fmt(n) {
 .ccsdk-stat-card--coin .ccsdk-stat-value { color: #f0c060; }
 .ccsdk-stat-card--points .ccsdk-stat-value { color: #5b8af7; }
 .ccsdk-stat-card--level .ccsdk-stat-value { color: #e8e8f0; }
+
+/* ── TÔM card — GreenJade premium currency ── */
+.ccsdk-stat-card--tom {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1a1208 0%, #2a1e08 60%, #1a1208 100%);
+  border-color: transparent;
+  box-shadow:
+    0 0 0 1px rgba(240, 168, 32, 0.55),
+    0 0 8px rgba(240, 168, 32, 0.20),
+    inset 0 1px 0 rgba(255, 210, 80, 0.10);
+  animation: ccsdk-tom-pulse 2.8s ease-in-out infinite;
+}
+
+.ccsdk-stat-card--tom .ccsdk-stat-label {
+  color: #c9892a;
+  letter-spacing: 0.1em;
+}
+
+.ccsdk-tom-value {
+  color: #ffd54f;
+  text-shadow: 0 0 12px rgba(255, 190, 40, 0.7), 0 0 24px rgba(255, 160, 20, 0.35);
+  font-weight: 700;
+}
+
+/* shimmer sweep */
+.ccsdk-tom-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 220, 100, 0.18) 50%,
+    transparent 65%
+  );
+  background-size: 200% 100%;
+  animation: ccsdk-tom-shimmer 2.4s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes ccsdk-tom-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(240, 168, 32, 0.55), 0 0 8px rgba(240, 168, 32, 0.20), inset 0 1px 0 rgba(255, 210, 80, 0.10); }
+  50%       { box-shadow: 0 0 0 1px rgba(240, 168, 32, 0.90), 0 0 14px rgba(240, 168, 32, 0.40), inset 0 1px 0 rgba(255, 210, 80, 0.18); }
+}
+
+@keyframes ccsdk-tom-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
 /* ── Stats header + refresh ── */
 .ccsdk-stats-header {
