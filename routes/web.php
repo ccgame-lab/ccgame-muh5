@@ -756,7 +756,7 @@ Route::post('/api/sdk/missions/claim-bonus', function (Request $request) {
         'success'      => true,
         'bonus_points' => $bonusPoints,
         'new_points'   => $user->fresh()->points,
-        'message'      => "+{$bonusPoints} POINT — hoàn thành nhiệm vụ ngày!",
+        'message'      => "+{$bonusPoints} POINT, hoàn thành nhiệm vụ ngày!",
     ]);
 })->name('sdk.missions.claim_bonus');
 
