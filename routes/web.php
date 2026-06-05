@@ -568,6 +568,7 @@ Route::get('/api/sdk/spin/status', function (Request $request) {
         'next_cost' => $hasFree ? 0 : $nextCost,
         'daily_limit' => $dailyLimit,
         'has_free_spin' => $hasFree,
+        'prizes' => config('economy.spin_prizes', []),
     ]);
 })->name('sdk.spin.status');
 

@@ -31,7 +31,7 @@ const state = reactive({
   spinning: false,
   spinStatusLoaded: false,
   spinStatusLoading: false,
-  spinStatus: { spins_today: 0, spins_remaining: 20, next_cost: 10, daily_limit: 20, has_free_spin: false },
+  spinStatus: { spins_today: 0, spins_remaining: 20, next_cost: 10, daily_limit: 20, has_free_spin: false, prizes: [] },
   spinLastResult: null,
 })
 
