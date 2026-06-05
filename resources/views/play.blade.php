@@ -27,6 +27,10 @@
             --font-body: 'Plus Sans Jakarta', sans-serif;
         }
 
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         html, body {
             margin: 0;
             padding: 0;
