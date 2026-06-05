@@ -27,6 +27,13 @@ const state = reactive({
   rankingItems: {},
   rankingActive: '',
 
+  // Daily missions
+  missions: [],
+  missionsLoaded: false,
+  missionsAllDone: false,
+  missionsBonusClaimed: false,
+  missionsBonusPoints: 5,
+
   // Live feed ticker
   feedEvents: [],
   feedLoaded: false,
@@ -229,6 +236,42 @@ export function useSdkState() {
     }
   }
 
+  async function loadMissions() {
+    const u = window.ccgame?.user || state.player.name || ''
+    try {
+      const res = await fetch(`/api/sdk/missions?u=${encodeURIComponent(u)}`)
+      if (!res.ok) throw new Error()
+      const d = await res.json()
+      state.missions = d.missions || []
+      state.missionsAllDone = d.all_done || false
+      state.missionsBonusClaimed = d.bonus_claimed || false
+      state.missionsBonusPoints = d.bonus_points || 5
+      state.missionsLoaded = true
+    } catch {
+      // silent
+    }
+  }
+
+  async function claimMissionsBonus() {
+    const u = window.ccgame?.user || state.player.name
+    if (!u) return { success: false, message: 'Chưa xác thực.' }
+    try {
+      const res = await fetch('/api/sdk/missions/claim-bonus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf() },
+        body: JSON.stringify({ u }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        state.wallet.points = data.new_points
+        state.missionsBonusClaimed = true
+      }
+      return data
+    } catch {
+      return { success: false, message: 'Lỗi kết nối.' }
+    }
+  }
+
   async function loadFeed() {
     try {
       const res = await fetch('/api/sdk/feed')
@@ -295,6 +338,8 @@ export function useSdkState() {
      loadModules,
      equipModule,
      unequipModule,
+     loadMissions,
+     claimMissionsBonus,
      loadFeed,
      loadPshopItems,
      buyWithTom,

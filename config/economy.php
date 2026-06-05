@@ -207,6 +207,8 @@ return [
     'ascension_upgrade_retention' => 0.5, // Giữ lại 50% upgrade levels sau ascension (ceil)
     'ascension_wp_refund_rate' => 0.2,   // Hoàn 20% WP đã dùng upgrade khi ascend
 
+    'missions_completion_bonus' => 5,
+
     'point_checkin_amount' => 3,
     'point_streak_bonus' => 10,
     'point_streak_threshold' => 7,

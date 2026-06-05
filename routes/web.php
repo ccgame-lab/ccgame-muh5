@@ -13,6 +13,7 @@ use App\Services\SocialEventService;
 use App\Models\GiftcodeRedemption;
 use App\Models\SdkDailyCheckin;
 use App\Models\SdkFeature;
+use App\Models\DiamondClaimLog;
 use App\Models\Server;
 use App\Models\SpinLog;
 use App\Models\User;
@@ -647,3 +648,80 @@ Route::get('/api/sdk/feed', function () {
 
     return response()->json(['events' => $events]);
 })->name('sdk.feed');
+
+// ─── SDK Daily Missions ───────────────────────────────────────────────────────
+
+Route::get('/api/sdk/missions', function (Request $request) {
+    $username = (string) $request->query('u', '');
+    $user = $username !== '' ? User::where('username', $username)->first() : null;
+    $today = now()->toDateString();
+    $bonusPoints = (int) config('economy.missions_completion_bonus', 5);
+
+    if (! $user) {
+        return response()->json([
+            'missions' => [
+                ['key' => 'checkin', 'label' => 'Điểm danh hôm nay', 'done' => false],
+                ['key' => 'spin5',   'label' => 'Quay 5 lần',         'done' => false, 'progress' => 0, 'target' => 5],
+                ['key' => 'mining',  'label' => 'Đào KC 1 lần',       'done' => false],
+            ],
+            'all_done' => false,
+            'bonus_claimed' => false,
+            'bonus_points' => $bonusPoints,
+        ]);
+    }
+
+    $checkinDone = SdkDailyCheckin::todayFor($user->id)->exists();
+    $spinsToday  = SpinLog::where('user_id', $user->id)->whereDate('created_at', $today)->count();
+    $miningDone  = DiamondClaimLog::where('user_id', $user->id)->whereDate('created_at', $today)->exists();
+    $allDone     = $checkinDone && $spinsToday >= 5 && $miningDone;
+    $bonusClaimed = Cache::has("missions_bonus_{$user->id}_{$today}");
+
+    return response()->json([
+        'missions' => [
+            ['key' => 'checkin', 'label' => 'Điểm danh hôm nay', 'done' => $checkinDone],
+            ['key' => 'spin5',   'label' => 'Quay 5 lần',         'done' => $spinsToday >= 5, 'progress' => min($spinsToday, 5), 'target' => 5],
+            ['key' => 'mining',  'label' => 'Đào KC 1 lần',       'done' => $miningDone],
+        ],
+        'all_done'     => $allDone,
+        'bonus_claimed' => $bonusClaimed,
+        'bonus_points' => $bonusPoints,
+    ]);
+})->name('sdk.missions');
+
+Route::post('/api/sdk/missions/claim-bonus', function (Request $request) {
+    $username = (string) $request->input('u', '');
+    $user = $username !== '' ? User::where('username', $username)->first() : null;
+    if (! $user) {
+        return response()->json(['success' => false, 'message' => 'Phiên chơi chưa xác thực, hãy tải lại trang.'], 401);
+    }
+
+    $today = now()->toDateString();
+    $cacheKey = "missions_bonus_{$user->id}_{$today}";
+
+    if (Cache::has($cacheKey)) {
+        return response()->json(['success' => false, 'message' => 'Đã nhận thưởng hôm nay rồi.']);
+    }
+
+    $spinsToday = SpinLog::where('user_id', $user->id)->whereDate('created_at', $today)->count();
+    $checkinDone = SdkDailyCheckin::todayFor($user->id)->exists();
+    $miningDone  = DiamondClaimLog::where('user_id', $user->id)->whereDate('created_at', $today)->exists();
+
+    if (! ($checkinDone && $spinsToday >= 5 && $miningDone)) {
+        return response()->json(['success' => false, 'message' => 'Chưa hoàn thành tất cả nhiệm vụ.']);
+    }
+
+    $bonusPoints = (int) config('economy.missions_completion_bonus', 5);
+
+    DB::transaction(function () use ($user, $bonusPoints) {
+        User::where('id', $user->id)->lockForUpdate()->firstOrFail()->increment('points', $bonusPoints);
+    });
+
+    Cache::put($cacheKey, true, now()->endOfDay());
+
+    return response()->json([
+        'success'      => true,
+        'bonus_points' => $bonusPoints,
+        'new_points'   => $user->fresh()->points,
+        'message'      => "+{$bonusPoints} POINT — hoàn thành nhiệm vụ ngày!",
+    ]);
+})->name('sdk.missions.claim_bonus');

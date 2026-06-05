@@ -58,6 +58,7 @@ function todayIndex() {
 async function onCheckin() {
   checkinLoading.value = true
   await emit('checkin')
+  window.dispatchEvent(new CustomEvent('checkin:done'))
   // Ensure loading state is visible for at least 100ms
   await new Promise(resolve => setTimeout(resolve, 100))
   checkinLoading.value = false

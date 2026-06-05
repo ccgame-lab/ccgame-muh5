@@ -182,6 +182,7 @@ async function onSpin() {
   setTimeout(() => {
     isAnimating.value = false
     showResult(result)
+    window.dispatchEvent(new CustomEvent('spin:done'))
     if (result.extra_spin) {
       setTimeout(() => onSpin(), 2400)
     }

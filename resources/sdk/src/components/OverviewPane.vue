@@ -46,6 +46,9 @@
     <!-- Live feed ticker -->
     <LiveFeedTicker />
 
+    <!-- Daily missions -->
+    <MissionsCard />
+
     <!-- Mining -->
     <MiningCard />
 
@@ -71,6 +74,7 @@
 <script setup>
 import { computed } from 'vue'
 import LiveFeedTicker from './LiveFeedTicker.vue'
+import MissionsCard from './MissionsCard.vue'
 import MiningCard from './MiningCard.vue'
 import SpinCard from './SpinCard.vue'
 import CheckinCard from './CheckinCard.vue'
