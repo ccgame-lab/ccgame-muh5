@@ -23,6 +23,7 @@ class GmApiService
             'ban' => $this->banPlayer($server, $payload['player_id'], $payload['account_name']),
             'send_mail' => $this->sendItemMail($server, $payload['player_id'], $payload['title'] ?? '', $payload['body'] ?? '', $payload['item_payload'] ?? ''),
             'send_global_mail' => $this->sendGlobalMail($server, $payload['title'] ?? '', $payload['body'] ?? '', $payload['item_payload'] ?? ''),
+            'charge_yuanbao' => $this->chargeCurrency($server, (string) $payload['account_name'], (int) $payload['amount']),
             default => throw new Exception("Unknown GM command: {$cmd}"),
         };
     }
