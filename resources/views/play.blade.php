@@ -228,18 +228,7 @@
             <div class="loader-subtext">{{ $serverName }} • Sẵn sàng khởi hành</div>
         </div>
 
-        <!-- Fullscreen Game Iframe -->
-        <iframe 
-            id="game-frame" 
-            src="{{ $gameUrl }}" 
-            allow="autoplay; fullscreen"
-            referrerpolicy="no-referrer"
-            scrolling="no"
-            loading="eager"
-            onload="hideLoader()"
-        ></iframe>
-
-        <!-- JavaScript to smoothly hide the loading overlay -->
+        <!-- Define hideLoader BEFORE the iframe: a cached/instant onload must not fire before the function exists -->
         <script>
             function hideLoader() {
                 const loader = document.getElementById('game-loader');
@@ -253,6 +242,17 @@
             // Fail-safe auto-hide loader after 15 seconds in case WebGL initialization takes too long
             setTimeout(hideLoader, 15000);
         </script>
+
+        <!-- Fullscreen Game Iframe -->
+        <iframe
+            id="game-frame"
+            src="{{ $gameUrl }}"
+            allow="autoplay; fullscreen"
+            referrerpolicy="no-referrer"
+            scrolling="no"
+            loading="eager"
+            onload="hideLoader()"
+        ></iframe>
     @else
         <!-- Beautiful Glassmorphism Fallback Screen -->
         <div class="fallback-container">
