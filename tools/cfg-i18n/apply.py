@@ -35,12 +35,12 @@ CUR = Path("D:/10_Projects/CCGame/ccgame-muh5/tools/r2-release/work/resource/cfg
 GLOSS = Path("D:/10_Projects/CCGame/ccgame-muh5/tools/cfg-i18n/glossary.json")
 REPORT = Path("D:/10_Projects/CCGame/ccgame-muh5/tools/cfg-i18n/_applied_report.txt")
 
-GEAR = Path("D:/10_Projects/CCGame/ccgame-muh5/tools/cfg-i18n/gear_strings.json")
-BATCH2 = Path("D:/10_Projects/CCGame/ccgame-muh5/tools/cfg-i18n/batch2_strings.json")
+D = Path("D:/10_Projects/CCGame/ccgame-muh5/tools/cfg-i18n")
+GEAR, BATCH2, BATCH3 = D / "gear_strings.json", D / "batch2_strings.json", D / "batch3_strings.json"
 ref = json.load(open(REF, encoding="utf-8"))
 cur = json.load(open(CUR, encoding="utf-8"))
 strings = dict(json.load(open(GLOSS, encoding="utf-8"))["strings"])
-for extra in (GEAR, BATCH2):
+for extra in (GEAR, BATCH2, BATCH3):
     if extra.exists():
         strings.update(json.load(open(extra, encoding="utf-8")))
 
