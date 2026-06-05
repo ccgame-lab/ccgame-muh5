@@ -10,6 +10,7 @@ use App\Models\PointTransaction;
 use App\Models\Server;
 use App\Models\SpinLog;
 use App\Models\User;
+use App\Services\SocialEventService;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class SpinService
 {
     public function __construct(
         protected PointService $pointService,
+        protected SocialEventService $socialEventService,
     ) {}
 
     /**
@@ -87,6 +89,15 @@ class SpinService
                         $balance = $this->pointService->credit($user, $value, 'spin_reward', null, [
                             'prize_index' => $prizeIndex,
                         ]);
+                        $this->socialEventService->push([
+                            'user_id'    => $user->id,
+                            'username'   => $user->username,
+                            'server_id'  => $serverId,
+                            'event_type' => 'spin_win',
+                            'template'   => sprintf('%s trúng %s từ vòng quay', $user->username, $prize['label']),
+                            'metadata'   => ['prize' => $prize['label'], 'value' => $value],
+                            'priority'   => 5,
+                        ]);
                     }
                     break;
 
@@ -126,6 +137,16 @@ class SpinService
                     ]);
 
                     ExecuteGmCommand::dispatch($gmAction->id);
+
+                    $this->socialEventService->push([
+                        'user_id'    => $user->id,
+                        'username'   => $user->username,
+                        'server_id'  => $serverId,
+                        'event_type' => 'spin_win',
+                        'template'   => sprintf('%s trúng %s từ vòng quay', $user->username, $prize['label']),
+                        'metadata'   => ['prize' => $prize['label'], 'value' => $value],
+                        'priority'   => 5,
+                    ]);
                     break;
 
                 case 'lose_turn':

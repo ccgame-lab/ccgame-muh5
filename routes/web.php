@@ -11,6 +11,7 @@ use App\Models\Giftcode;
 use App\Models\SocialEvent;
 use App\Services\SocialEventService;
 use App\Models\GiftcodeRedemption;
+use App\Models\PointTransaction;
 use App\Models\SdkDailyCheckin;
 use App\Models\SdkFeature;
 use App\Models\DiamondClaimLog;
@@ -310,6 +311,14 @@ Route::post('/api/sdk/checkin', function (Request $request) {
         $lockedUser = User::where('id', $userId)->lockForUpdate()->firstOrFail();
         $lockedUser->increment('points', $pointAmount);
 
+        PointTransaction::create([
+            'user_id' => $userId,
+            'type'    => 'checkin',
+            'amount'  => $pointAmount,
+            'balance_after' => $lockedUser->points,
+            'meta'    => ['streak' => $streak],
+        ]);
+
         SdkDailyCheckin::create([
             'user_id' => $userId,
             'checked_at' => $today,
@@ -519,6 +528,15 @@ Route::post('/api/sdk/giftcode/redeem', function (Request $request) {
         // Award points to user
         $lockedUser->increment('points', $rewardAmount);
 
+        PointTransaction::create([
+            'user_id'      => $lockedUser->id,
+            'type'         => 'giftcode',
+            'amount'       => $rewardAmount,
+            'balance_after' => $lockedUser->points,
+            'reference'    => $lockedGiftcode->code,
+            'meta'         => ['giftcode_id' => $lockedGiftcode->id],
+        ]);
+
         // Update giftcode usage
         $lockedGiftcode->increment('used_count');
 
@@ -716,7 +734,16 @@ Route::post('/api/sdk/missions/claim-bonus', function (Request $request) {
     $bonusPoints = (int) config('economy.missions_completion_bonus', 5);
 
     DB::transaction(function () use ($user, $bonusPoints) {
-        User::where('id', $user->id)->lockForUpdate()->firstOrFail()->increment('points', $bonusPoints);
+        $lockedUser = User::where('id', $user->id)->lockForUpdate()->firstOrFail();
+        $lockedUser->increment('points', $bonusPoints);
+
+        PointTransaction::create([
+            'user_id'      => $lockedUser->id,
+            'type'         => 'missions_bonus',
+            'amount'       => $bonusPoints,
+            'balance_after' => $lockedUser->points,
+            'meta'         => [],
+        ]);
     });
 
     Cache::put($cacheKey, true, now()->endOfDay());
