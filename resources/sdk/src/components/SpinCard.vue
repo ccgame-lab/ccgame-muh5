@@ -95,7 +95,9 @@ const nextMilestone = computed(() => {
 
 function buildCenterOverlay() {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="14" fill="%23facc15"/><circle cx="50" cy="50" r="9" fill="%23ca8a04"/></svg>`
-  return 'data:image/svg+xml;utf8,' + svg
+  const img = new Image()
+  img.src = 'data:image/svg+xml;charset=utf-8,' + svg
+  return img
 }
 
 function initWheel(prizes) {
