@@ -135,9 +135,9 @@ const props = defineProps({
 // 3 mức tiếp tế (chỉ hiển thị + điều hướng sang GreenJade supplies; SDK không xử lý tiền/ví).
 // Quy đổi theo hệ GreenJade: 1.000đ = 1 Tôm, +1 OXY mỗi 10.000đ.
 const supportTiers = [
-  { id: 'small',  emoji: '☕', name: 'Ủng hộ Nhỏ', vnd: '10.000đ',  reward: '10 Tôm',          tag: '',            popular: false },
-  { id: 'medium', emoji: '🍜', name: 'Ủng hộ Vừa', vnd: '50.000đ',  reward: '50 Tôm · +5 OXY',  tag: 'Phổ biến',    popular: true },
-  { id: 'large',  emoji: '🖥️', name: 'Ủng hộ Lớn', vnd: '100.000đ', reward: '100 Tôm · +10 OXY', tag: 'Ý nghĩa nhất', popular: false },
+  { id: 'small',  emoji: '☕', name: 'Ủng hộ Nhỏ', vnd: '50.000đ',  reward: '50 Tôm · +5 OXY',   tag: '',            popular: false },
+  { id: 'medium', emoji: '🍜', name: 'Ủng hộ Vừa', vnd: '200.000đ', reward: '200 Tôm · +20 OXY', tag: 'Phổ biến',    popular: true },
+  { id: 'large',  emoji: '🖥️', name: 'Ủng hộ Lớn', vnd: '500.000đ', reward: '500 Tôm · +50 OXY', tag: 'Ý nghĩa nhất', popular: false },
 ]
 
 const filtered = computed(() => props.features.filter(f => f.href !== ''))
