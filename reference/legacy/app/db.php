@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -21,6 +22,7 @@ declare(strict_types=1);
  * Ném RuntimeException nếu thiếu key bắt buộc.
  *
  * @return array{host:string, port:string, name:string, user:string, pass:string}
+ *
  * @throws RuntimeException
  */
 function db_config(): array
@@ -30,7 +32,7 @@ function db_config(): array
 
     $cfg = $_CFG['db'] ?? null;
 
-    if (!is_array($cfg)) {
+    if (! is_array($cfg)) {
         throw new RuntimeException(
             'DB chưa được cấu hình. Tạo storage/config.ini với section [db].'
         );
@@ -77,10 +79,10 @@ function db_pdo(): PDO
     );
 
     return new PDO($dsn, $c['user'], $c['pass'], [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
+        PDO::ATTR_EMULATE_PREPARES => false,
         // Timeout kết nối 5 giây — tránh treo request khi DB down
-        PDO::ATTR_TIMEOUT            => 5,
+        PDO::ATTR_TIMEOUT => 5,
     ]);
 }

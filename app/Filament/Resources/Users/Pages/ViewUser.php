@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Users\Pages;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Widgets\Users\GmActionLogWidget;
 use App\Filament\Widgets\Users\PointTransactionWidget;
+use App\Models\User;
 use App\Services\PointService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
@@ -19,6 +20,9 @@ use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 
+/**
+ * @property User $record
+ */
 class ViewUser extends ViewRecord
 {
     protected static string $resource = UserResource::class;
@@ -26,6 +30,14 @@ class ViewUser extends ViewRecord
     public function getMaxContentWidth(): Width|string|null
     {
         return Width::Full;
+    }
+
+    public function getRecord(): User
+    {
+        /** @var User $record */
+        $record = parent::getRecord();
+
+        return $record;
     }
 
     // ── Section A: User Identity (read-only) ──
@@ -163,7 +175,7 @@ class ViewUser extends ViewRecord
         $record = $this->getRecord();
 
         return [
-            'userId'         => $record->id,
+            'userId' => $record->id,
             'targetUsername' => $record->username,
         ];
     }

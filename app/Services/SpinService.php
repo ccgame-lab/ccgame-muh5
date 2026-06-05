@@ -6,8 +6,8 @@ namespace App\Services;
 
 use App\Jobs\ExecuteGmCommand;
 use App\Models\GmAction;
-use App\Models\Server;
 use App\Models\PointTransaction;
+use App\Models\Server;
 use App\Models\SpinLog;
 use App\Models\User;
 use Exception;
@@ -59,7 +59,7 @@ class SpinService
 
             if ($isFree) {
                 $wallet = $user->webWallet;
-                $balance = $wallet ? (int) $wallet->balance : 0;
+                $balance = $wallet ? (int) $wallet->getAttribute('balance') : 0;
             } else {
                 $balance = $this->pointService->debit($user, $actualCost, 'spin', [
                     'spin_number' => $spinsToday + 1,

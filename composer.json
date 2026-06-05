@@ -18,6 +18,7 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "~3.0",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
         "laravel/pint": "^1.27",
@@ -56,6 +57,26 @@
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
             "@php artisan test"
+        ],
+        "pint:fix": "./vendor/bin/pint",
+        "pint:check": "./vendor/bin/pint --test",
+        "pint:dirty": "./vendor/bin/pint --dirty",
+        "pint:diff": "./vendor/bin/pint --test --diff",
+        "pint:bail": "./vendor/bin/pint --test --bail",
+        "stan:check": "./vendor/bin/phpstan analyse",
+        "stan:baseline": "./vendor/bin/phpstan analyse --generate-baseline",
+        "stan:clear": "./vendor/bin/phpstan clear-result-cache",
+        "code:check": [
+            "@pint:check",
+            "@stan:check"
+        ],
+        "code:fix": [
+            "@pint:fix",
+            "@stan:check"
+        ],
+        "code:ci": [
+            "@pint:bail",
+            "@stan:check --no-progress"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
-use App\Models\Giftcode;
 use App\Models\GiftcodeRedemption;
 use App\Models\GmAction;
 use App\Models\SdkDailyCheckin;
@@ -18,11 +17,11 @@ class SdkStatsWidget extends StatsOverviewWidget
     protected function getStats(): array
     {
         $checkinToday = SdkDailyCheckin::whereDate('checked_at', today())->count();
-        $checkinWeek  = SdkDailyCheckin::whereBetween('checked_at', [
+        $checkinWeek = SdkDailyCheckin::whereBetween('checked_at', [
             now()->startOfWeek(Carbon::MONDAY),
             now()->endOfWeek(Carbon::SUNDAY),
         ])->distinct('user_id')->count('user_id');
-        $totalUsers   = User::count();
+        $totalUsers = User::count();
 
         return [
             Stat::make('Checkin hôm nay', $checkinToday)

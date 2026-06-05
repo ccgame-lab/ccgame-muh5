@@ -404,6 +404,7 @@ class S1ShopService
     {
         if ($currency === 'points') {
             $freshUser = $user->fresh();
+
             return $freshUser ? (int) $freshUser->points : 0;
         }
 

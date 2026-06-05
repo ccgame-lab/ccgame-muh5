@@ -524,28 +524,28 @@ return [
     'legacy_mining' => [
         'enabled' => true,
 
-        'base_rate_per_hour'        => 20_000,
-        'base_daily_cap'            => 300_000,
+        'base_rate_per_hour' => 2_000,
+        'base_daily_cap' => 30_000,
 
         'maintenance_cooldown_hours' => 6,
-        'efficiency_decay_per_hour'  => 0.03,
-        'min_efficiency'             => 0.35,
+        'efficiency_decay_per_hour' => 0.03,
+        'min_efficiency' => 0.35,
 
         'boosts' => [
             'small' => [
-                'multiplier'     => 1.2,
+                'multiplier' => 1.2,
                 'cap_multiplier' => 1.5,
-                'hours'          => 12,
+                'hours' => 12,
             ],
             'medium' => [
-                'multiplier'     => 1.5,
+                'multiplier' => 1.5,
                 'cap_multiplier' => 2.5,
-                'hours'          => 24,
+                'hours' => 24,
             ],
             'whale' => [
-                'multiplier'     => 2.0,
+                'multiplier' => 2.0,
                 'cap_multiplier' => 5.0,
-                'hours'          => 72,
+                'hours' => 72,
             ],
         ],
 
@@ -574,12 +574,12 @@ return [
         |
         */
         'legacy_power' => [
-            'enabled'                => true,
-            'max_bonus'              => 0.50,
-            'speed_level_bonus'      => 0.03,
-            'capacity_level_bonus'   => 0.01,
-            'ascension_level_bonus'  => 0.05,
-            'extra_machine_bonus'    => 0.05,
+            'enabled' => true,
+            'max_bonus' => 0.50,
+            'speed_level_bonus' => 0.03,
+            'capacity_level_bonus' => 0.01,
+            'ascension_level_bonus' => 0.05,
+            'extra_machine_bonus' => 0.05,
         ],
     ],
 

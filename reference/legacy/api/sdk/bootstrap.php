@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -9,8 +10,8 @@ declare(strict_types=1);
  */
 
 // Import các tệp bootstrap và db của dự án
-require_once __DIR__ . '/../../../app/bootstrap.php';
-require_once __DIR__ . '/../../../app/db.php';
+require_once __DIR__.'/../../../app/bootstrap.php';
+require_once __DIR__.'/../../../app/db.php';
 
 // Thiết lập định dạng header JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -38,6 +39,7 @@ function table_exists(PDO $pdo, string $table): bool
 {
     try {
         $pdo->query("SELECT 1 FROM `$table` LIMIT 1");
+
         return true;
     } catch (PDOException $e) {
         return false;
@@ -50,9 +52,10 @@ function get_safe_columns(PDO $pdo, string $table, array $allowed_cols): array
         $stmt = $pdo->prepare("SHOW COLUMNS FROM `$table`");
         $stmt->execute();
         $cols = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        if (!$cols) {
+        if (! $cols) {
             return [];
         }
+
         return array_values(array_intersect($cols, $allowed_cols));
     } catch (PDOException $e) {
         return [];
@@ -69,7 +72,7 @@ $whitelist = [
     'diamond_machines' => ['user_id', 'machine_index', 'level', 'speed_level', 'storage_level', 'efficiency_level', 'base_rate', 'capacity', 'last_claim_at'],
     'wcoin_transactions' => ['id', 'user_id', 'amount', 'type', 'description', 'created_at'],
     'wpoint_transactions' => ['id', 'user_id', 'amount', 'type', 'description', 'created_at'],
-    'social_events' => ['id', 'username', 'event_type', 'description', 'created_at']
+    'social_events' => ['id', 'username', 'event_type', 'description', 'created_at'],
 ];
 
 // Khởi tạo các mảng dữ liệu mặc định để tránh lỗi rỗng
@@ -78,11 +81,11 @@ $changelogs = [];
 $giftcodes = [];
 $diamond = [
     'balance' => 0,
-    'machines' => []
+    'machines' => [],
 ];
 $transactions = [
     'wcoin' => [],
-    'wpoint' => []
+    'wpoint' => [],
 ];
 $ranking = [];
 $social = [];
@@ -92,25 +95,25 @@ try {
     if (table_exists($pdo, 'users')) {
         $user_cols = get_safe_columns($pdo, 'users', $whitelist['users']);
         if (in_array('username', $user_cols, true)) {
-            $select_user = implode(', ', array_map(fn($c) => "`$c`", $user_cols));
+            $select_user = implode(', ', array_map(fn ($c) => "`$c`", $user_cols));
             $stmt = $pdo->prepare("SELECT $select_user FROM `users` WHERE `username` = :username LIMIT 1");
             $stmt->execute([':username' => $user]);
             $u = $stmt->fetch();
             if ($u) {
                 $user_data = $u;
-                
+
                 // Khởi tạo ví chuẩn từ bảng users (wcoin, wpoint)
                 $user_data['wallet'] = [
                     'wcoin' => (int) ($u['wcoin'] ?? 0),
                     'wpoint' => (int) ($u['wpoint'] ?? 0),
-                    'balance' => 0
+                    'balance' => 0,
                 ];
-                
+
                 // Query kết hợp web_wallets để lấy balance phụ (nếu có)
                 if (table_exists($pdo, 'web_wallets') && isset($u['id'])) {
                     $wallet_cols = get_safe_columns($pdo, 'web_wallets', $whitelist['web_wallets']);
                     if (in_array('user_id', $wallet_cols, true)) {
-                        $select_wallet = implode(', ', array_map(fn($c) => "`$c`", $wallet_cols));
+                        $select_wallet = implode(', ', array_map(fn ($c) => "`$c`", $wallet_cols));
                         $stmt = $pdo->prepare("SELECT $select_wallet FROM `web_wallets` WHERE `user_id` = :user_id LIMIT 1");
                         $stmt->execute([':user_id' => $u['id']]);
                         $w = $stmt->fetch();
@@ -119,7 +122,7 @@ try {
                         }
                     }
                 }
-                
+
                 // Loại bỏ trường wcoin và wpoint ở cấp độ root để giữ data sạch
                 unset($user_data['wcoin'], $user_data['wpoint']);
             }
@@ -136,23 +139,23 @@ try {
     if (table_exists($pdo, 'changelogs')) {
         $cols = get_safe_columns($pdo, 'changelogs', $whitelist['changelogs']);
         if ($cols) {
-            $select = implode(', ', array_map(fn($c) => "`$c`", $cols));
+            $select = implode(', ', array_map(fn ($c) => "`$c`", $cols));
             $query = "SELECT $select FROM `changelogs`";
             $where = [];
             if (in_array('is_published', $cols, true)) {
-                $where[] = "`is_published` = 1";
+                $where[] = '`is_published` = 1';
             }
-            if (!empty($where)) {
-                $query .= " WHERE " . implode(" AND ", $where);
+            if (! empty($where)) {
+                $query .= ' WHERE '.implode(' AND ', $where);
             }
             if (in_array('created_at', $cols, true)) {
-                $query .= " ORDER BY `created_at` DESC";
+                $query .= ' ORDER BY `created_at` DESC';
             } elseif (in_array('version_date', $cols, true)) {
-                $query .= " ORDER BY `version_date` DESC";
+                $query .= ' ORDER BY `version_date` DESC';
             } else {
-                $query .= " ORDER BY `id` DESC";
+                $query .= ' ORDER BY `id` DESC';
             }
-            $query .= " LIMIT 5";
+            $query .= ' LIMIT 5';
             $changelogs = $pdo->query($query)->fetchAll();
         }
     }
@@ -165,7 +168,7 @@ try {
     if (table_exists($pdo, 'giftcodes')) {
         $cols = get_safe_columns($pdo, 'giftcodes', $whitelist['giftcodes']);
         if ($cols) {
-            $select = implode(', ', array_map(fn($c) => "`$c`", $cols));
+            $select = implode(', ', array_map(fn ($c) => "`$c`", $cols));
             $giftcodes = $pdo->query("SELECT $select FROM `giftcodes` ORDER BY `id` DESC LIMIT 10")->fetchAll();
         }
     }
@@ -179,7 +182,7 @@ try {
         if (table_exists($pdo, 'diamond_wallets')) {
             $cols = get_safe_columns($pdo, 'diamond_wallets', $whitelist['diamond_wallets']);
             if (in_array('user_id', $cols, true) && in_array('balance', $cols, true)) {
-                $stmt = $pdo->prepare("SELECT `balance` FROM `diamond_wallets` WHERE `user_id` = :user_id LIMIT 1");
+                $stmt = $pdo->prepare('SELECT `balance` FROM `diamond_wallets` WHERE `user_id` = :user_id LIMIT 1');
                 $stmt->execute([':user_id' => $user_db_id]);
                 $val = $stmt->fetchColumn();
                 if ($val !== false) {
@@ -190,7 +193,7 @@ try {
         if (table_exists($pdo, 'diamond_machines')) {
             $cols = get_safe_columns($pdo, 'diamond_machines', $whitelist['diamond_machines']);
             if (in_array('user_id', $cols, true)) {
-                $select = implode(', ', array_map(fn($c) => "`$c`", $cols));
+                $select = implode(', ', array_map(fn ($c) => "`$c`", $cols));
                 $stmt = $pdo->prepare("SELECT $select FROM `diamond_machines` WHERE `user_id` = :user_id ORDER BY `machine_index` ASC");
                 $stmt->execute([':user_id' => $user_db_id]);
                 $diamond['machines'] = $stmt->fetchAll();
@@ -207,7 +210,7 @@ try {
         if (table_exists($pdo, 'wcoin_transactions')) {
             $cols = get_safe_columns($pdo, 'wcoin_transactions', $whitelist['wcoin_transactions']);
             if (in_array('user_id', $cols, true)) {
-                $select = implode(', ', array_map(fn($c) => "`$c`", $cols));
+                $select = implode(', ', array_map(fn ($c) => "`$c`", $cols));
                 $order_col = in_array('created_at', $cols, true) ? 'created_at' : 'id';
                 $stmt = $pdo->prepare("SELECT $select FROM `wcoin_transactions` WHERE `user_id` = :user_id ORDER BY `$order_col` DESC LIMIT 10");
                 $stmt->execute([':user_id' => $user_db_id]);
@@ -217,7 +220,7 @@ try {
         if (table_exists($pdo, 'wpoint_transactions')) {
             $cols = get_safe_columns($pdo, 'wpoint_transactions', $whitelist['wpoint_transactions']);
             if (in_array('user_id', $cols, true)) {
-                $select = implode(', ', array_map(fn($c) => "`$c`", $cols));
+                $select = implode(', ', array_map(fn ($c) => "`$c`", $cols));
                 $order_col = in_array('created_at', $cols, true) ? 'created_at' : 'id';
                 $stmt = $pdo->prepare("SELECT $select FROM `wpoint_transactions` WHERE `user_id` = :user_id ORDER BY `$order_col` DESC LIMIT 10");
                 $stmt->execute([':user_id' => $user_db_id]);
@@ -234,7 +237,7 @@ try {
     if (table_exists($pdo, 'hall_of_fame_legends')) {
         $cols = get_safe_columns($pdo, 'hall_of_fame_legends', $whitelist['hall_of_fame_legends']);
         if ($cols) {
-            $select = implode(', ', array_map(fn($c) => "`$c`", $cols));
+            $select = implode(', ', array_map(fn ($c) => "`$c`", $cols));
             $order_col = in_array('created_at', $cols, true) ? 'created_at' : 'id';
             $ranking = $pdo->query("SELECT $select FROM `hall_of_fame_legends` ORDER BY `$order_col` DESC LIMIT 10")->fetchAll();
         }
@@ -248,7 +251,7 @@ try {
     if (table_exists($pdo, 'social_events')) {
         $cols = get_safe_columns($pdo, 'social_events', $whitelist['social_events']);
         if ($cols) {
-            $select = implode(', ', array_map(fn($c) => "`$c`", $cols));
+            $select = implode(', ', array_map(fn ($c) => "`$c`", $cols));
             $order_col = in_array('created_at', $cols, true) ? 'created_at' : 'id';
             $social = $pdo->query("SELECT $select FROM `social_events` ORDER BY `$order_col` DESC LIMIT 10")->fetchAll();
         }
@@ -275,5 +278,5 @@ echo json_encode([
     'transactions' => $transactions,
     'ranking' => $ranking,
     'social' => $social,
-    'features' => $features
+    'features' => $features,
 ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);

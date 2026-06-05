@@ -559,7 +559,7 @@ class DiamondMiningService
         return DB::transaction(function () use ($user, $tier, $tierIndex): DiamondBoost {
             // 1. Lock wallet row
             $wallet = DiamondWallet::where('user_id', $user->id)->lockForUpdate()->first();
-            
+
             if (! $wallet) {
                 throw new Exception('Wallet not found.');
             }
@@ -741,9 +741,9 @@ class DiamondMiningService
     {
         $total = 0;
         $types = [
-            'speed' => (int) $machine->speed_level, 
-            'storage' => (int) $machine->storage_level, 
-            'efficiency' => (int) $machine->efficiency_level
+            'speed' => (int) $machine->speed_level,
+            'storage' => (int) $machine->storage_level,
+            'efficiency' => (int) $machine->efficiency_level,
         ];
 
         foreach ($types as $type => $currentLevel) {

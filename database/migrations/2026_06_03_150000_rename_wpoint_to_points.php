@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("ALTER TABLE users CHANGE COLUMN wpoint points INT NOT NULL DEFAULT 0");
+        DB::statement('ALTER TABLE users CHANGE COLUMN wpoint points INT NOT NULL DEFAULT 0');
         Schema::rename('wpoint_transactions', 'point_transactions');
 
         // s1_shop_items: expand enum → update data → contract enum
@@ -37,6 +37,6 @@ return new class extends Migration
         DB::statement("ALTER TABLE s1_shop_items MODIFY COLUMN currency ENUM('kc','wpoint') NOT NULL");
 
         Schema::rename('point_transactions', 'wpoint_transactions');
-        DB::statement("ALTER TABLE users CHANGE COLUMN points wpoint INT NOT NULL DEFAULT 0");
+        DB::statement('ALTER TABLE users CHANGE COLUMN points wpoint INT NOT NULL DEFAULT 0');
     }
 };

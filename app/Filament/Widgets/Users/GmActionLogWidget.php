@@ -40,11 +40,11 @@ class GmActionLogWidget extends TableWidget
                     ->label('Action')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'ban'       => 'danger',
-                        'kick'      => 'warning',
-                        'lookup'    => 'info',
+                        'ban' => 'danger',
+                        'kick' => 'warning',
+                        'lookup' => 'info',
                         'send_mail' => 'primary',
-                        default     => 'gray',
+                        default => 'gray',
                     }),
                 TextColumn::make('admin.name')
                     ->label('Admin')
@@ -53,11 +53,11 @@ class GmActionLogWidget extends TableWidget
                     ->label('Status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'pending'   => 'warning',
+                        'pending' => 'warning',
                         'executing' => 'info',
-                        'executed'  => 'success',
-                        'failed'    => 'danger',
-                        default     => 'gray',
+                        'executed' => 'success',
+                        'failed' => 'danger',
+                        default => 'gray',
                     }),
                 TextColumn::make('payload')
                     ->label('Payload')

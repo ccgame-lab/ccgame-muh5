@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\PointTransaction;
+use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
 

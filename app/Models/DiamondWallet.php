@@ -4,7 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property Carbon|null $last_maintained_at
+ * @property Carbon|null $boost_until
+ * @property Carbon|null $cap_until
+ * @property Carbon|null $last_claimed_at
+ */
 class DiamondWallet extends Model
 {
     protected $fillable = [

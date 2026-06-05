@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Jobs\DiamondMiningJob;
 use App\Models\DiamondClaimLog;
 use App\Models\DiamondDailyLog;
+use App\Models\DiamondMachine;
 use App\Models\DiamondWallet;
+use App\Models\GmAction;
+use App\Models\Server;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Legacy mining — simplified maintenance-based idle KC faucet.
@@ -33,12 +39,12 @@ final class LegacyMiningService
         return DiamondWallet::firstOrCreate(
             ['user_id' => $user->id],
             [
-                'balance'          => 0,
-                'lifetime_mined'   => 0,
-                'lifetime_spent'   => 0,
-                'ascension_level'  => 0,
+                'balance' => 0,
+                'lifetime_mined' => 0,
+                'lifetime_spent' => 0,
+                'ascension_level' => 0,
                 'boost_multiplier' => 1.0,
-                'cap_multiplier'   => 1.0,
+                'cap_multiplier' => 1.0,
             ]
         );
     }
@@ -79,6 +85,7 @@ final class LegacyMiningService
             $machineCount = $machines->count();
 
             foreach ($machines as $m) {
+                /** @var DiamondMachine $m */
                 $breakdown['speed'] += (float) max(0, ($m->speed_level - 1)) * $spdBonus;
                 $breakdown['capacity'] += (float) max(0, ($m->storage_level - 1)) * $capBonus;
             }
@@ -100,9 +107,9 @@ final class LegacyMiningService
         $total = min($total, $maxBonus);
 
         return [
-            'bonus'      => round($total, 4),
+            'bonus' => round($total, 4),
             'multiplier' => round(1 + $total, 4),
-            'breakdown'  => $breakdown,
+            'breakdown' => $breakdown,
         ];
     }
 
@@ -110,27 +117,92 @@ final class LegacyMiningService
     // Public API
     // ─────────────────────────────────────────────────────────────────────────
 
+    public function getEquippedModules(int $userId): Collection
+    {
+        return DB::table('diamond_modules')
+            ->where('user_id', $userId)
+            ->whereNotNull('slot_index')
+            ->get();
+    }
+
+    public function getAllModules(int $userId): Collection
+    {
+        return DB::table('diamond_modules')
+            ->where('user_id', $userId)
+            ->get();
+    }
+
+    public function equipModule(User $user, int $moduleId, int $slotIndex): void
+    {
+        $state = $this->getState($user);
+        $machineLevel = (int) ($state->machine_level ?? 1);
+        $slotsAvailable = 1;
+        if ($machineLevel >= 5) {
+            $slotsAvailable = 3;
+        } elseif ($machineLevel >= 3) {
+            $slotsAvailable = 2;
+        }
+
+        if ($slotIndex < 0 || $slotIndex >= $slotsAvailable) {
+            throw new Exception('Vị trí không khả dụng với level máy hiện tại.');
+        }
+
+        DB::transaction(function () use ($user, $moduleId, $slotIndex) {
+            $module = DB::table('diamond_modules')->where('id', $moduleId)->where('user_id', $user->id)->first();
+            if (! $module) {
+                throw new Exception('Module không tồn tại.');
+            }
+
+            // Unequip current module in the slot if exists
+            DB::table('diamond_modules')->where('user_id', $user->id)->where('slot_index', $slotIndex)->update(['slot_index' => null]);
+            // Equip new module
+            DB::table('diamond_modules')->where('id', $moduleId)->update(['slot_index' => $slotIndex]);
+        });
+    }
+
+    public function unequipModule(User $user, int $moduleId): void
+    {
+        DB::table('diamond_modules')->where('id', $moduleId)->where('user_id', $user->id)->update(['slot_index' => null]);
+    }
+
     /**
      * Return the current mining quote: rate, efficiency, cap, boost info.
      *
      * Read-only. Client never sends rate/amount/multiplier.
      *
-     * @return array{rate_per_hour: int, efficiency: float, boost_multiplier: float, daily_cap: int, cap_multiplier: float, legacy_power_bonus: float, legacy_power_multiplier: float, boost_until: ?string, cap_until: ?string, last_maintained_at: ?string}
+     * @return array{rate_per_hour: int, efficiency: float, boost_multiplier: float, daily_cap: int, cap_multiplier: float, legacy_power_bonus: float, legacy_power_multiplier: float, boost_until: ?string, cap_until: ?string, last_maintained_at: ?string, machine_level: int, legacy_bonus: float, is_veteran: bool, slots_available: int, modules: array, today_claimed: int, pending_amount: int}
      */
     public function quote(User $user): array
     {
         $state = $this->getState($user);
 
-        $efficiency     = $this->efficiency($state);
-        $boost          = $this->activeBoost($state);
-        $capMultiplier  = $this->activeCapMultiplier($state);
-        $legacyPower    = $this->computeLegacyPowerBonus($user);
+        $equippedModules = $this->getEquippedModules($user->id);
+        $moduleTypes = $equippedModules->pluck('module_type')->toArray();
+        $hasDurability = in_array('durability_plate', $moduleTypes, true);
+        $hasOverflow = in_array('overflow_tank', $moduleTypes, true);
+
+        $moduleRateMultiplier = 1.0;
+        foreach ($moduleTypes as $type) {
+            if ($type === 'speed_core') {
+                $moduleRateMultiplier *= 1.20;
+            }
+        }
+
+        $efficiency = $this->efficiency($state, $hasDurability);
+        $boost = $this->activeBoost($state);
+        $capMultiplier = $this->activeCapMultiplier($state);
+        if ($hasOverflow) {
+            $capMultiplier *= 1.5;
+        }
+
+        $legacyPower = $this->computeLegacyPowerBonus($user);
 
         $rate = (int) floor(
             config('economy.legacy_mining.base_rate_per_hour', 20000)
             * $efficiency
             * $boost
             * $legacyPower['multiplier']
+            * $moduleRateMultiplier
         );
 
         $dailyCap = (int) floor(
@@ -138,17 +210,42 @@ final class LegacyMiningService
             * $capMultiplier
         );
 
+        $machineLevel = (int) ($state->machine_level ?? 1);
+        $slotsAvailable = 1;
+        if ($machineLevel >= 5) {
+            $slotsAvailable = 3;
+        } elseif ($machineLevel >= 3) {
+            $slotsAvailable = 2;
+        }
+
+        $todayClaimed = (int) DiamondClaimLog::where('user_id', $user->id)
+            ->whereDate('created_at', now()->toDateString())
+            ->sum('amount_claimed');
+
+        $now = now();
+        $elapsedHours = max(0, $state->last_claimed_at instanceof Carbon
+            ? $state->last_claimed_at->diffInSeconds($now) / 3600
+            : 0);
+        $pendingAmount = (int) floor($elapsedHours * $rate);
+
         return [
-            'rate_per_hour'           => $rate,
-            'efficiency'              => round($efficiency, 3),
-            'boost_multiplier'        => round($boost, 2),
-            'daily_cap'               => $dailyCap,
-            'cap_multiplier'          => round($capMultiplier, 2),
-            'legacy_power_bonus'      => $legacyPower['bonus'],
+            'rate_per_hour' => $rate,
+            'efficiency' => round($efficiency, 3),
+            'boost_multiplier' => round($boost, 2),
+            'daily_cap' => $dailyCap,
+            'cap_multiplier' => round($capMultiplier, 2),
+            'legacy_power_bonus' => $legacyPower['bonus'],
             'legacy_power_multiplier' => $legacyPower['multiplier'],
-            'boost_until'             => $state->boost_until?->toIso8601String(),
-            'cap_until'               => $state->cap_until?->toIso8601String(),
-            'last_maintained_at'      => $state->last_maintained_at?->toIso8601String(),
+            'boost_until' => $state->boost_until?->toIso8601String(),
+            'cap_until' => $state->cap_until?->toIso8601String(),
+            'last_maintained_at' => $state->last_maintained_at?->toIso8601String(),
+            'machine_level' => $machineLevel,
+            'legacy_bonus' => (float) ($state->legacy_bonus ?? 0),
+            'is_veteran' => ($state->lifetime_mined > 1000000 || ($state->legacy_bonus ?? 0) > 0),
+            'slots_available' => $slotsAvailable,
+            'modules' => $equippedModules->toArray(),
+            'today_claimed' => $todayClaimed,
+            'pending_amount' => $pendingAmount,
         ];
     }
 
@@ -210,6 +307,19 @@ final class LegacyMiningService
 
             $rawAmount = (int) floor($elapsedHours * $q['rate_per_hour']);
 
+            // lucky_crystal chance
+            $hasLuckyCrystal = false;
+            foreach ($q['modules'] as $mod) {
+                $type = is_array($mod) ? $mod['module_type'] : $mod->module_type;
+                if ($type === 'lucky_crystal') {
+                    $hasLuckyCrystal = true;
+                    break;
+                }
+            }
+            if ($hasLuckyCrystal && rand(1, 100) <= 10) {
+                $rawAmount *= 2;
+            }
+
             // Daily cap
             $today = $now->toDateString();
             $todayClaimed = (int) DiamondClaimLog::where('user_id', $user->id)
@@ -224,32 +334,32 @@ final class LegacyMiningService
                 $state->save();
 
                 return [
-                    'amount'          => 0,
-                    'quote'           => $q,
+                    'amount' => 0,
+                    'quote' => $q,
                     'daily_remaining' => max(0, $q['daily_cap'] - $todayClaimed),
                 ];
             }
 
             // Credit KC to game server via DiamondMiningJob
-            $server = \App\Models\Server::find($serverId);
+            $server = Server::find($serverId);
             if ($server && $server->db_connection_name) {
-                $actionUuid = \Illuminate\Support\Str::uuid();
+                $actionUuid = (string) Str::uuid();
 
-                \App\Models\GmAction::create([
+                GmAction::create([
                     'action_uuid' => $actionUuid,
-                    'admin_id'    => null,
-                    'server_id'   => $server->id,
+                    'admin_id' => null,
+                    'server_id' => $server->id,
                     'action_type' => 'charge_currency',
                     'target_user' => (string) $user->id,
-                    'payload'     => [
-                        'amount'       => $amount,
+                    'payload' => [
+                        'amount' => $amount,
                         'account_name' => $user->username,
-                        'server_name'  => $server->name,
+                        'server_name' => $server->name,
                     ],
-                    'status'      => 'pending',
+                    'status' => 'pending',
                 ]);
 
-                \App\Jobs\DiamondMiningJob::dispatch(
+                DiamondMiningJob::dispatch(
                     $server,
                     $user->username,
                     $amount,
@@ -259,27 +369,27 @@ final class LegacyMiningService
 
             // Write claim log with economy snapshots
             DiamondClaimLog::create([
-                'user_id'              => $user->id,
-                'machine_index'        => 0, // single machine
-                'amount_claimed'       => $amount,
-                'production_seconds'   => (int) ($elapsedHours * 3600),
-                'machine_level'        => 1,
-                'speed_level'          => 1,
-                'storage_level'        => 1,
-                'efficiency_level'     => 1,
-                'machine_snapshot'     => [
-                    'elapsed_hours'            => round($elapsedHours, 4),
-                    'raw_amount'               => $rawAmount,
-                    'today_claimed'            => $todayClaimed + $amount,
-                    'legacy_power_bonus'       => $q['legacy_power_bonus'],
-                    'legacy_power_multiplier'  => $q['legacy_power_multiplier'],
+                'user_id' => $user->id,
+                'machine_index' => 0, // single machine
+                'amount_claimed' => $amount,
+                'production_seconds' => (int) ($elapsedHours * 3600),
+                'machine_level' => 1,
+                'speed_level' => 1,
+                'storage_level' => 1,
+                'efficiency_level' => 1,
+                'machine_snapshot' => [
+                    'elapsed_hours' => round($elapsedHours, 4),
+                    'raw_amount' => $rawAmount,
+                    'today_claimed' => $todayClaimed + $amount,
+                    'legacy_power_bonus' => $q['legacy_power_bonus'],
+                    'legacy_power_multiplier' => $q['legacy_power_multiplier'],
                 ],
-                'rate_snapshot'        => $q['rate_per_hour'],
-                'cap_snapshot'         => $q['daily_cap'],
-                'efficiency_snapshot'  => $q['efficiency'],
-                'boost_snapshot'       => $q['boost_multiplier'],
-                'ip'                   => request()->ip(),
-                'user_agent'           => request()->userAgent(),
+                'rate_snapshot' => $q['rate_per_hour'],
+                'cap_snapshot' => $q['daily_cap'],
+                'efficiency_snapshot' => $q['efficiency'],
+                'boost_snapshot' => $q['boost_multiplier'],
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
             ]);
 
             // Update daily tracking
@@ -295,8 +405,8 @@ final class LegacyMiningService
             $state->save();
 
             return [
-                'amount'          => $amount,
-                'quote'           => $q,
+                'amount' => $amount,
+                'quote' => $q,
                 'daily_remaining' => $q['daily_cap'] - ($todayClaimed + $amount),
             ];
         });
@@ -319,13 +429,13 @@ final class LegacyMiningService
 
         $cfg = $boosts[$tier];
 
-        DB::transaction(function () use ($user, $tier, $cfg) {
+        DB::transaction(function () use ($user, $cfg) {
             $state = DiamondWallet::where('user_id', $user->id)->lockForUpdate()->firstOrFail();
 
             $state->boost_multiplier = (float) $cfg['multiplier'];
-            $state->boost_until      = now()->addHours((int) $cfg['hours']);
-            $state->cap_multiplier   = (float) $cfg['cap_multiplier'];
-            $state->cap_until        = now()->addHours((int) $cfg['hours']);
+            $state->boost_until = now()->addHours((int) $cfg['hours']);
+            $state->cap_multiplier = (float) $cfg['cap_multiplier'];
+            $state->cap_until = now()->addHours((int) $cfg['hours']);
             $state->save();
         });
     }
@@ -350,7 +460,7 @@ final class LegacyMiningService
      * Starts at 1.0 after maintenance, decays linearly by decay_per_hour,
      * never below min_efficiency.
      */
-    private function efficiency(DiamondWallet $state): float
+    private function efficiency(DiamondWallet $state, bool $hasDurability = false): float
     {
         if (! $state->last_maintained_at) {
             // Never maintained — start at floor
@@ -359,7 +469,10 @@ final class LegacyMiningService
 
         $hoursSince = $state->last_maintained_at->diffInHours(now());
         $decay = config('economy.legacy_mining.efficiency_decay_per_hour', 0.03);
-        $min   = config('economy.legacy_mining.min_efficiency', 0.35);
+        if ($hasDurability) {
+            $decay *= 0.5;
+        }
+        $min = config('economy.legacy_mining.min_efficiency', 0.35);
 
         return max($min, 1 - ($hoursSince * $decay));
     }

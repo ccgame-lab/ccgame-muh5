@@ -116,7 +116,6 @@ class PointShopService
     /**
      * Find actor by account name in the game DB.
      *
-     * @return object
      *
      * @throws Exception
      */

@@ -11,6 +11,7 @@ const state = reactive({
   features: [],
   changelog: [],
   checkin: { checked_today: false, streak: 0, week: [] },
+  modules: [],
 
   // Lazy ranking
   rankingLoaded: false,
@@ -120,6 +121,50 @@ export function useSdkState() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''
   }
 
+  async function loadModules() {
+    const u = window.ccgame?.user || state.player.name
+    if (!u) return
+    try {
+      const res = await fetch(`/api/mining/modules?u=${encodeURIComponent(u)}`)
+      if (!res.ok) throw new Error()
+      state.modules = await res.json()
+    } catch {
+      state.modules = []
+    }
+  }
+
+  async function equipModule(moduleId, slotIndex) {
+    const u = window.ccgame?.user || state.player.name
+    try {
+      const res = await fetch('/api/mining/equip-module', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf() },
+        body: JSON.stringify({ u, module_id: moduleId, slot_index: slotIndex })
+      })
+      if (!res.ok) throw new Error()
+      await loadModules()
+      return { success: true }
+    } catch {
+      return { success: false, message: 'Lỗi kết nối.' }
+    }
+  }
+
+  async function unequipModule(moduleId) {
+    const u = window.ccgame?.user || state.player.name
+    try {
+      const res = await fetch('/api/mining/unequip-module', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf() },
+        body: JSON.stringify({ u, module_id: moduleId })
+      })
+      if (!res.ok) throw new Error()
+      await loadModules()
+      return { success: true }
+    } catch {
+      return { success: false, message: 'Lỗi kết nối.' }
+    }
+  }
+
    return {
      state: readonly(state),
      loadBootstrap,
@@ -127,6 +172,9 @@ export function useSdkState() {
      doCheckin,
      applyPointsReward,
      refreshWallet,
+     loadModules,
+     equipModule,
+     unequipModule,
      setRankingActive(key) { state.rankingActive = key },
    }
 }

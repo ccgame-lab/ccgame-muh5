@@ -6,6 +6,7 @@ namespace App\Jobs;
 
 use App\Models\GmAction;
 use App\Models\Server;
+use App\Services\Game\GmApiService;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -59,6 +60,7 @@ class ExecuteGmCommand implements ShouldQueue
                 'duration_ms' => $duration,
             ]);
 
+            /** @var array<string, mixed> $logPayload */
             $logPayload = (array) ($log->payload ?? []);
             $amount = (int) ($logPayload['amount'] ?? 0);
             if ($amount > config('economy.gm_alert_threshold', 500000)) {
@@ -92,7 +94,7 @@ class ExecuteGmCommand implements ShouldQueue
             throw new \Exception("Server ID {$log->server_id} not found.");
         }
 
-        $gmService = app(\App\Services\Game\GmApiService::class);
+        $gmService = app(GmApiService::class);
 
         return $gmService->executeCommand(
             $log->action_type,

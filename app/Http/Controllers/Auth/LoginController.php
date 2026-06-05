@@ -25,7 +25,10 @@ class LoginController extends Controller
             return $this->handleTokenCallback($request, (string) $token);
         }
 
-        return view('auth.login');
+        /** @var view-string $view */
+        $view = 'auth.login';
+
+        return view($view);
     }
 
     /**

@@ -24,7 +24,7 @@ class SocialEventService
     {
         try {
             // Test user exclusion
-            if (in_array(strtolower($data['username'] ?? ''), self::TEST_USERS, true)) {
+            if (in_array(strtolower($data['username']), self::TEST_USERS, true)) {
                 return;
             }
 

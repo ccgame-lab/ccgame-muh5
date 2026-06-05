@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use App\Services\SocialEventService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\DB;
 
 class PointTransaction extends Model
 {
@@ -29,9 +27,7 @@ class PointTransaction extends Model
         ];
     }
 
-    protected static function booted()
-    {
-    }
+    protected static function booted() {}
 
     public function user(): BelongsTo
     {

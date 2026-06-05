@@ -27,9 +27,9 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
@@ -63,7 +63,7 @@ class UserResource extends Resource
                 TextInput::make('password')
                     ->password()
                     ->hiddenOn('edit')
-                    ->requiredOn('create'),
+                    ->required(fn (string $operation): bool => $operation === 'create'),
                 Select::make('tier')
                     ->options(['free' => 'Free', 'vip' => 'VIP'])
                     ->required()

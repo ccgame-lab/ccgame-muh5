@@ -17,7 +17,6 @@ class PlayController extends Controller
      * Decode and safely verify a launch token using HMAC-SHA256.
      * Matches the legacy Nuxt/reference verifyLaunchToken logic.
      *
-     * @param string $token
      * @return array<string, mixed>|null
      */
     private function verifyLaunchToken(string $token): ?array
@@ -33,12 +32,14 @@ class PlayController extends Controller
 
         if (empty($secret)) {
             logger()->warning('MUH5_LAUNCH_SECRET is not configured; rejecting launch token.');
+
             return null;
         }
 
         $parts = explode('.', $token);
         if (count($parts) !== 2) {
             logger()->warning('Invalid launch token format: missing parts');
+
             return null;
         }
 
@@ -52,8 +53,9 @@ class PlayController extends Controller
         $rawHmac = hash_hmac('sha256', $payloadBase64, $secret, true);
         $expectedSignature = rtrim(strtr(base64_encode($rawHmac), '+/', '-_'), '=');
 
-        if (!hash_equals($signature, $expectedSignature)) {
+        if (! hash_equals($signature, $expectedSignature)) {
             logger()->warning('Invalid launch token signature');
+
             return null;
         }
 
@@ -64,29 +66,33 @@ class PlayController extends Controller
             }
 
             $payload = json_decode($jsonStr, true);
-            if (!is_array($payload)) {
+            if (! is_array($payload)) {
                 return null;
             }
 
             if (($payload['gameId'] ?? '') !== 'muh5') {
                 logger()->warning('Invalid launch token: incorrect gameId');
+
                 return null;
             }
 
             $now = time();
             if (($payload['expiresAt'] ?? 0) < $now) {
                 logger()->warning('Launch token has expired');
+
                 return null;
             }
 
             if (($payload['server']['key'] ?? '') !== 's1') {
                 logger()->warning('Invalid launch token: incorrect server key');
+
                 return null;
             }
 
             return $payload;
         } catch (\Throwable $e) {
-            logger()->warning('Failed to parse launch token payload: ' . $e->getMessage());
+            logger()->warning('Failed to parse launch token payload: '.$e->getMessage());
+
             return null;
         }
     }
@@ -94,23 +100,18 @@ class PlayController extends Controller
     /**
      * Derive guest Suggested Character name hint.
      * Max 6 UTF-8 characters matching ccgame-web/reference.
-     *
-     * @param string $playerId
-     * @return string
      */
     private function deriveGuestCharacterNick(string $playerId): string
     {
         $hex = preg_replace('/[^a-f0-9]/i', '', $playerId) ?? '';
         $last5 = substr($hex, -5);
         $padded = str_pad($last5 ?: '00000', 5, '0', STR_PAD_LEFT);
-        return 'g' . substr($padded, 0, 5);
+
+        return 'g'.substr($padded, 0, 5);
     }
 
     /**
      * Normalize WebSocket host (stripping protocols and paths).
-     *
-     * @param string $addr
-     * @return string
      */
     private function normalizeSrvAddr(string $addr): string
     {
@@ -136,16 +137,11 @@ class PlayController extends Controller
 
     /**
      * Replicate player identity into game single-source-of-truth database tables.
-     * 
+     *
      * NOTE: Database Provisioning constraints:
      * - This only syncs game-engine login credentials.
      * - It only writes account/passwd.
      * - It must NEVER touch wallet/payment/balance/economy fields.
-     *
-     * @param string $uid
-     * @param string $spverify
-     * @param string|null $dbName
-     * @return void
      */
     private function provisionPlayerCredentials(string $uid, string $spverify, ?string $dbName = null): void
     {
@@ -162,10 +158,10 @@ class PlayController extends Controller
         }
 
         // Update target server database
-        if (!empty($dbName)) {
+        if (! empty($dbName)) {
             try {
                 DB::connection('mysql')
-                    ->table($dbName . '.globaluser')
+                    ->table($dbName.'.globaluser')
                     ->updateOrInsert(
                         ['account' => $uid],
                         ['passwd' => $spverify]
@@ -178,18 +174,15 @@ class PlayController extends Controller
 
     /**
      * Unified game entrance supporting standard Laravel sessions and signed launch tokens.
-     *
-     * @param Request $request
-     * @return View
      */
     public function entry(Request $request): View
     {
         $launch = $request->query('launch');
 
-        if (!empty($launch)) {
+        if (! empty($launch)) {
             $payload = $this->verifyLaunchToken((string) $launch);
 
-            if (!$payload) {
+            if (! $payload) {
                 return view('play', [
                     'playAllowed' => false,
                     'errorReason' => 'invalid_launch',
@@ -239,13 +232,13 @@ class PlayController extends Controller
             ];
 
             if ($authMode === 'guest') {
-                $nick = !empty($player['suggestedCharacterName'])
+                $nick = ! empty($player['suggestedCharacterName'])
                     ? trim($player['suggestedCharacterName'])
                     : $this->deriveGuestCharacterNick($player['id'] ?? $username);
                 $params['nickName'] = $nick;
             }
 
-            $gameUrl = url('/muh5-client/index.html') . '?' . http_build_query($params);
+            $gameUrl = url('/muh5-client/index.html').'?'.http_build_query($params);
 
             return view('play', [
                 'playAllowed' => true,
@@ -266,7 +259,7 @@ class PlayController extends Controller
             $user = Auth::user();
 
             $server = Server::where('visible', true)->orderBy('id')->first();
-            if (!$server) {
+            if (! $server) {
                 abort(503, 'Không có server nào đang mở.');
             }
 
@@ -281,7 +274,7 @@ class PlayController extends Controller
                 'srvport' => (string) $server->port,
             ];
 
-            $gameUrl = url('/muh5-client/index.html') . '?' . http_build_query($params);
+            $gameUrl = url('/muh5-client/index.html').'?'.http_build_query($params);
 
             return view('play', [
                 'playAllowed' => true,
@@ -308,9 +301,6 @@ class PlayController extends Controller
 
     /**
      * Standard game entrance for specific servers (standard logged-in users).
-     *
-     * @param Server $server
-     * @return View
      */
     public function game(Server $server): View
     {
@@ -328,7 +318,7 @@ class PlayController extends Controller
             'srvport' => (string) $server->port,
         ];
 
-        $gameUrl = url('/muh5-client/index.html') . '?' . http_build_query($params);
+        $gameUrl = url('/muh5-client/index.html').'?'.http_build_query($params);
 
         return view('play', [
             'playAllowed' => true,
@@ -342,6 +332,4 @@ class PlayController extends Controller
             'expiresAt' => null,
         ]);
     }
-
-
 }

@@ -14,7 +14,7 @@ class SdkDailyCheckinStats extends StatsOverviewWidget
     protected function getStats(): array
     {
         $checkinToday = SdkDailyCheckin::whereDate('checked_at', today())->count();
-        $checkinWeek  = SdkDailyCheckin::whereBetween('checked_at', [
+        $checkinWeek = SdkDailyCheckin::whereBetween('checked_at', [
             now()->startOfWeek(Carbon::MONDAY),
             now()->endOfWeek(Carbon::SUNDAY),
         ])->distinct('user_id')->count('user_id');

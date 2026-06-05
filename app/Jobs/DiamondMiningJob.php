@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\Server;
+use App\Services\Game\GmApiService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -28,7 +29,7 @@ class DiamondMiningJob implements ShouldQueue
 
     public function handle(): void
     {
-        $gmService = app(\App\Services\Game\GmApiService::class);
+        $gmService = app(GmApiService::class);
 
         $gmService->chargeCurrency($this->server, $this->username, $this->amount);
     }

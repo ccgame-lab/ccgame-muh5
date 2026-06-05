@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Changelog;
-use Illuminate\Http\JsonResponse;
+use App\Models\Server;
+use Carbon\Carbon;
 
 class AnnouncementController extends Controller
 {
@@ -19,15 +20,20 @@ class AnnouncementController extends Controller
                 ->orderByDesc('version_date')
                 ->limit(5)
                 ->get()
-                ->map(fn (Changelog $changelog): array => [
-                    'id' => $changelog->id,
-                    'title' => $changelog->title,
-                    'content' => $changelog->player_notes,
-                    'body' => $changelog->player_notes,
-                    'date' => $changelog->version_date->format('Y-m-d'),
-                    'server' => $changelog->server?->name,
-                    'created_at' => $changelog->created_at?->toDateTimeString(),
-                ])
+                ->map(function (Changelog $changelog): array {
+                    /** @var Server|null $server */
+                    $server = $changelog->server;
+
+                    return [
+                        'id' => $changelog->id,
+                        'title' => $changelog->title,
+                        'content' => $changelog->player_notes,
+                        'body' => $changelog->player_notes,
+                        'date' => Carbon::parse($changelog->version_date)->format('Y-m-d'),
+                        'server' => $server?->name,
+                        'created_at' => $changelog->created_at?->toDateTimeString(),
+                    ];
+                })
                 ->values()
                 ->all();
         } catch (\Throwable $e) {

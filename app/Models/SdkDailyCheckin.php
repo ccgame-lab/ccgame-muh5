@@ -36,7 +36,7 @@ class SdkDailyCheckin extends Model
     }
 
     /**
-     * @param int $userId
+     * @param  Builder<static>  $query
      * @return Builder<static>
      */
     public function scopeTodayFor(Builder $query, int $userId): Builder

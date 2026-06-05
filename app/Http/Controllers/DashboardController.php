@@ -6,8 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Models\DiamondMachine;
 use App\Models\DiamondWallet;
-use App\Models\Server;
 use App\Models\PointTransaction;
+use App\Models\Server;
 use App\Services\DailyLoginService;
 use App\Services\DiamondMiningService;
 use Carbon\Carbon;
@@ -54,8 +54,8 @@ class DashboardController extends Controller
 
         foreach ($machines as $machine) {
             $calc = $miningService->calculateUnclaimedDiamond($machine, $freshUser);
-            $ratePerHour += (int) ($calc['rate_per_hour'] ?? 0);
-            $unclaimedDiamond += (int) ($calc['produced'] ?? 0);
+            $ratePerHour += (int) $calc['rate_per_hour'];
+            $unclaimedDiamond += (int) $calc['produced'];
         }
 
         $serverOnline = (bool) Cache::remember('dashboard:server_online', 30, function (): bool {

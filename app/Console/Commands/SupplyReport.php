@@ -10,6 +10,7 @@ use App\Models\GmAction;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class SupplyReport extends Command
 {
@@ -34,11 +35,11 @@ class SupplyReport extends Command
         $walletCount = DiamondWallet::where('balance', '>', 0)->count();
         $blockCount = DiamondWallet::where('diamond_blocks', '>', 0)->count();
 
-        $this->line('<fg=cyan>Portal KC outstanding:</> <fg=yellow>' . number_format($totalBalance) . '</>');
-        $this->line('<fg=cyan>Lifetime mined (all users):</> <fg=yellow>' . number_format($totalLifetime) . '</>');
-        $this->line('<fg=cyan>KC Block outstanding:</> <fg=yellow>' . number_format($totalBlocks) . '</>');
-        $this->line('<fg=cyan>Users with KC balance:</> ' . $walletCount);
-        $this->line('<fg=cyan>Users with KC Block:</> ' . $blockCount);
+        $this->line('<fg=cyan>Portal KC outstanding:</> <fg=yellow>'.number_format($totalBalance).'</>');
+        $this->line('<fg=cyan>Lifetime mined (all users):</> <fg=yellow>'.number_format($totalLifetime).'</>');
+        $this->line('<fg=cyan>KC Block outstanding:</> <fg=yellow>'.number_format($totalBlocks).'</>');
+        $this->line('<fg=cyan>Users with KC balance:</> '.$walletCount);
+        $this->line('<fg=cyan>Users with KC Block:</> '.$blockCount);
         $this->newLine();
 
         // ─── KC-equivalent outstanding ─────────────────────────────────────
@@ -46,7 +47,7 @@ class SupplyReport extends Command
         // the same as KC since they're just compressed for storage).
         // No reverse conversion path currently exists in portal.
         $kcEquivalent = $totalBalance + $totalBlocks;
-        $this->line('<fg=cyan>KC-equivalent total (balance + blocks):</> <fg=yellow>' . number_format($kcEquivalent) . '</>');
+        $this->line('<fg=cyan>KC-equivalent total (balance + blocks):</> <fg=yellow>'.number_format($kcEquivalent).'</>');
         $this->newLine();
 
         // ─── 2. Daily supply stats ─────────────────────────────────────────
@@ -78,7 +79,8 @@ class SupplyReport extends Command
                 ->limit(10)
                 ->get()
                 ->map(function (DiamondWallet $w) use ($date) {
-                    static $idx = 0; $idx++;
+                    static $idx = 0;
+                    $idx++;
                     $user = User::find($w->user_id);
                     $minedToday = (int) DiamondClaimLog::where('user_id', $w->user_id)
                         ->whereDate('created_at', $date)
@@ -111,7 +113,8 @@ class SupplyReport extends Command
             $this->table(
                 ['#', 'Username', 'KC Blocks', 'KC Balance', 'Total'],
                 $blockHolders->map(function (DiamondWallet $w) {
-                    static $idx = 0; $idx++;
+                    static $idx = 0;
+                    $idx++;
                     $user = User::find($w->user_id);
 
                     return [
@@ -122,7 +125,7 @@ class SupplyReport extends Command
                         number_format((int) $w->diamond_blocks + (int) $w->balance),
                     ];
                 })
-                ->toArray()
+                    ->toArray()
             );
         }
         $this->newLine();
@@ -146,6 +149,6 @@ class SupplyReport extends Command
         return (int) GmAction::where('action_type', $actionType)
             ->whereDate('created_at', $date)
             ->where('status', 'executed')
-            ->sum(\Illuminate\Support\Facades\DB::raw("CAST(JSON_EXTRACT(payload, '$.amount') AS UNSIGNED)"));
+            ->sum(DB::raw("CAST(JSON_EXTRACT(payload, '$.amount') AS UNSIGNED)"));
     }
 }

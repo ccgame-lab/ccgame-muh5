@@ -38,7 +38,7 @@ class NarrativeService
     /**
      * Render the narrative event for the social feed
      *
-     * @param array<string, mixed> $event
+     * @param  array<string, mixed>  $event
      * @return array<string, mixed>
      */
     public static function render(array $event, string $clientIp = 'global'): array
@@ -273,12 +273,12 @@ class NarrativeService
         $hourOffset = crc32($clientIp) % 6 - 3;
         $hour = (date('H') + $hourOffset + 24) % 24;
 
-        if ($hour >= 0 && $hour < 6) { // Night Mode
+        if ($hour < 6) { // Night Mode
             return [
                 'normal' => ['(âm thầm)', '(lặng lẽ)', '(không ồn ào)'],
                 'whale' => ['(xuyên đêm)', '(khuya vẫn nạp)', '(không ngủ)'],
             ];
-        } elseif ($hour >= 18 && $hour <= 23) { // Rush Hour
+        } elseif ($hour >= 18) { // Rush Hour
             return [
                 'normal' => ['(tốc độ)', '(dứt khoát)', '(mạnh tay)'],
                 'whale' => ['(dồn dập)', '(cực gắt)', '(rực lửa)', '(bùng nổ)'],

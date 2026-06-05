@@ -29,15 +29,13 @@ class ExampleTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonStructure([
-                'user',
-                'announcements',
-                'transactions',
-                'ranking',
-                'hallOfFame' => [
-                    'servers',
-                    'rankings',
-                ],
-                'diamond',
+                'server',
+                'player',
+                'wallet',
+                'tabs',
+                'features',
+                'checkin',
+                'changelog',
             ]);
     }
 

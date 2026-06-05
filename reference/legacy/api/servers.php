@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -14,8 +15,8 @@ declare(strict_types=1);
  *   503 → {"error": "Service Unavailable"} — không lộ chi tiết lỗi
  */
 
-require __DIR__ . '/../../app/bootstrap.php';
-require __DIR__ . '/../../app/db.php';
+require __DIR__.'/../../app/bootstrap.php';
+require __DIR__.'/../../app/db.php';
 
 // Chỉ chấp nhận GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -44,8 +45,8 @@ try {
 
     // Cast numeric fields — PDO trả string theo mặc định
     foreach ($servers as &$row) {
-        $row['id']     = (int) $row['id'];
-        $row['port']   = (int) $row['port'];
+        $row['id'] = (int) $row['id'];
+        $row['port'] = (int) $row['port'];
         $row['status'] = (int) $row['status'];
     }
     unset($row);

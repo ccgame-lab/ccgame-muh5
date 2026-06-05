@@ -33,7 +33,7 @@ class MiningReport extends Command
             ->distinct('user_id')
             ->count('user_id');
 
-        $this->line("<fg=cyan>Total mined:</> <fg=yellow>" . number_format($totalMined) . " KC</>");
+        $this->line('<fg=cyan>Total mined:</> <fg=yellow>'.number_format($totalMined).' KC</>');
         $this->line("<fg=cyan>Unique claimers:</> {$payerCount}");
         $this->newLine();
 
@@ -47,12 +47,12 @@ class MiningReport extends Command
                 ->orderByDesc('total')
                 ->limit(10)
                 ->get()
-                ->map(fn ($row, $i) => [
+                ->map(fn (DiamondClaimLog $row, int $i) => [
                     $i + 1,
                     $row->user_id,
-                    number_format((int) $row->total),
-                    number_format((int) $row->avg_rate),
-                    $row->claims,
+                    number_format((int) $row->getAttribute('total')),
+                    number_format((int) $row->getAttribute('avg_rate')),
+                    $row->getAttribute('claims'),
                 ])
                 ->toArray()
         );
@@ -68,19 +68,17 @@ class MiningReport extends Command
                 ->orderByDesc('boost_multiplier')
                 ->limit(10)
                 ->get()
-                ->map(function (DiamondWallet $w) use ($date, &$i) {
-                    static $idx = 0; $idx++;
-
+                ->map(function (DiamondWallet $w, int $index) use ($date) {
                     $minedToday = (int) DiamondClaimLog::where('user_id', $w->user_id)
                         ->whereDate('created_at', $date)
                         ->sum('amount_claimed');
 
                     return [
-                        $idx,
+                        $index + 1,
                         $w->user_id,
-                        number_format((float) $w->boost_multiplier, 2) . 'x',
-                        number_format((float) $w->cap_multiplier, 2) . 'x',
-                        $w->boost_until?->format('H:i'),
+                        number_format((float) $w->boost_multiplier, 2).'x',
+                        number_format((float) $w->cap_multiplier, 2).'x',
+                        $w->boost_until ? Carbon::parse($w->boost_until)->format('H:i') : null,
                         number_format($minedToday),
                     ];
                 })

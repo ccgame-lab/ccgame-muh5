@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\Game\GmApiService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -62,7 +63,7 @@ class SendItemMailAction
                     ->disabled()
                     ->dehydrated(false),
                 Hidden::make('player_id'),
-                \Filament\Forms\Components\Placeholder::make('player_id_error')
+                Placeholder::make('player_id_error')
                     ->content(fn (Get $get) => ! $get('player_id') && $get('server_id')
                         ? '⚠️ Không tìm thấy nhân vật — không thể gửi thư.'
                         : '')
@@ -97,6 +98,7 @@ class SendItemMailAction
             ->action(function (User $record, array $data): void {
                 if (empty($data['player_id'])) {
                     Notification::make()->title('Lỗi')->body('Chưa xác định nhân vật.')->danger()->send();
+
                     return;
                 }
 
