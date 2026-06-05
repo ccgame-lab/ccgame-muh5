@@ -27,6 +27,10 @@ const state = reactive({
   rankingItems: {},
   rankingActive: '',
 
+  // Live feed ticker
+  feedEvents: [],
+  feedLoaded: false,
+
   // Spin wheel
   spinning: false,
   spinStatusLoaded: false,
@@ -225,6 +229,18 @@ export function useSdkState() {
     }
   }
 
+  async function loadFeed() {
+    try {
+      const res = await fetch('/api/sdk/feed')
+      if (!res.ok) throw new Error()
+      const d = await res.json()
+      state.feedEvents = d.events || []
+      state.feedLoaded = true
+    } catch {
+      // silent — ticker hides when empty
+    }
+  }
+
   async function loadModules() {
     const u = window.ccgame?.user || state.player.name
     if (!u) return
@@ -279,6 +295,7 @@ export function useSdkState() {
      loadModules,
      equipModule,
      unequipModule,
+     loadFeed,
      loadPshopItems,
      buyWithTom,
      loadSpinStatus,

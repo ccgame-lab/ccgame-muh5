@@ -8,6 +8,8 @@ use App\Http\Controllers\PlayController;
 use App\Http\Controllers\PointShopController;
 use App\Jobs\SendGameMailJob;
 use App\Models\Giftcode;
+use App\Models\SocialEvent;
+use App\Services\SocialEventService;
 use App\Models\GiftcodeRedemption;
 use App\Models\SdkDailyCheckin;
 use App\Models\SdkFeature;
@@ -23,6 +25,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
@@ -605,3 +608,42 @@ Route::post('/api/sdk/spin', function (Request $request) {
         return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
     }
 })->name('sdk.spin');
+
+// ─── SDK Social Feed ──────────────────────────────────────────────────────────
+Route::get('/api/sdk/feed', function () {
+    $format = static function (array $item): array {
+        $username = $item['username'] ?? 'Người chơi';
+        $type = $item['event_type'] ?? '';
+        $meta = is_array($item['metadata']) ? $item['metadata'] : [];
+        $amount = number_format((float) ($meta['amount'] ?? 0));
+        $message = match (true) {
+            in_array($type, ['recharge', 'user_recharge'], true) => "{$username} vừa nạp {$amount} Tôm",
+            $type === 'spin_win' => sprintf('%s trúng %s từ vòng quay', $username, $meta['prize'] ?? 'giải'),
+            $type === 'purchase_item' => sprintf('%s vừa mua %s', $username, $meta['item_name'] ?? 'vật phẩm'),
+            default => "{$username} vừa thực hiện giao dịch",
+        };
+
+        return ['username' => $username, 'event_type' => $type, 'message' => $message, 'created_at' => $item['created_at'] ?? ''];
+    };
+
+    try {
+        $raw = Redis::lrange(SocialEventService::REDIS_KEY, 0, 9);
+        if (! empty($raw)) {
+            return response()->json([
+                'events' => array_map(fn (string $j) => $format(json_decode($j, true) ?? []), $raw),
+            ]);
+        }
+    } catch (\Exception) {
+        // Redis unavailable — fall through to DB
+    }
+
+    $events = SocialEvent::latest()->limit(10)->get()
+        ->map(fn ($e) => $format([
+            'username' => $e->username,
+            'event_type' => $e->event_type,
+            'metadata' => $e->metadata ?? [],
+            'created_at' => $e->created_at?->toIso8601String() ?? '',
+        ]))->values()->toArray();
+
+    return response()->json(['events' => $events]);
+})->name('sdk.feed');
