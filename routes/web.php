@@ -60,8 +60,8 @@ Route::get('/api/sdk/bootstrap', function (Request $request) {
 
     $username = (string) $request->query('u', '');
     $user = null;
-    $player = ['id' => 0, 'name' => 'Khách', 'level' => 0, 'vip' => 0];
-    $wallet = ['points' => 0, 'coin' => 0, 'tom' => null];
+    $player = ['id' => 0, 'name' => 'Khách', 'level' => 0, 'vip' => 0, 'rs' => 0];
+    $wallet = ['points' => 0, 'coin' => 0, 'diamond_blocks' => 0, 'tom' => null];
 
     if ($username !== '') {
         $user = User::where('username', $username)->first();
@@ -82,15 +82,19 @@ Route::get('/api/sdk/bootstrap', function (Request $request) {
                 });
             }
 
+            $rs = (int) ($actor['zhuansheng_lv'] ?? 0);
+
             $player = [
                 'id' => $user->id,
                 'name' => $user->name ?: $user->username,
                 'level' => $level,
                 'vip' => $vip,
+                'rs' => $rs,
             ];
             $wallet = [
                 'points' => (int) $user->points,
                 'coin' => (int) ($user->webWallet?->balance ?? 0),
+                'diamond_blocks' => (int) ($user->wallet?->diamond_blocks ?? 0),
                 'tom' => $tomBalance,
             ];
         }

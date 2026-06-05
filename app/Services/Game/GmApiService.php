@@ -172,7 +172,7 @@ class GmApiService
             ->first([
                 'actorid', 'actorname', 'accountname', 'level',
                 'job', 'sex', 'serverindex', 'gold', 'yuanbao',
-                'vip_level', 'totalpower',
+                'vip_level', 'totalpower', 'zhuansheng_lv',
             ]);
 
         if (! $actor) {

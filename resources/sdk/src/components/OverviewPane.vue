@@ -24,22 +24,22 @@
 
     <!-- Stats grid 2x2 -->
     <div class="ccsdk-stats">
-      <div class="ccsdk-stat-card ccsdk-stat-card--coin">
-        <span class="ccsdk-stat-label">XU</span>
-        <span class="ccsdk-stat-value">{{ fmt(wallet.coin) }}</span>
+      <div class="ccsdk-stat-card ccsdk-stat-card--tom">
+        <span class="ccsdk-stat-label">TÔM</span>
+        <span class="ccsdk-stat-value ccsdk-tom-value">{{ fmt(wallet.tom) }}</span>
+        <span class="ccsdk-tom-shimmer"></span>
       </div>
       <div class="ccsdk-stat-card ccsdk-stat-card--points">
         <span class="ccsdk-stat-label">POINT</span>
         <span class="ccsdk-stat-value">{{ fmt(wallet.points) }}</span>
       </div>
-      <div class="ccsdk-stat-card ccsdk-stat-card--level">
-        <span class="ccsdk-stat-label">Cấp độ</span>
-        <span class="ccsdk-stat-value">{{ player.level }}</span>
+      <div class="ccsdk-stat-card ccsdk-stat-card--block">
+        <span class="ccsdk-stat-label">Block KC</span>
+        <span class="ccsdk-stat-value">{{ fmt(wallet.diamond_blocks) }}</span>
       </div>
-      <div v-if="wallet.tom != null" class="ccsdk-stat-card ccsdk-stat-card--tom">
-        <span class="ccsdk-stat-label">TÔM</span>
-        <span class="ccsdk-stat-value ccsdk-tom-value">{{ fmt(wallet.tom) }}</span>
-        <span class="ccsdk-tom-shimmer"></span>
+      <div class="ccsdk-stat-card ccsdk-stat-card--rs">
+        <span class="ccsdk-stat-label">Trùng Sinh</span>
+        <span class="ccsdk-stat-value">{{ player.rs }}</span>
       </div>
     </div>
 
@@ -58,7 +58,7 @@
         <div class="ccsdk-expand-title">Ví POINT</div>
         <div class="ccsdk-wallet-info">
           <div class="ccsdk-wi-row"><span>POINT hiện có</span><strong>{{ fmt(wallet.points) }}</strong></div>
-          <div class="ccsdk-wi-row" v-if="wallet.coin"><span>Xu</span><strong>{{ fmt(wallet.coin) }}</strong></div>
+          <div class="ccsdk-wi-row" v-if="wallet.diamond_blocks"><span>Block KC</span><strong>{{ fmt(wallet.diamond_blocks) }}</strong></div>
           <div class="ccsdk-wi-row" v-if="wallet.tom != null"><span>Tôm</span><strong class="ccsdk-tom-val">{{ fmt(wallet.tom) }} 🦐</strong></div>
         </div>
       </div>
@@ -103,8 +103,8 @@ import DonatePanel from './DonatePane.vue'
 import { useSdkState } from '../composables/useSdkState.js'
 
 const props = defineProps({
-  player: { type: Object, default: () => ({ id: 0, name: '', level: 0, vip: 0 }) },
-  wallet: { type: Object, default: () => ({ coin: 0, points: 0 }) },
+  player: { type: Object, default: () => ({ id: 0, name: '', level: 0, vip: 0, rs: 0 }) },
+  wallet: { type: Object, default: () => ({ coin: 0, points: 0, diamond_blocks: 0, tom: null }) },
   features: { type: Array, default: () => [] },
   checkin: { type: Object, default: () => ({ checked_today: false, streak: 0, week: [] }) },
   refreshing: { type: Boolean, default: false },
@@ -249,6 +249,8 @@ function fmt(n) {
 .ccsdk-stat-card--coin .ccsdk-stat-value { color: #f0c060; }
 .ccsdk-stat-card--points .ccsdk-stat-value { color: #5b8af7; }
 .ccsdk-stat-card--level .ccsdk-stat-value { color: #e8e8f0; }
+.ccsdk-stat-card--block .ccsdk-stat-value { color: #2ec4b6; }
+.ccsdk-stat-card--rs .ccsdk-stat-value { color: #a78bfa; }
 
 /* ── TÔM card ── */
 .ccsdk-stat-card--tom {
