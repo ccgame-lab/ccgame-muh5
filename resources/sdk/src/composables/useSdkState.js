@@ -26,6 +26,13 @@ const state = reactive({
   rankingTypes: [],
   rankingItems: {},
   rankingActive: '',
+
+  // Spin wheel
+  spinning: false,
+  spinStatusLoaded: false,
+  spinStatusLoading: false,
+  spinStatus: { spins_today: 0, spins_remaining: 20, next_cost: 10, daily_limit: 20, has_free_spin: false },
+  spinLastResult: null,
 })
 
 export function useSdkState() {
@@ -169,6 +176,55 @@ export function useSdkState() {
     }
   }
 
+  async function loadSpinStatus() {
+    if (state.spinStatusLoaded || state.spinStatusLoading) return
+    state.spinStatusLoading = true
+    try {
+      const u = window.ccgame?.user || state.player.name || ''
+      const res = await fetch(`/api/sdk/spin/status?u=${encodeURIComponent(u)}`)
+      if (!res.ok) throw new Error()
+      const d = await res.json()
+      state.spinStatus = d
+      state.spinStatusLoaded = true
+    } catch {
+      // silent — spin card hides gracefully
+    } finally {
+      state.spinStatusLoading = false
+    }
+  }
+
+  async function doSpin() {
+    if (state.spinning) return { success: false, message: 'Đang quay...' }
+    const u = window.ccgame?.user || state.player.name
+    if (!u) return { success: false, message: 'Chưa xác thực.' }
+    state.spinning = true
+    try {
+      const res = await fetch('/api/sdk/spin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf() },
+        body: JSON.stringify({ u, server_id: state.server.id || null }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        state.wallet.points = data.point_balance
+        state.spinStatus = {
+          spins_today: data.spins_today,
+          spins_remaining: data.spins_remaining,
+          next_cost: data.next_cost ?? state.spinStatus.next_cost,
+          daily_limit: state.spinStatus.daily_limit,
+          has_free_spin: data.extra_spin,
+        }
+        state.spinStatusLoaded = true
+        state.spinLastResult = data
+      }
+      return data
+    } catch {
+      return { success: false, message: 'Lỗi kết nối.' }
+    } finally {
+      state.spinning = false
+    }
+  }
+
   async function loadModules() {
     const u = window.ccgame?.user || state.player.name
     if (!u) return
@@ -225,6 +281,8 @@ export function useSdkState() {
      unequipModule,
      loadPshopItems,
      buyWithTom,
+     loadSpinStatus,
+     doSpin,
      setRankingActive(key) { state.rankingActive = key },
    }
 }

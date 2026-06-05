@@ -46,6 +46,9 @@
     <!-- Mining -->
     <MiningCard />
 
+    <!-- Spin -->
+    <SpinCard />
+
     <!-- Check-in -->
     <CheckinCard
       :week="checkinWeek"
@@ -65,6 +68,7 @@
 <script setup>
 import { computed } from 'vue'
 import MiningCard from './MiningCard.vue'
+import SpinCard from './SpinCard.vue'
 import CheckinCard from './CheckinCard.vue'
 import GiftcodeCard from './GiftcodeCard.vue'
 import FeatureGrid from './FeatureGrid.vue'

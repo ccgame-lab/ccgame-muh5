@@ -12,11 +12,13 @@ use App\Models\GiftcodeRedemption;
 use App\Models\SdkDailyCheckin;
 use App\Models\SdkFeature;
 use App\Models\Server;
+use App\Models\SpinLog;
 use App\Models\User;
 use App\Services\Game\GmApiService;
 use App\Services\GameRankingService;
 use App\Services\GreenJadeClient;
 use App\Services\LegacyMiningService;
+use App\Services\SpinService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -530,3 +532,75 @@ Route::post('/api/sdk/giftcode/redeem', function (Request $request) {
         'new_points' => $user->fresh()->points,
     ]);
 })->name('sdk.giftcode.redeem');
+
+// Spin status — returns daily spin counters without mutating state
+Route::get('/api/sdk/spin/status', function (Request $request) {
+    $defaults = fn () => response()->json([
+        'spins_today' => 0,
+        'spins_remaining' => (int) config('economy.spin_daily_limit', 20),
+        'next_cost' => (int) config('economy.spin_cost', 10),
+        'daily_limit' => (int) config('economy.spin_daily_limit', 20),
+        'has_free_spin' => false,
+    ]);
+
+    $username = (string) $request->query('u', '');
+    if ($username === '') return $defaults();
+
+    $user = User::where('username', $username)->first();
+    if (! $user) return $defaults();
+
+    $today = now()->toDateString();
+    $baseCost = (int) config('economy.spin_cost', 10);
+    $dailyLimit = (int) config('economy.spin_daily_limit', 20);
+    $threshold = (int) config('economy.spin_diminish_after', 10);
+    $multiplier = (float) config('economy.spin_diminish_multiplier', 1.3);
+
+    $spinsToday = SpinLog::where('user_id', $user->id)->whereDate('created_at', $today)->count();
+    $hasFree = Cache::has("spin_free_{$user->id}");
+
+    $nextCost = $spinsToday >= $threshold
+        ? (int) ceil($baseCost * pow($multiplier, $spinsToday - $threshold))
+        : $baseCost;
+
+    return response()->json([
+        'spins_today' => $spinsToday,
+        'spins_remaining' => max(0, $dailyLimit - $spinsToday),
+        'next_cost' => $hasFree ? 0 : $nextCost,
+        'daily_limit' => $dailyLimit,
+        'has_free_spin' => $hasFree,
+    ]);
+})->name('sdk.spin.status');
+
+// Spin — execute one spin, deduct POINT, deliver prize
+Route::post('/api/sdk/spin', function (Request $request) {
+    $username = (string) $request->input('u', '');
+    if ($username === '') {
+        return response()->json(['success' => false, 'message' => 'Chưa xác thực.'], 401);
+    }
+
+    $user = User::where('username', $username)->first();
+    if (! $user) {
+        return response()->json(['success' => false, 'message' => 'Người dùng không tồn tại.'], 404);
+    }
+
+    $serverId = $request->input('server_id') ? (int) $request->input('server_id') : null;
+
+    try {
+        $result = app(SpinService::class)->spin($user, $serverId);
+
+        // Compute next_cost for the upcoming spin
+        $baseCost = (int) config('economy.spin_cost', 10);
+        $threshold = (int) config('economy.spin_diminish_after', 10);
+        $mult = (float) config('economy.spin_diminish_multiplier', 1.3);
+        $spinsNow = $result['spins_today'];
+        $nextCost = $result['extra_spin'] ? 0 : (
+            $spinsNow >= $threshold
+                ? (int) ceil($baseCost * pow($mult, $spinsNow - $threshold))
+                : $baseCost
+        );
+
+        return response()->json(array_merge($result, ['next_cost' => $nextCost]));
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+    }
+})->name('sdk.spin');
