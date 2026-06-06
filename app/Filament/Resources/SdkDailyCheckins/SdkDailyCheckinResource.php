@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Filament\Resources\SdkDailyCheckins;
 
 use App\Filament\Resources\SdkDailyCheckins\Pages\ListSdkDailyCheckins;
+use App\Filament\Resources\SdkDailyCheckins\Pages\ViewSdkDailyCheckin;
 use App\Models\SdkDailyCheckin;
 use BackedEnum;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -20,7 +22,11 @@ class SdkDailyCheckinResource extends Resource
 {
     protected static ?string $model = SdkDailyCheckin::class;
 
+    protected static bool $shouldSkipAuthorization = true;
+
     protected static string|\UnitEnum|null $navigationGroup = 'SDK';
+
+    protected static ?string $navigationLabel = 'Điểm danh hàng ngày';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
@@ -28,19 +34,26 @@ class SdkDailyCheckinResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable(),
                 TextColumn::make('user.username')
                     ->label('Username')
                     ->searchable(),
                 TextColumn::make('checked_at')
-                    ->date()
+                    ->label('Ngày điểm danh')
+                    ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('streak')
+                    ->label('Chuỗi liên tiếp')
                     ->numeric()
                     ->sortable(),
                 IconColumn::make('reward_given')
+                    ->label('Đã nhận thưởng')
                     ->boolean(),
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Tạo lúc')
+                    ->since()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -49,8 +62,12 @@ class SdkDailyCheckinResource extends Resource
                     ->label('Hôm nay')
                     ->query(fn ($query) => $query->whereDate('checked_at', today())),
 
-                Filter::make('checked_at')
-                    ->label('Khoảng ngày')
+                Filter::make('reward_given')
+                    ->label('Đã nhận thưởng')
+                    ->query(fn ($query) => $query->where('reward_given', true)),
+
+                Filter::make('checked_at_range')
+                    ->label('Khoảng ngày điểm danh')
                     ->form([
                         DatePicker::make('checked_from')
                             ->label('Từ ngày')
@@ -77,9 +94,11 @@ class SdkDailyCheckinResource extends Resource
                         fn ($q, $username) => $q->whereHas('user', fn ($uq) => $uq->where('username', 'like', "%{$username}%")),
                     )),
             ])
-            ->recordActions([])
+            ->recordActions([
+                ViewAction::make(),
+            ])
             ->toolbarActions([])
-            ->defaultSort('checked_at', 'desc');
+            ->defaultSort('id', 'desc');
     }
 
     public static function getRelations(): array
@@ -91,6 +110,7 @@ class SdkDailyCheckinResource extends Resource
     {
         return [
             'index' => ListSdkDailyCheckins::route('/'),
+            'view'  => ViewSdkDailyCheckin::route('/{record}'),
         ];
     }
 }

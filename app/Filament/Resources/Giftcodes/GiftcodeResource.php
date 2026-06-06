@@ -8,6 +8,7 @@ use App\Filament\Resources\Giftcodes\Pages\CreateGiftcode;
 use App\Filament\Resources\Giftcodes\Pages\EditGiftcode;
 use App\Filament\Resources\Giftcodes\Pages\ListGiftcodes;
 use App\Filament\Resources\Giftcodes\Pages\ViewGiftcode;
+use App\Filament\Resources\Giftcodes\RelationManagers\RedemptionsRelationManager;
 use App\Models\Giftcode;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
@@ -168,7 +169,9 @@ class GiftcodeResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            RedemptionsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array
