@@ -35,10 +35,12 @@
 
     if (!applyUrlParams()) {
         var tries = 0;
+        // Cho urlParamDefault (CDN main.min.js) xuat hien. Poll 10ms toi da 2s thay vi
+        // interval 0 chay burst CPU ~4s khi CDN cham. Co urlParamDefault la dung ngay.
         var timer = setInterval(function () {
-            if (applyUrlParams() || ++tries > 1000) {
+            if (applyUrlParams() || ++tries > 200) {
                 clearInterval(timer);
             }
-        }, 0);
+        }, 10);
     }
 })();

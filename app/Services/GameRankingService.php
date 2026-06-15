@@ -11,6 +11,16 @@ class GameRankingService
 {
     private const DEFAULT_LIMIT = 50;
 
+    /** Map ten field normalize (output) -> cot that trong bang actors, de day orderBy xuong DB. */
+    private const COLUMN_MAP = [
+        'name' => 'actorname',
+        'level' => 'level',
+        'zs' => 'zhuansheng_lv',
+        'power' => 'totalpower',
+        'vip' => 'vip_level',
+        'job' => 'job',
+    ];
+
     /**
      * Lấy top actors từ game DB cho một danh mục ranking.
      *
@@ -26,6 +36,10 @@ class GameRankingService
         $all = collect();
         $sortPrimary = $config['sort'] ?? 'level';
         $sortSecondary = $config['sort_secondary'] ?? null;
+        $limit = $config['limit'] ?? self::DEFAULT_LIMIT;
+
+        $primaryCol = self::COLUMN_MAP[$sortPrimary] ?? null;
+        $secondaryCol = $sortSecondary ? (self::COLUMN_MAP[$sortSecondary] ?? null) : null;
 
         foreach ($servers as $server) {
             $conn = $server->db_connection_name;
@@ -33,15 +47,25 @@ class GameRankingService
                 continue;
             }
             try {
-                $rows = DB::connection($conn)
+                $query = DB::connection($conn)
                     ->table('actors')
                     ->select(array_merge(
                         ['actorname', 'level', 'job', 'vip_level', 'zhuansheng_lv', 'totalpower'],
                         $config['extra_columns'] ?? [],
                     ))
-                    ->where('level', '>', 1)
-                    ->get()
-                    ->map(fn ($a) => $this->format($a, $server->name));
+                    ->where('level', '>', 1);
+
+                // Day sort + limit xuong DB khi sort key map duoc cot that, tranh keo
+                // toan bo bang actors vao PHP. Khong map duoc thi giu hanh vi cu (lay het).
+                if ($primaryCol) {
+                    $query->orderByDesc($primaryCol);
+                    if ($secondaryCol) {
+                        $query->orderByDesc($secondaryCol);
+                    }
+                    $query->limit($limit);
+                }
+
+                $rows = $query->get()->map(fn ($a) => $this->format($a, $server->name));
 
                 $all = $all->merge($rows);
             } catch (\Throwable) {
@@ -62,7 +86,7 @@ class GameRankingService
         });
 
         return $sorted
-            ->take($config['limit'] ?? self::DEFAULT_LIMIT)
+            ->take($limit)
             ->values()
             ->map(fn (array $item, int $i) => array_merge(['rank' => $i + 1], $item))
             ->all();

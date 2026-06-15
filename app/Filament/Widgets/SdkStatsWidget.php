@@ -11,17 +11,24 @@ use App\Models\User;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Cache;
 
 class SdkStatsWidget extends StatsOverviewWidget
 {
     protected function getStats(): array
     {
-        $checkinToday = SdkDailyCheckin::whereDate('checked_at', today())->count();
-        $checkinWeek = SdkDailyCheckin::whereBetween('checked_at', [
+        // Dashboard admin: cache moi stat de moi lan mo khong ban 5 query. TTL ngan, du tuoi.
+        // Key co kem ngay cho stat "hom nay" de qua nua dem khong dinh gia tri ngay cu.
+        $day = today()->toDateString();
+        $checkinToday = Cache::remember("sdkstats:checkin_today:{$day}", 60, fn () => SdkDailyCheckin::whereDate('checked_at', today())->count());
+        $checkinWeek = Cache::remember('sdkstats:checkin_week', 60, fn () => SdkDailyCheckin::whereBetween('checked_at', [
             now()->startOfWeek(Carbon::MONDAY),
             now()->endOfWeek(Carbon::SUNDAY),
-        ])->distinct('user_id')->count('user_id');
-        $totalUsers = User::count();
+        ])->distinct('user_id')->count('user_id'));
+        $totalUsers = Cache::remember('sdkstats:total_users', 300, fn () => User::count());
+        $giftcodeToday = Cache::remember("sdkstats:giftcode_today:{$day}", 60, fn () => GiftcodeRedemption::whereDate('created_at', today())->count());
+        // Chi dem GM that bai trong 7 ngay gan day, tranh con so tich luy vinh vien gay hieu nham.
+        $gmFailed = Cache::remember('sdkstats:gm_failed_7d', 60, fn () => GmAction::where('status', 'failed')->where('created_at', '>=', now()->subDays(7))->count());
 
         return [
             Stat::make('Checkin hôm nay', $checkinToday)
@@ -33,10 +40,10 @@ class SdkStatsWidget extends StatsOverviewWidget
             Stat::make('Tổng user', $totalUsers)
                 ->icon('heroicon-o-user-group')
                 ->color('gray'),
-            Stat::make('Giftcode dùng hôm nay', GiftcodeRedemption::whereDate('created_at', today())->count())
+            Stat::make('Giftcode dùng hôm nay', $giftcodeToday)
                 ->icon('heroicon-o-ticket')
                 ->color('warning'),
-            Stat::make('GM actions thất bại', GmAction::where('status', 'failed')->count())
+            Stat::make('GM thất bại (7 ngày)', $gmFailed)
                 ->icon('heroicon-o-exclamation-triangle')
                 ->color('danger'),
         ];

@@ -66,6 +66,9 @@ import { useSdkState } from '../composables/useSdkState.js'
 const { state, loadSpinStatus, doSpin } = useSdkState()
 const wheelContainer = ref(null)
 let wheelInstance = null
+let resultTimer = null
+let autoSpinTimer = null
+let mounted = true
 
 const isAnimating = ref(false)
 const resultVisible = ref(false)
@@ -149,7 +152,7 @@ function showResult(data) {
     resultText.value = `+${data.prize_value * 1000} KC`
   }
   resultVisible.value = true
-  setTimeout(() => { resultVisible.value = false }, 3000)
+  setTimeout(() => { if (!mounted) return; resultVisible.value = false }, 3000)
 
   if (data.milestone_bonus) {
     showToast(`+${data.milestone_bonus} POINT thưởng cột mốc!`, 'ccsdk-spin-toast--milestone')
@@ -161,7 +164,7 @@ function showResult(data) {
 function showToast(msg, cls) {
   toastMsg.value = msg
   toastClass.value = cls
-  setTimeout(() => { toastMsg.value = '' }, 2800)
+  setTimeout(() => { if (!mounted) return; toastMsg.value = '' }, 2800)
 }
 
 async function onSpin() {
@@ -179,12 +182,13 @@ async function onSpin() {
 
   wheelInstance.spinToItem(result.prize_index, SPIN_DURATION, true, 4, 1)
 
-  setTimeout(() => {
+  resultTimer = setTimeout(() => {
+    if (!mounted) return
     isAnimating.value = false
     showResult(result)
     window.dispatchEvent(new CustomEvent('spin:done'))
     if (result.extra_spin) {
-      setTimeout(() => onSpin(), 2400)
+      autoSpinTimer = setTimeout(() => { if (mounted && wheelInstance) onSpin() }, 2400)
     }
   }, SPIN_DURATION + 200)
 }
@@ -199,6 +203,9 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  mounted = false
+  if (resultTimer) clearTimeout(resultTimer)
+  if (autoSpinTimer) clearTimeout(autoSpinTimer)
   wheelInstance = null
 })
 </script>

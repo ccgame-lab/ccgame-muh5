@@ -26,7 +26,7 @@
 import { computed, onMounted } from 'vue'
 import { useSdkState } from '../composables/useSdkState.js'
 
-const { state, loadTransactions } = useSdkState()
+const { state, loadTransactions, resetTransactions } = useSdkState()
 
 const transactions = computed(() => state.transactions)
 const loading = computed(() => state.transactionsLoading)
@@ -67,8 +67,7 @@ function relTime(ts) {
 }
 
 function reload() {
-  state.transactionsLoaded = false
-  loadTransactions()
+  resetTransactions()
 }
 
 onMounted(() => loadTransactions())

@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useSdkState } from '../composables/useSdkState.js'
 
 const { state, loadMissions, claimMissionsBonus } = useSdkState()
@@ -62,11 +62,17 @@ function showToast(msg) {
   setTimeout(() => { toast.value = null }, 3000)
 }
 
-onMounted(() => loadMissions())
-
 // Re-check after checkin, spin, mining events
 const EVENTS = ['mining:claim', 'spin:done', 'checkin:done']
-EVENTS.forEach(e => window.addEventListener(e, loadMissions))
+
+onMounted(() => {
+  loadMissions()
+  EVENTS.forEach(e => window.addEventListener(e, loadMissions))
+})
+
+onUnmounted(() => {
+  EVENTS.forEach(e => window.removeEventListener(e, loadMissions))
+})
 </script>
 
 <style scoped>

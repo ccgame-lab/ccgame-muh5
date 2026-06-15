@@ -91,15 +91,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, defineAsyncComponent, h } from 'vue'
 import LiveFeedTicker from './LiveFeedTicker.vue'
 import MissionsCard from './MissionsCard.vue'
 import CompactUtilityGrid from './CompactUtilityGrid.vue'
 import GiftcodeCard from './GiftcodeCard.vue'
-import SpinCard from './SpinCard.vue'
-import MiningCard from './MiningCard.vue'
 import CheckinCard from './CheckinCard.vue'
 import DonatePanel from './DonatePane.vue'
+
+// Lazy: chi tai khi user mo panel tuong ung. SpinCard keo theo spin-wheel (~6.8KB gzip)
+// nen tach ra khoi chunk chinh, MiningCard cung tach cho gon first-load.
+// errorComponent: chunk load fail (mang) thi hien thong bao thay vi panel cam.
+const asyncErr = { render: () => h('div', { style: 'padding:14px;font-size:11px;color:#8888aa;text-align:center' }, 'Không tải được, thử làm mới trang.') }
+const SpinCard = defineAsyncComponent({ loader: () => import('./SpinCard.vue'), errorComponent: asyncErr, timeout: 12000 })
+const MiningCard = defineAsyncComponent({ loader: () => import('./MiningCard.vue'), errorComponent: asyncErr, timeout: 12000 })
 import { useSdkState } from '../composables/useSdkState.js'
 
 const props = defineProps({

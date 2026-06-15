@@ -227,7 +227,10 @@ export function useSdkState() {
       const data = await res.json()
       if (data.success) {
         state.wallet.points = data.point_balance
+        // Giu lai prizes (va field khac) khi cap nhat: spin tra ve khong co prizes,
+        // gan object moi se mat prizes -> mo lai panel Vong Quay wheel se trang.
         state.spinStatus = {
+          ...state.spinStatus,
           spins_today: data.spins_today,
           spins_remaining: data.spins_remaining,
           next_cost: data.next_cost ?? state.spinStatus.next_cost,
@@ -243,6 +246,11 @@ export function useSdkState() {
     } finally {
       state.spinning = false
     }
+  }
+
+  function resetTransactions() {
+    state.transactionsLoaded = false
+    return loadTransactions()
   }
 
   async function loadTransactions() {
@@ -365,6 +373,7 @@ export function useSdkState() {
      equipModule,
      unequipModule,
      loadTransactions,
+     resetTransactions,
      loadMissions,
      claimMissionsBonus,
      loadFeed,
