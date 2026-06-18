@@ -145,7 +145,7 @@ return [
             'image' => 'https://cdn.ccgame.org/h5/muh5/resource/resource/image/chenghao/ch_mu_72.png',
             'price_wpoint' => null,
             'price_wcoin' => null,
-            'price_tom' => null, // TẠM ẨN: bật = 80 sau khi item 380077 + title 82 lên S1
+            'price_tom' => 80,
             'game_item_id' => 380077,
             'feecallback_item_id' => 380077,
             'tags' => ['Danh Hiệu', 'Lực Chiến Đỉnh', 'Vĩnh Viễn', 'Mùa Hồi Quy'],
