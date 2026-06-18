@@ -17,6 +17,7 @@ use App\Models\Server;
 use App\Models\SocialEvent;
 use App\Models\SpinLog;
 use App\Models\User;
+use App\Services\DonateRankingService;
 use App\Services\Game\GmApiService;
 use App\Services\GameRankingService;
 use App\Services\GreenJadeClient;
@@ -157,6 +158,10 @@ Route::get('/api/sdk/bootstrap', function (Request $request) {
             return ['checked_today' => $today, 'streak' => $streak, 'week' => $week];
         })(),
         'changelog' => $announcements,
+        'ranking_popup' => [
+            'show' => true,
+            'has_donated' => $user ? app(DonateRankingService::class)->hasDonated($user) : false,
+        ],
     ]);
 })->name('sdk.bootstrap');
 
@@ -185,6 +190,22 @@ Route::get('/api/sdk/ranking', function () {
 
     return response()->json(['types' => $types, 'items' => $items]);
 });
+
+// SDK donate ranking — top người tiêu Tôm theo kỳ (week/month/season/all)
+Route::get('/api/sdk/donate-ranking', function () {
+    $period = (string) request()->query('period', 'week');
+    if (! in_array($period, ['week', 'month', 'season', 'all'], true)) {
+        $period = 'week';
+    }
+    try {
+        $top = app(DonateRankingService::class)->topDonors($period, 10);
+    } catch (Throwable $e) {
+        report($e);
+        $top = [];
+    }
+
+    return response()->json(['period' => $period, 'top' => $top]);
+})->name('sdk.donate_ranking');
 
 // ─── Point Shop (Tom / GreenJade wallet) ─────────────────────────────────────
 
