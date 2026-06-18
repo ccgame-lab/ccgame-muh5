@@ -47,15 +47,17 @@
       @touchstart="onDragStart"
     @click="onFabClick"
   >CC</div>
-  <RankingPopup
-    v-if="rankingPopupOpen"
-    :power-top="state.rankingItems.power || []"
-    :donate="state.donateRanking"
-    :has-donated="state.rankingPopup.has_donated"
-    @close="closePopup"
-    @dismiss-day="dismissPopupDay"
-    @load-period="changePeriod"
-  />
+  <Teleport to="body">
+    <RankingPopup
+      v-if="rankingPopupOpen"
+      :power-top="state.rankingItems.power || []"
+      :donate="state.donateRanking"
+      :has-donated="state.rankingPopup.has_donated"
+      @close="closePopup"
+      @dismiss-day="dismissPopupDay"
+      @load-period="changePeriod"
+    />
+  </Teleport>
 </template>
 
 <script setup>
