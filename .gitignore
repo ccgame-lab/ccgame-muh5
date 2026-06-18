@@ -31,3 +31,9 @@ Thumbs.db
 
 /resources/sdk/node_modules
 .brain/
+
+# Báo cáo nhịp-ngày tự sinh (autonomy), không commit
+/ops/reports/
+
+# Claude settings cá nhân (local), không commit
+.claude/settings.local.json
