@@ -29,6 +29,10 @@ const state = reactive({
   rankingItems: {},
   rankingActive: '',
 
+  // Ranking popup (hiện khi mở game)
+  rankingPopup: { show: false, has_donated: false },
+  donateRanking: { period: 'week', top: [], loading: false, loaded: false },
+
   // Transactions tab
   transactions: [],
   transactionsLoaded: false,
@@ -72,6 +76,7 @@ export function useSdkState() {
         suppliesUrl: d.supplies_url || state.suppliesUrl,
         supportTiers: d.support_tiers || state.supportTiers,
         checkin: d.checkin || { checked_today: false, streak: 0, week: [] },
+        rankingPopup: d.ranking_popup || state.rankingPopup,
         loaded: true,
         error: null,
       })
@@ -98,6 +103,22 @@ export function useSdkState() {
       state.rankingError = 'Không tải được bảng xếp hạng. Thử lại sau.'
     } finally {
       state.rankingLoading = false
+    }
+  }
+
+  async function loadDonateRanking(period = 'week') {
+    state.donateRanking.loading = true
+    try {
+      const res = await fetch(`/api/sdk/donate-ranking?period=${encodeURIComponent(period)}`)
+      if (!res.ok) throw new Error('500')
+      const d = await res.json()
+      state.donateRanking.period = d.period || period
+      state.donateRanking.top = d.top || []
+      state.donateRanking.loaded = true
+    } catch {
+      state.donateRanking.top = []
+    } finally {
+      state.donateRanking.loading = false
     }
   }
 
@@ -366,6 +387,7 @@ export function useSdkState() {
      state: readonly(state),
      loadBootstrap,
      loadRanking,
+     loadDonateRanking,
      doCheckin,
      applyPointsReward,
      refreshWallet,

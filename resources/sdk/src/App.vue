@@ -47,6 +47,15 @@
       @touchstart="onDragStart"
     @click="onFabClick"
   >CC</div>
+  <RankingPopup
+    v-if="rankingPopupOpen"
+    :power-top="state.rankingItems.power || []"
+    :donate="state.donateRanking"
+    :has-donated="state.rankingPopup.has_donated"
+    @close="closePopup"
+    @dismiss-day="dismissPopupDay"
+    @load-period="changePeriod"
+  />
 </template>
 
 <script setup>
@@ -56,12 +65,14 @@ import OverviewPane from './components/OverviewPane.vue'
 import RankingPane from './components/RankingPane.vue'
 import NotificationsPane from './components/NotificationsPane.vue'
 import TransactionsPane from './components/TransactionsPane.vue'
+import RankingPopup from './components/RankingPopup.vue'
 
-const { state, loadBootstrap, loadRanking, setRankingActive, doCheckin, refreshWallet, loadTransactions } = useSdkState()
+const { state, loadBootstrap, loadRanking, loadDonateRanking, setRankingActive, doCheckin, refreshWallet, loadTransactions } = useSdkState()
 const open = ref(false)
 const activeTab = ref('overview')
 const booted = ref(false)
 const fabRef = ref(null)
+const rankingPopupOpen = ref(false)
 
 // Dragging state
 let dragging = false
@@ -88,6 +99,32 @@ watch(open, async (v) => {
     if (state.tabs.length) activeTab.value = state.tabs[0].key || 'overview'
   }
 })
+
+onMounted(() => { maybeShowPopup() })
+
+async function maybeShowPopup() {
+  try {
+    const today = new Date().toDateString()
+    if (localStorage.getItem('ccgame_rankpop_off') === today) return
+    if (!booted.value) {
+      booted.value = true
+      await loadBootstrap()
+      if (state.tabs.length) activeTab.value = state.tabs[0].key || 'overview'
+    }
+    if (!state.loaded || !state.rankingPopup.show) return
+    await Promise.all([loadRanking(), loadDonateRanking('week')])
+    rankingPopupOpen.value = true
+  } catch { /* popup is best-effort, never block the game */ }
+}
+
+function closePopup() { rankingPopupOpen.value = false }
+
+function dismissPopupDay() {
+  try { localStorage.setItem('ccgame_rankpop_off', new Date().toDateString()) } catch { /* private mode */ }
+  rankingPopupOpen.value = false
+}
+
+function changePeriod(p) { loadDonateRanking(p) }
 
 function onDragStart(e) {
   const el = fabRef.value
