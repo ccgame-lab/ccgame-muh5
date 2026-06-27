@@ -68,6 +68,7 @@
       :power-top="state.rankingItems.power || []"
       :donate="state.donateRanking"
       :has-donated="state.rankingPopup.has_donated"
+      :server="state.server?.name || ''"
       @close="closePopup"
       @dismiss-day="dismissPopupDay"
       @load-period="changePeriod"
