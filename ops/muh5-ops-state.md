@@ -1,29 +1,25 @@
-# muh5 - Trạng thái ops (checkpoint resume sau compact)
+# muh5 - Trạng thái ops (checkpoint resume)
 
-> Cập nhật 2026-06-27. Ảnh chụp để resume sạch sau khi compact context. Plan canonical ở các file ops/ khác.
+> Cập nhật 2026-06-27 (phiên design+distribution). Ảnh chụp để resume sạch.
 
-## ĐÃ SHIP (live prod muh5.ccgame.org)
-- **Chí Tôn 380077**: thêm vào picklist `config/game_items.php` (admin chọn gửi mail được). Verified live.
-- **Pet Đọa Thiên Sứ**: `config/pshop.php` `pet_doa_thien_su` -> game_item_id 500053, image pet_021, 60 Tôm, limit 1, bỏ coming-soon. (Clone Lôi Trạch, stats honest = Lôi Trạch, chuẩn hóa sau.)
-- **10 danh hiệu bán**: `config/pshop.php` - bộ Hắc Ám 7 cấp (380030-380036, 20-55 Tôm) + 3 premium (Ngạo Thị 380023, Thiên Sứ 380024, Kì Tích Vương Giả 380038). Giao GM-mail như Chí Tôn. Giá = lead-call, owner chỉnh được.
-- **SDK panel width-bump tạm**: `resources/sdk/src/styles/sdk.css` - desktop 480px (>=768), 560px (>=1280), mobile giữ 290px. (Mới band-aid, sẽ redesign full.)
-- Deploy = `bash deploy.sh` (push master -> clone+rsync prod -> composer/optimize:clear -> smoke curl). prod KHÔNG phải git checkout.
+## ĐÃ SHIP LIVE prod (muh5.ccgame.org)
+- **Landing dopamine** (`resources/views/landing.blade.php`): thay màn need-auth cho khách organic (case `no_session` ở `PlayController::entry`). Hero art knight thật + headline "Vào là có đồ. Cày là ra ngọc." + 6 layout family (đặc sắc, class-selector tương tác **3 class: MG Đấu Sĩ / DK Chiến Binh / ELF Tiên Nữ** - muh5 CHỈ có 3 class, không phải 6), sự kiện x10+giftcode+mốc nạp, gallery mosaic, cộng đồng) + SEO/OG. Thiết kế qua claude.ai/design -> port blade. Theme dark #07070a + gold #c9a94e, font Be Vietnam Pro + Playfair Display. Validate full (hero/class JS/responsive) + verify live. Commit 35205ad.
+- **OG image landscape** (`public/assets/landing/og-image.jpg`, 1200x630): banner knight + wordmark CCGAME gold (render canvas). FB preview chuẩn. Commit 242644c.
+- **Ảnh brand fanpage** (`public/assets/brand/`): `ccgame-cover.jpg` (1640x624) + `ccgame-profile.jpg` (600x600, emblem CC). Tải từ `muh5.ccgame.org/assets/brand/*`.
+- (Trước đó) Chí Tôn picklist, pet Đọa Thiên Sứ, 10 danh hiệu, SDK panel width-bump tạm.
 
-## ĐANG CHỜ OWNER
-- **Promo 72h** (nạp tiền tươi -> item qua GM-mail, KHÔNG bán Tôm): bài Zalo + bài FB đã soạn (Đọa Thiên Sứ ở mốc 100k). Owner: điền "admin" + đăng + tạo giftcode tân thủ. Runbook fulfillment: `ops/promo-72h-fulfillment.md`.
-- **Mốc giá**: pet 60 Tôm + 10 danh hiệu giá ladder = lead-call, owner duyệt/chỉnh.
+## FANPAGE CCGame (việc distribution mới)
+- Page cũ **GreenJade** (vanity gcenter.vn, 42K follower) reach chết + dính **Facebook Gaming** (FB khai tử -> ẩn danh không thấy). -> Lập page mới sạch. KHÔNG xoá page cũ (cross-post kéo 42K).
+- Brand kit + spec tạo page: `ops/fanpage-ccgame.md`. Tên "CCGame - Game Private", **category CHUẨN (KHÔNG Gaming Video Creator)**, bio, CTA, vanity.
+- 16 bài content + lịch 8 ngày: `ops/fanpage-content-batch.md` (sinh bởi workflow, giọng dân cày MU honest).
+- Cơ chế: agents soạn -> **hẹn giờ Meta Business Suite** (KHÔNG auto-post browser-bot = tránh ban).
+- **CHỜ OWNER:** tạo page (đúng category) + gửi link page mới + **link NHÓM FB** -> wire vào landing (`fbUrl`/`fanpageUrl` đang placeholder facebook.com) + bài #12/#13/#15.
 
-## ĐANG LÀM (phase design)
-- **Redesign SDK responsive** (PC dashboard 2-3 cột, mobile thoáng, KHÔNG ẩn content - content vốn đã không ẩn, chỉ cramped) + **landing dopamine muh5.ccgame.org** (thay màn "need auth" cụt + thêm SEO).
-- Index hiện: route `/` -> redirect `/play` -> `PlayController::entry` -> `play.blade.php`. Khách chưa-auth = màn fallback 🛡️ + nút "Về CCGame". Đây là chỗ buff dopamine.
-- **Workflow design**: claude.ai/design (lean, không design-sync full) -> handoff -> implement. Bí kíp: brain `playbooks/claude-design-workflow.md`. Art mới = Gemini tab. Theme: dark #07070a + gold #c9a94e, font Outfit/Jakarta.
-- **Art có sẵn (0 generate)**: hero `F:\Storage\10_Projects\MU Archangel H5\old_backup\mu.gcenter.fun\static\images\game\bzsch5\bg1-6.jpg`; logo `E:\40_Reference\MuH5\angel\...\icon\logo_web.png`; sprite `...\res\body\body101_*`; icon skill `...\image\qjzlicon\qjzl_icon_1-105.png`.
-- Sau muh5 mới sang **trang hoàng index ccgame.org**.
-
-## PLAN/DOSSIER (file)
-- `ops/title-shop-design.md`: bán DANH HIỆU = +lực vĩnh viễn (đáng tiền); bán SLOT = cosmetic +0 lực (server-locked, hoãn). 57 danh hiệu free bán được (tId 22-78). Cơ chế titleslot server-side Lua, `@addtitleslot` GM cmd.
-- `ops/engage-distro-plan.md`: feature 累充 (mốc nạp tích lũy event) = hook cao; FB group + giftcode tân thủ = distribution ROI cao (đúng directive "FB không Zalo"); **cờ dark-pattern `SpinService.php`** (nghi rate=0/near-miss giả) - cần audit 1 lần.
+## ĐANG LÀM / CHỜ
+- **SDK redesign**: đã thiết kế xong ở claude.ai/design (project "MU Online SDK Redesign", file `MU SDK Overlay.dc.html`). PC = dashboard nhiều cột (trái player+ví+điểm danh, phải tài sản+feed+nhiệm vụ), gold accent đơn, currency = dot ngữ nghĩa. **CHƯA PORT**. Port = restyle 16 component Vue (`resources/sdk/src`) + `sdk.css` sang layout dashboard responsive, GIỮ data-binding/API. Job lớn, đụng UI live player -> làm cẩn thận. Sau port: `cd resources/sdk && npm run build` -> deploy.
+- **Art pass landing**: wire sprite 6 class (class-selector) + 6 screenshot gallery (boss/pvp/map/cánh/ui/bxh) từ kho art (E:\40_Reference\MuH5, F:\Storage). Hiện để placeholder (nhìn intentional). Sau wire -> redeploy.
 
 ## RÀNG BUỘC
-- Đụng ví/payment/settlement = FROZEN, owner duyệt. config:cache active prod (dùng config() không env()). Không em-dash. Game server (Lua/VPS) = Locked Mode, test server99 trước.
-- Ship-fast: ưu tiên rollback hơn audit kỹ, bớt overbuild.
+- Ví/payment/settlement = FROZEN, owner duyệt. config:cache active prod (dùng config()). Không em-dash. Game server Lua/VPS = Locked Mode (SDK web KHÔNG thuộc khoá này - sửa được). Push master cần owner authorize (harness chặn auto).
+- Deploy = `bash deploy.sh` (preflight tree sạch + HEAD==origin/master -> clone+rsync prod -> composer --no-dev -> optimize:clear -> smoke). Prod KHÔNG phải git checkout.
+- Ship-fast: ưu tiên rollback hơn audit kỹ.

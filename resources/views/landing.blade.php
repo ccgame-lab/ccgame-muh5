@@ -7,13 +7,11 @@
     $fanpageUrl  = $fanpageUrl  ?? 'https://www.facebook.com';  // TODO owner: thay bằng link FANPAGE thật
     $ogImage     = url('/assets/landing/og-image.jpg');
     $canonical   = url('/');
+    // muh5 chỉ có 3 class: MG (Đấu Sĩ), DK (Chiến Binh), ELF (Tiên Nữ)
     $classes = [
+        ['code' => 'MG',  'name' => 'Đấu Sĩ',     'en' => 'Magic Gladiator',  'role' => 'Lai kiếm-phép · Linh hoạt',  'desc' => 'Vừa chém vừa nổ phép, không tốn ô năng lượng riêng. Cơ động, mạnh sớm, càn quét tốt cả khi solo lẫn đi nhóm.'],
         ['code' => 'DK',  'name' => 'Chiến Binh', 'en' => 'Dark Knight',      'role' => 'Cận chiến · Tank-DPS',       'desc' => 'Cầm đại đao xông thẳng vào trận. Máu dày, sát thương cao, đứng tuyến đầu gánh team trong cả PvP lẫn săn boss.'],
-        ['code' => 'DW',  'name' => 'Pháp Sư',    'en' => 'Dark Wizard',      'role' => 'Phép · Sát thương diện rộng', 'desc' => 'Hoả lực phép thuật càn quét cả màn hình. Dọn quái cày kéo nhanh nhất server, đổi lại máu mỏng nên cần đi nhóm.'],
-        ['code' => 'FE',  'name' => 'Tiên Nữ',    'en' => 'Fairy Elf',        'role' => 'Tầm xa · Hỗ trợ',            'desc' => 'Cung thủ bắn tỉa kiêm buff đồng đội. Tăng sức mạnh cả nhóm và rỉa boss từ khoảng cách an toàn.'],
-        ['code' => 'MG',  'name' => 'Đấu Sĩ',     'en' => 'Magic Gladiator',  'role' => 'Lai kiếm-phép · Linh hoạt',  'desc' => 'Vừa chém vừa nổ phép, không tốn ô năng lượng riêng. Cơ động, mạnh sớm, càn quét tốt khi solo.'],
-        ['code' => 'DL',  'name' => 'Chúa Tể',    'en' => 'Dark Lord',        'role' => 'Triệu hồi · Chỉ huy',        'desc' => 'Cưỡi thú, gọi quân đoàn và chỉ huy chiến trường. Trùm PvP và công thành, càng đông người càng mạnh.'],
-        ['code' => 'SUM', 'name' => 'Triệu Hồi',  'en' => 'Summoner',         'role' => 'Khống chế · Debuff',         'desc' => 'Nguyền rủa, trói chân và làm yếu kẻ địch. Khắc chế đội hình đối phương, mở combo cho cả nhóm.'],
+        ['code' => 'ELF', 'name' => 'Tiên Nữ',    'en' => 'Fairy Elf',        'role' => 'Tầm xa · Hỗ trợ',            'desc' => 'Cung thủ bắn tỉa kiêm buff đồng đội. Tăng sức mạnh cả nhóm và rỉa boss từ khoảng cách an toàn.'],
     ];
 @endphp
 <!DOCTYPE html>
@@ -221,7 +219,7 @@
                 <span style="width:26px;height:1px;background:#c9a94e;display:inline-block"></span>
                 <span style="font-size:12px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:#c9a94e">Chọn lối chơi</span>
             </div>
-            <h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:clamp(30px,3.6vw,48px);line-height:1.08;color:#ece8df;max-width:620px">Sáu class, sáu kiểu cày</h2>
+            <h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:clamp(30px,3.6vw,48px);line-height:1.08;color:#ece8df;max-width:620px">Ba class, ba kiểu cày</h2>
 
             <div style="display:flex;flex-wrap:wrap;gap:clamp(22px,3vw,44px);margin-top:46px">
                 <div style="flex:1 1 290px;min-width:270px;border:1px solid rgba(201,169,78,.18);align-self:flex-start">
