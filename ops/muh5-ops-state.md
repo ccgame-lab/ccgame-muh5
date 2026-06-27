@@ -12,6 +12,15 @@
 | **Telegram** | Announcement/giftcode | https://t.me/ccgameorg ("CCGame - ccgame.org", + Lobby group discussion) | Live, post ghim |
 
 Tất cả 4 kênh social ĐÃ wire vào landing section "Cộng đồng" (`fbUrl`/`fanpageUrl`/`zaloUrl`/`tgUrl`). Người vào từ QC → có đủ đường: chơi game + 4 kênh cộng đồng.
+
+## OPS AUTOMATION (teammates + kênh nội bộ - 2026-06-27)
+- **2 teammate subagent** (`.claude/agents/`, project source of truth - KHÔNG ở brain vì mang kiến thức dự án):
+  - `ccgame-content` - soạn bài social/giftcode/announcement, giọng dân cày MU honest, khoá cứng 3 class + no-p2w-false-claim. Report-back, KHÔNG tự đăng/commit.
+  - `ccgame-growth` - đọc metrics QC (CTR/CPC/cost-per-join), phán scale/kill, theo dõi growth kênh. Read-only, KHÔNG tiêu tiền.
+  - README roster đã update (domain Distribution thêm, justified = trọn 1 phiên làm tay).
+- **Kênh Telegram nội bộ "CCGame Ops (nội bộ)"** (private, chỉ owner): nơi đẩy draft/giftcode/metrics chờ duyệt trước khi ra public. Invite link nội bộ `t.me/+huS9VfYH6iM4M2Fl` (KHÔNG public). Note quy trình đã ghim.
+- **Quy trình hiện tại (tay):** agent soạn → Claude chính đẩy draft (kênh nội bộ / chat) → owner duyệt → đăng public/hẹn lịch. Claude chính = bàn tay duy nhất (đăng/commit/deploy).
+- **Bot tự đẩy (deferred):** cần owner tạo bot ở BotFather + token → script + scheduled task tự post theo lịch. Token giữ ngoài repo (`~/.secrets/`), KHÔNG commit. (Owner có lịch sử tạo/xoá bot: KiemTheM-BOT, GreenJade Storage BOT - hiện `/mybots` = none.)
 **Còn cosmetic:** username page FB (bỏ profile.php?id); preview link Zalo trong post Telegram hơi xấu (id.zalo.me login) - bỏ qua được.
 
 ## ĐÃ SHIP LIVE prod (muh5.ccgame.org)
