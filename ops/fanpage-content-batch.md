@@ -2,7 +2,7 @@
 
 > ⚠️ muh5 CHỈ có **3 class: MG Đấu Sĩ · DK Chiến Binh · ELF Tiên Nữ** (KHÔNG có DW/DL/SUM). Đã bỏ 3 bài spotlight class không tồn tại.
 > Giọng dân cày MU, honest no-dark-pattern. Copy-paste vào Meta Business Suite -> **Lên lịch** (KHÔNG auto-post bot).
-> Link mặc định: `muh5.ccgame.org`. Link nhóm FB = `facebook.com/groups/gcenter.vn` (nhóm "Chia Sẻ Game Lậu Cày Cuốc Miễn Phí", admin owner, công khai 622+). Art: file có sẵn ghi rõ; còn lại lấy từ kho art MU ở pass art.
+> Link mặc định: `muh5.ccgame.org`. Link nhóm FB = `facebook.com/groups/gcenter.vn` (nhóm "Chia Sẻ Game Lậu Cày Cuốc Miễn Phí", admin owner, công khai 622+). Nhóm Zalo (support/giftcode) = `https://zalo.me/g/naa2cur0bgwtessdzhon`. Art: file có sẵn ghi rõ; còn lại lấy từ kho art MU ở pass art.
 
 ## Lịch gợi ý (2 bài/ngày, trộn loại, 11-13h hoặc 19-22h)
 | Ngày | Sáng/Trưa | Tối |
