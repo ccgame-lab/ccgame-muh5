@@ -1,5 +1,7 @@
 <template>
   <div class="ccsdk-pane">
+   <!-- Cot trai: danh tinh + vi + diem danh -->
+   <div class="ccsdk-col ccsdk-col--left">
     <!-- Player row -->
     <div class="ccsdk-player">
       <div class="ccsdk-player-avatar">{{ avatarText }}</div>
@@ -42,7 +44,10 @@
         <span class="ccsdk-stat-value">{{ player.rs }}</span>
       </div>
     </div>
+   </div>
 
+   <!-- Cot phai: hoat dong + tien ich + diem danh -->
+   <div class="ccsdk-col ccsdk-col--right">
     <!-- Live feed ticker -->
     <LiveFeedTicker />
 
@@ -87,6 +92,7 @@
       :checked-today="checkin.checked_today"
       @checkin="onCheckin"
     />
+   </div>
   </div>
 </template>
 
@@ -164,6 +170,18 @@ function fmt(n) {
 .ccsdk-pane {
   padding: 14px;
 }
+.ccsdk-col { display: flex; flex-direction: column; min-width: 0; }
+
+/* PC: 2 cot dashboard (mobile giu 1 cot doc) */
+@media (min-width: 768px) {
+  .ccsdk-pane {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    gap: 18px;
+    align-items: start;
+    padding: 16px 18px;
+  }
+}
 
 /* ── Player row ── */
 .ccsdk-player {
@@ -177,13 +195,13 @@ function fmt(n) {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #7c6ff7, #5b8af7);
+  background: linear-gradient(135deg, #c9a94e, #a3812d);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   font-weight: 700;
-  color: #fff;
+  color: #0d0d14;
   flex-shrink: 0;
 }
 
@@ -235,7 +253,7 @@ function fmt(n) {
   padding: 8px 10px;
   border-radius: 8px;
   background: #1e1e32;
-  border: 1px solid rgba(120,100,255,0.18);
+  border: 1px solid rgba(201,169,78,0.18);
 }
 
 .ccsdk-stat-label {

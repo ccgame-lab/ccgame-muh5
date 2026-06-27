@@ -26,12 +26,12 @@
 }
 .ccgame-sdk-panel--open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
 
-/* PC: bung panel rong + cao hon (mobile giu 290px) */
+/* PC: bung panel rong dang dashboard nhieu cot (mobile giu 290px 1 cot) */
 @media (min-width: 768px) {
-  .ccgame-sdk-panel { width: 480px; max-height: 84vh; bottom: 88px; right: 24px; }
+  .ccgame-sdk-panel { width: 700px; max-height: 86vh; bottom: 88px; right: 24px; }
 }
 @media (min-width: 1280px) {
-  .ccgame-sdk-panel { width: 560px; }
+  .ccgame-sdk-panel { width: 760px; }
 }
 
 .ccgame-sdk-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 10px; border-bottom: 1px solid #1e1e2e; flex-shrink: 0; }
