@@ -289,14 +289,8 @@ class PlayController extends Controller
             ]);
         }
 
-        // Not authenticated and no launch token
-        return view('play', [
-            'playAllowed' => false,
-            'errorReason' => 'no_session',
-            'serverName' => 'S1',
-            'displayName' => 'Khách',
-            'gameUrl' => '',
-        ]);
+        // Not authenticated and no launch token -> dopamine landing (khách organic + SEO/OG)
+        return view('landing');
     }
 
     /**
