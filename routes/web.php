@@ -193,7 +193,11 @@ Route::get('/api/sdk/ranking', function () {
         $items[$r['key']] = $r['players'];
     }
 
-    return response()->json(['types' => $types, 'items' => $items]);
+    return response()->json([
+        'types' => $types,
+        'items' => $items,
+        'inactive_days' => GameRankingService::INACTIVE_DAYS,
+    ]);
 });
 
 // SDK donate ranking — top người tiêu Tôm theo kỳ (week/month/season/all)

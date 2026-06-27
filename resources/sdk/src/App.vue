@@ -39,7 +39,7 @@
       <div v-if="activeTab==='mining'" class="ccgame-sdk-feature-pane"><MiningCard /></div>
       <div v-if="activeTab==='giftcode'" class="ccgame-sdk-feature-pane"><GiftcodeCard /></div>
       <TransactionsPane v-show="activeTab==='transactions'" />
-      <RankingPane v-show="activeTab==='ranking'" :types="state.rankingTypes" :items="state.rankingItems" :active="state.rankingActive" :loading="state.rankingLoading" :error="state.rankingError" @update:active="setRankingActive" />
+      <RankingPane v-show="activeTab==='ranking'" :types="state.rankingTypes" :items="state.rankingItems" :active="state.rankingActive" :inactive-days="state.rankingInactiveDays" :loading="state.rankingLoading" :error="state.rankingError" @update:active="setRankingActive" />
       <NotificationsPane v-show="activeTab==='notifications'" />
     </div>
 
@@ -69,6 +69,7 @@
       :donate="state.donateRanking"
       :has-donated="state.rankingPopup.has_donated"
       :server="state.server?.name || ''"
+      :inactive-days="state.rankingInactiveDays"
       @close="closePopup"
       @dismiss-day="dismissPopupDay"
       @load-period="changePeriod"

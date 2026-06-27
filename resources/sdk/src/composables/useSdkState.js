@@ -27,6 +27,7 @@ const state = reactive({
   rankingError: null,
   rankingTypes: [],
   rankingItems: {},
+  rankingInactiveDays: 14,
   rankingActive: '',
 
   // Ranking popup (hiện khi mở game)
@@ -97,6 +98,7 @@ export function useSdkState() {
       const d = await res.json()
       state.rankingTypes = d.types || []
       state.rankingItems = d.items || {}
+      state.rankingInactiveDays = d.inactive_days || state.rankingInactiveDays
       state.rankingActive = d.types?.[0]?.key || ''
       state.rankingLoaded = true
     } catch {

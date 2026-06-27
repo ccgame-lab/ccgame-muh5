@@ -60,6 +60,11 @@
       </template>
 
       <div v-else class="ccgame-sdk-empty">Chưa có dữ liệu</div>
+
+      <div class="ccsdk-rank-note">
+        <span class="mat-icon">schedule</span>
+        Chỉ hiện người chơi hoạt động trong {{ inactiveDays }} ngày gần đây. Nghỉ lâu sẽ tạm ẩn, quay lại là hiện lại.
+      </div>
     </template>
 
     <!-- No ranking types configured -->
@@ -75,6 +80,7 @@ const props = defineProps({
   types: { type: Array, default: () => [] },
   items: { type: Object, default: () => ({}) },
   active: { type: String, default: '' },
+  inactiveDays: { type: Number, default: 14 },
   loading: { type: Boolean, default: false },
   error: { type: String, default: '' },
 })
@@ -270,5 +276,26 @@ watch(() => props.types, (types) => {
   color: #4a4a6a;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+/* Tín hiệu: BXH lọc người chơi offline lâu */
+.ccsdk-rank-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: #0d0d16;
+  border: 1px solid #1a1a2a;
+  font-size: 9.5px;
+  line-height: 1.45;
+  color: #6a6a8a;
+}
+.ccsdk-rank-note .mat-icon {
+  font-size: 13px;
+  color: #c9a94e;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 </style>

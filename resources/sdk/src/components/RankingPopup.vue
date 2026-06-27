@@ -91,6 +91,12 @@
           </template>
         </div>
 
+        <!-- tín hiệu: BXH lọc người chơi offline lâu -->
+        <div class="rp-note">
+          <span class="mat-icon">schedule</span>
+          Chỉ hiện người chơi hoạt động trong {{ inactiveDays }} ngày gần đây. Nghỉ lâu sẽ tạm ẩn, quay lại là hiện lại.
+        </div>
+
         <!-- banner -->
         <div class="rp-banner">
           <span class="mat-icon rp-banner-icon">trending_up</span>
@@ -118,6 +124,7 @@ const props = defineProps({
   donate: { type: Object, default: () => ({ period: 'week', top: [], loading: false }) },
   hasDonated: { type: Boolean, default: false },
   server: { type: String, default: '' },
+  inactiveDays: { type: Number, default: 14 },
 })
 defineEmits(['close', 'dismiss-day', 'load-period'])
 
@@ -285,6 +292,12 @@ function fmt(n) {
   background: rgba(201,169,78,.1); border: 1px solid rgba(201,169,78,.32); border-radius: 12px; }
 .rp-banner-icon { font-size: 19px; color: #e0b84a; flex: none; }
 .rp-banner-text { font-size: 11.5px; font-weight: 600; line-height: 1.4; color: #e7e3d9; }
+
+/* tín hiệu lọc inactive */
+.rp-note { display: flex; align-items: flex-start; gap: 7px; margin-top: 14px; padding: 9px 11px;
+  border-radius: 9px; background: #0c0c14; border: 1px solid rgba(255,255,255,.06);
+  font-size: 10px; line-height: 1.45; color: #8c877b; }
+.rp-note .mat-icon { font-size: 14px; color: #c9a94e; flex: none; margin-top: 1px; }
 
 /* footer */
 .rp-foot { flex: none; display: flex; align-items: center; gap: 10px; padding: 14px 18px;

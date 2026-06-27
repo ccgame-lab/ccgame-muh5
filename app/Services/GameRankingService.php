@@ -17,7 +17,7 @@ class GameRankingService
      * KHONG dung `lastonlinetime` (int epoch 2010-01-01, khong phai 1970 -> de filter sai am tham).
      * Tune 1 dong; 14 = lenient (giau nham 1 player active con hai hon hien 1 entry stale).
      */
-    private const INACTIVE_DAYS = 14;
+    public const INACTIVE_DAYS = 14;
 
     /** Map ten field normalize (output) -> cot that trong bang actors, de day orderBy xuong DB. */
     private const COLUMN_MAP = [
