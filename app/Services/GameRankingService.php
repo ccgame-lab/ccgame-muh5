@@ -11,6 +11,14 @@ class GameRankingService
 {
     private const DEFAULT_LIMIT = 50;
 
+    /**
+     * Loai actor offline >= N ngay khoi ranking (deadwood/whale bo game van chiem top).
+     * Dung `updatetime` (datetime that, server flush moi khi online) - phan biet active/inactive sach.
+     * KHONG dung `lastonlinetime` (int epoch 2010-01-01, khong phai 1970 -> de filter sai am tham).
+     * Tune 1 dong; 14 = lenient (giau nham 1 player active con hai hon hien 1 entry stale).
+     */
+    private const INACTIVE_DAYS = 14;
+
     /** Map ten field normalize (output) -> cot that trong bang actors, de day orderBy xuong DB. */
     private const COLUMN_MAP = [
         'name' => 'actorname',
@@ -53,7 +61,10 @@ class GameRankingService
                         ['actorname', 'level', 'job', 'vip_level', 'zhuansheng_lv', 'totalpower'],
                         $config['extra_columns'] ?? [],
                     ))
-                    ->where('level', '>', 1);
+                    ->where('level', '>', 1)
+                    // Loai actor offline >= INACTIVE_DAYS. NOW() chay tren clock DB game ->
+                    // ne lech timezone PHP<->DB. INACTIVE_DAYS la int const (khong phai input) -> inline an toan.
+                    ->whereRaw('updatetime > NOW() - INTERVAL '.self::INACTIVE_DAYS.' DAY');
 
                 // Day sort + limit xuong DB khi sort key map duoc cot that, tranh keo
                 // toan bo bang actors vao PHP. Khong map duoc thi giu hanh vi cu (lay het).
