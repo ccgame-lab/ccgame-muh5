@@ -11,9 +11,9 @@
     $canonical   = url('/');
     // muh5 chỉ có 3 class: MG (Đấu Sĩ), DK (Chiến Binh), ELF (Tiên Nữ)
     $classes = [
-        ['code' => 'MG',  'name' => 'Đấu Sĩ',     'en' => 'Magic Gladiator',  'role' => 'Lai kiếm-phép · Linh hoạt',  'desc' => 'Vừa chém vừa nổ phép, không tốn ô năng lượng riêng. Cơ động, mạnh sớm, càn quét tốt cả khi solo lẫn đi nhóm.'],
-        ['code' => 'DK',  'name' => 'Chiến Binh', 'en' => 'Dark Knight',      'role' => 'Cận chiến · Tank-DPS',       'desc' => 'Cầm đại đao xông thẳng vào trận. Máu dày, sát thương cao, đứng tuyến đầu gánh team trong cả PvP lẫn săn boss.'],
-        ['code' => 'ELF', 'name' => 'Tiên Nữ',    'en' => 'Fairy Elf',        'role' => 'Tầm xa · Hỗ trợ',            'desc' => 'Cung thủ bắn tỉa kiêm buff đồng đội. Tăng sức mạnh cả nhóm và rỉa boss từ khoảng cách an toàn.'],
+        ['code' => 'MG',  'name' => 'Đấu Sĩ',     'en' => 'Magic Gladiator',  'role' => 'Lai kiếm-phép · Linh hoạt',  'desc' => 'Vừa chém vừa nổ phép, không tốn ô năng lượng riêng. Cơ động, mạnh sớm, càn quét tốt cả khi solo lẫn đi nhóm.', 'img' => asset('assets/landing/class-mg.png')],
+        ['code' => 'DK',  'name' => 'Chiến Binh', 'en' => 'Dark Knight',      'role' => 'Cận chiến · Tank-DPS',       'desc' => 'Cầm đại đao xông thẳng vào trận. Máu dày, sát thương cao, đứng tuyến đầu gánh team trong cả PvP lẫn săn boss.', 'img' => asset('assets/landing/class-dk.png')],
+        ['code' => 'ELF', 'name' => 'Tiên Nữ',    'en' => 'Fairy Elf',        'role' => 'Tầm xa · Hỗ trợ',            'desc' => 'Cung thủ bắn tỉa kiêm buff đồng đội. Tăng sức mạnh cả nhóm và rỉa boss từ khoảng cách an toàn.', 'img' => asset('assets/landing/class-elf.png')],
     ];
 @endphp
 <!DOCTYPE html>
@@ -237,11 +237,8 @@
 
                 <div style="flex:1.4 1 380px;min-width:300px;display:flex;flex-direction:column">
                     <div style="position:relative;flex:1;min-height:360px;background:repeating-linear-gradient(45deg,#0b0b10,#0b0b10 11px,#0e0e15 11px,#0e0e15 22px);border:1px solid rgba(201,169,78,.2);border-radius:4px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center">
-                        <div style="position:absolute;inset:0;background:radial-gradient(54% 60% at 50% 38%, rgba(201,169,78,.12), transparent 70%)"></div>
-                        <div style="position:relative;font-family:ui-monospace,SFMono-Regular,monospace;font-size:12px;letter-spacing:.16em;color:#8a8475;line-height:2;text-transform:uppercase">
-                            <div style="color:#c9a94e;font-weight:700;letter-spacing:.22em;margin-bottom:8px">[ ẢNH CLASS ]</div>
-                            <span id="lx-img-label">{{ $classes[0]['code'] }} · {{ $classes[0]['name'] }}</span><br><span style="opacity:.6">sprite + icon skill</span>
-                        </div>
+                        <div style="position:absolute;inset:0;background:radial-gradient(54% 60% at 50% 40%, rgba(201,169,78,.16), transparent 70%)"></div>
+                        <img id="lx-cls-img" src="{{ $classes[0]['img'] }}" alt="{{ $classes[0]['name'] }} - {{ $classes[0]['en'] }}" loading="lazy" style="position:relative;max-height:330px;max-width:80%;width:auto;object-fit:contain;filter:drop-shadow(0 18px 28px rgba(0,0,0,.55)) drop-shadow(0 0 24px rgba(201,169,78,.2))">
                         <div style="position:absolute;left:0;right:0;bottom:0;padding:22px;background:linear-gradient(180deg,transparent,rgba(7,7,10,.92));text-align:left">
                             <div id="lx-cls-name" style="font-family:'Playfair Display',serif;font-weight:800;font-size:clamp(26px,3vw,38px);color:#ece8df;line-height:1">{{ $classes[0]['name'] }}</div>
                             <div id="lx-cls-en" style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#c9a94e;margin-top:6px;font-family:ui-monospace,monospace">{{ $classes[0]['en'] }}</div>
@@ -400,7 +397,8 @@
             b.classList.toggle('is-active', Number(b.getAttribute('data-idx')) === i);
         });
         var set = function(id, v){ var el = document.getElementById(id); if(el) el.textContent = v; };
-        set('lx-img-label', c.code + ' · ' + c.name);
+        var img = document.getElementById('lx-cls-img');
+        if(img){ img.src = c.img; img.alt = c.name + ' - ' + c.en; }
         set('lx-cls-name', c.name);
         set('lx-cls-en', c.en);
         set('lx-cls-role', c.role);
