@@ -6,6 +6,7 @@
     $fbUrl       = $fbUrl       ?? 'https://www.facebook.com/groups/gcenter.vn';                 // Nhóm FB acquisition (admin: owner, công khai 622+)
     $fanpageUrl  = $fanpageUrl  ?? 'https://www.facebook.com/profile.php?id=61591520487111';     // Fanpage CCGame (đổi sang vanity khi set username)
     $zaloUrl     = $zaloUrl     ?? 'https://zalo.me/g/naa2cur0bgwtessdzhon';                      // Nhóm Zalo support/giftcode
+    $tgUrl       = $tgUrl       ?? 'https://t.me/ccgameorg';                                       // Kênh Telegram announcement/giftcode
     $ogImage     = url('/assets/landing/og-image.jpg');
     $canonical   = url('/');
     // muh5 chỉ có 3 class: MG (Đấu Sĩ), DK (Chiến Binh), ELF (Tiên Nữ)
@@ -350,6 +351,11 @@
                     <h3 style="font-size:19px;font-weight:700;color:#ece8df;margin-bottom:10px">Nhóm Zalo</h3>
                     <p style="font-size:15px;line-height:1.6;color:#9a9488;margin-bottom:24px">Nhận GiftCode tân thủ, hỏi đáp nhanh và hỗ trợ trực tiếp từ admin.</p>
                     <a href="{{ $zaloUrl }}" target="_blank" rel="noopener" class="lx-cta lx-cta-out" style="display:inline-block;align-self:flex-start;margin-top:auto;background:transparent;border:1px solid rgba(201,169,78,.55);color:#e6d3a3;font-weight:700;font-size:15px;padding:11px 24px;border-radius:3px;white-space:nowrap">Vào nhóm Zalo</a>
+                </div>
+                <div style="flex:1 1 320px;border:1px solid rgba(201,169,78,.18);background:#0c0c13;border-radius:4px;padding:32px;display:flex;flex-direction:column">
+                    <h3 style="font-size:19px;font-weight:700;color:#ece8df;margin-bottom:10px">Telegram</h3>
+                    <p style="font-size:15px;line-height:1.6;color:#9a9488;margin-bottom:24px">Kênh thông báo sự kiện, GiftCode và cập nhật phiên bản - nhận realtime.</p>
+                    <a href="{{ $tgUrl }}" target="_blank" rel="noopener" class="lx-cta lx-cta-out" style="display:inline-block;align-self:flex-start;margin-top:auto;background:transparent;border:1px solid rgba(201,169,78,.55);color:#e6d3a3;font-weight:700;font-size:15px;padding:11px 24px;border-radius:3px;white-space:nowrap">Vào kênh Telegram</a>
                 </div>
             </div>
         </div>

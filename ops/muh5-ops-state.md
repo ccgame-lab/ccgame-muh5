@@ -2,6 +2,18 @@
 
 > Cập nhật 2026-06-27 (phiên design+distribution). Ảnh chụp để resume sạch.
 
+## KÊNH PHÂN PHỐI (canonical - đã thiết lập + wire landing)
+| Kênh | Vai trò | Link | Trạng thái |
+|---|---|---|---|
+| **Game** | Sản phẩm | https://muh5.ccgame.org | Live (landing dopamine, OG, 3 class) |
+| **FB Page** | Brand/announcement | facebook.com/profile.php?id=61591520487111 ("CCGame - Game Private") | Live, bài ghim, **QC 99k đang chạy** |
+| **FB Group** | Acquisition/cộng đồng | facebook.com/groups/gcenter.vn ("Chia Sẻ Game Lậu Cày Cuốc Miễn Phí", admin owner, 622+) | Live, tái dùng nhóm cũ |
+| **Zalo Group** | Support/giftcode chat | https://zalo.me/g/naa2cur0bgwtessdzhon ("CCGame - MU Archangel H5") | Live, tin chào ghim |
+| **Telegram** | Announcement/giftcode | https://t.me/ccgameorg ("CCGame - ccgame.org", + Lobby group discussion) | Live, post ghim |
+
+Tất cả 4 kênh social ĐÃ wire vào landing section "Cộng đồng" (`fbUrl`/`fanpageUrl`/`zaloUrl`/`tgUrl`). Người vào từ QC → có đủ đường: chơi game + 4 kênh cộng đồng.
+**Còn cosmetic:** username page FB (bỏ profile.php?id); preview link Zalo trong post Telegram hơi xấu (id.zalo.me login) - bỏ qua được.
+
 ## ĐÃ SHIP LIVE prod (muh5.ccgame.org)
 - **Landing dopamine** (`resources/views/landing.blade.php`): thay màn need-auth cho khách organic (case `no_session` ở `PlayController::entry`). Hero art knight thật + headline "Vào là có đồ. Cày là ra ngọc." + 6 layout family (đặc sắc, class-selector tương tác **3 class: MG Đấu Sĩ / DK Chiến Binh / ELF Tiên Nữ** - muh5 CHỈ có 3 class, không phải 6), sự kiện x10+giftcode+mốc nạp, gallery mosaic, cộng đồng) + SEO/OG. Thiết kế qua claude.ai/design -> port blade. Theme dark #07070a + gold #c9a94e, font Be Vietnam Pro + Playfair Display. Validate full (hero/class JS/responsive) + verify live. Commit 35205ad.
 - **OG image landscape** (`public/assets/landing/og-image.jpg`, 1200x630): banner knight + wordmark CCGAME gold (render canvas). FB preview chuẩn. Commit 242644c.
