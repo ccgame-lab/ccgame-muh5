@@ -4,7 +4,7 @@
     $portalUrl   = config('portal.url') ?: 'https://ccgame.org';
     $playUrl     = $playUrl     ?? $portalUrl;                  // CTA "Chơi Ngay" -> cổng CCGame (auth + launch)
     $fbUrl       = $fbUrl       ?? 'https://www.facebook.com/groups/gcenter.vn';                 // Nhóm FB acquisition (admin: owner, công khai 622+)
-    $fanpageUrl  = $fanpageUrl  ?? 'https://www.facebook.com/profile.php?id=61591520487111';     // Fanpage CCGame (đổi sang vanity khi set username)
+    $fanpageUrl  = $fanpageUrl  ?? 'https://www.facebook.com/ccgameprivate';                      // Fanpage CCGame (vanity ccgameprivate)
     $zaloUrl     = $zaloUrl     ?? 'https://zalo.me/g/naa2cur0bgwtessdzhon';                      // Nhóm Zalo support/giftcode
     $tgUrl       = $tgUrl       ?? 'https://t.me/ccgameorg';                                       // Kênh Telegram announcement/giftcode
     $ogImage     = url('/assets/landing/og-image.jpg');

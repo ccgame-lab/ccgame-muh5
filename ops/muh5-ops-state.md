@@ -6,7 +6,7 @@
 | Kênh | Vai trò | Link | Trạng thái |
 |---|---|---|---|
 | **Game** | Sản phẩm | https://muh5.ccgame.org | Live (landing dopamine, OG, 3 class) |
-| **FB Page** | Brand/announcement | facebook.com/profile.php?id=61591520487111 ("CCGame - Game Private") | Live, bài ghim, **QC 99k đang chạy** |
+| **FB Page** | Brand/announcement | **facebook.com/ccgameprivate** ("CCGame - Game Private", vanity đã đặt) | Live, bài ghim, **QC 99k đang chạy** |
 | **FB Group** | Acquisition/cộng đồng | facebook.com/groups/gcenter.vn ("Chia Sẻ Game Lậu Cày Cuốc Miễn Phí", admin owner, 622+) | Live, tái dùng nhóm cũ |
 | **Zalo Group** | Support/giftcode chat | https://zalo.me/g/naa2cur0bgwtessdzhon ("CCGame - MU Archangel H5") | Live, tin chào ghim |
 | **Telegram** | Announcement/giftcode | https://t.me/ccgameorg ("CCGame - ccgame.org", + Lobby group discussion) | Live, post ghim |
