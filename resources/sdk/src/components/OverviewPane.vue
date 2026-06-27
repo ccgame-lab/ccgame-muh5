@@ -1,456 +1,612 @@
 <template>
-  <div class="ccsdk-pane">
-    <!-- Cot trai: danh tinh + vi gon + diem danh -->
-    <div class="ccsdk-col ccsdk-col--left">
-      <!-- Player row -->
-      <div class="ccsdk-player">
-        <div class="ccsdk-player-avatar">{{ avatarText }}</div>
-        <div class="ccsdk-player-info">
-          <div class="ccsdk-player-name">{{ player.name }}</div>
-          <div class="ccsdk-player-level">Lv.{{ player.level }}<span v-if="player.rs > 0"> · RS{{ player.rs }}</span></div>
+  <div class="ov-pane">
+    <!-- ─── LEFT COL: player · wallet · checkin ─── -->
+    <div class="ov-col ov-col--left">
+      <!-- Player card -->
+      <div class="ov-card ov-player">
+        <div class="ov-avatar">{{ avatarText }}</div>
+        <div class="ov-player-info">
+          <div class="ov-player-name">{{ player.name }}</div>
+          <div class="ov-player-badges">
+            <span class="ov-badge ov-badge--lv">Lv {{ player.level }}<span v-if="player.rs > 0"> · RS{{ player.rs }}</span></span>
+            <span v-if="player.vip > 0" class="ov-badge ov-badge--vip">VIP {{ player.vip }}</span>
+          </div>
         </div>
-        <div v-if="player.vip > 0" class="ccsdk-vip-badge">VIP {{ player.vip }}</div>
-        <button
-          class="ccsdk-refresh-btn"
-          :class="{ 'ccsdk-refresh-btn--spin': refreshing }"
-          :disabled="refreshing"
-          @click="$emit('refresh')"
-          title="Làm mới"
-        >↻</button>
+        <button class="ov-icon-btn" :class="{ 'ov-icon-btn--spin': refreshing }" :disabled="refreshing" @click="$emit('refresh')" title="Làm mới">
+          <span class="mat-icon">refresh</span>
+        </button>
       </div>
 
-      <!-- Vi gon: dot indicators -->
-      <div class="ccsdk-wallet-section">
-        <div class="ccsdk-section-header">
-          <span class="ccsdk-section-label">VÍ CỦA TÔI</span>
-          <button class="ccsdk-detail-btn" @click="togglePanel('wallet')">Chi tiết ›</button>
+      <!-- Ví CỦA TÔI -->
+      <div class="ov-card">
+        <div class="ov-card-hdr">
+          <span class="ov-lbl">VÍ CỦA TÔI</span>
+          <button class="ov-text-btn" @click="togglePanel('wallet')">Chi tiết<span class="mat-icon" style="font-size:16px">chevron_right</span></button>
         </div>
-        <div class="ccsdk-wallet-rows">
-          <div class="ccsdk-wallet-row">
-            <span class="ccsdk-dot ccsdk-dot--tom"></span>
-            <span class="ccsdk-wallet-row-label">Tôm</span>
-            <span class="ccsdk-wallet-row-val ccsdk-tom-hl">{{ fmt(wallet.tom) }}</span>
+        <div class="ov-wallet-rows">
+          <div class="ov-wr">
+            <span class="ov-wdot" style="background:#ffd54f"></span>
+            <span class="ov-wlabel">Tôm</span>
+            <span class="ov-wval">{{ fmt(wallet.tom) }}</span>
           </div>
-          <div class="ccsdk-wallet-row">
-            <span class="ccsdk-dot ccsdk-dot--point"></span>
-            <span class="ccsdk-wallet-row-label">Point</span>
-            <span class="ccsdk-wallet-row-val">{{ fmt(wallet.points) }}</span>
+          <div class="ov-wr">
+            <span class="ov-wdot" style="background:#5b8af7"></span>
+            <span class="ov-wlabel">Point</span>
+            <span class="ov-wval">{{ fmt(wallet.points) }}</span>
           </div>
         </div>
-        <transition name="ccsdk-panel-slide">
-          <div v-if="activePanel === 'wallet'" class="ccsdk-wallet-detail">
-            <div class="ccsdk-wi-row" v-if="wallet.diamond_blocks"><span>Block KC</span><strong>{{ fmt(wallet.diamond_blocks) }}</strong></div>
-            <div class="ccsdk-wi-row"><span>Trùng Sinh</span><strong>{{ player.rs }}</strong></div>
+        <transition name="ov-slide">
+          <div v-if="activePanel === 'wallet'" class="ov-wallet-extra">
+            <div class="ov-wr">
+              <span class="ov-wdot" style="background:#2ec4b6"></span>
+              <span class="ov-wlabel">Block KC</span>
+              <span class="ov-wval">{{ fmt(wallet.diamond_blocks) }}</span>
+            </div>
+            <div class="ov-wr">
+              <span class="ov-wdot" style="background:#a78bfa"></span>
+              <span class="ov-wlabel">Trùng Sinh</span>
+              <span class="ov-wval">{{ player.rs }}</span>
+            </div>
           </div>
         </transition>
       </div>
 
-      <!-- Diem danh giu o cot trai -->
-      <CheckinCard
-        :week="checkinWeek"
-        :streak="checkin.streak"
-        :checked-today="checkin.checked_today"
-        @checkin="onCheckin"
-      />
+      <!-- Điểm danh -->
+      <div class="ov-card">
+        <div class="ov-card-hdr">
+          <span class="ov-lbl">ĐIỂM DANH 7 NGÀY</span>
+          <span class="ov-streak"><span class="mat-icon" style="font-size:14px">local_fire_department</span>{{ checkin.streak }} ngày</span>
+        </div>
+        <CheckinCard
+          :week="checkinWeek"
+          :streak="checkin.streak"
+          :checked-today="checkin.checked_today"
+          @checkin="onCheckin"
+        />
+      </div>
     </div>
 
-    <!-- Cot phai: tai san hero + feed + missions + utilities -->
-    <div class="ccsdk-col ccsdk-col--right">
-      <!-- TÀI SẢN hero numbers -->
-      <div class="ccsdk-assets">
-        <div class="ccsdk-section-label">TÀI SẢN</div>
-        <div class="ccsdk-asset-item ccsdk-asset-item--tom">
-          <div class="ccsdk-asset-icon">🍤</div>
-          <div class="ccsdk-asset-body">
-            <div class="ccsdk-asset-name">Tôm</div>
-            <div class="ccsdk-asset-value ccsdk-tom-value">{{ fmt(wallet.tom) }}<span class="ccsdk-tom-shimmer"></span></div>
-            <div class="ccsdk-asset-sub">số dư khả dụng</div>
-          </div>
+    <!-- ─── MID COL: assets · live · missions · widgets · panels ─── -->
+    <div class="ov-col ov-col--mid">
+      <!-- TÀI SẢN 2×2 -->
+      <div class="ov-card">
+        <div class="ov-card-hdr">
+          <span class="ov-lbl">TÀI SẢN</span>
         </div>
-        <div class="ccsdk-asset-item ccsdk-asset-item--kc">
-          <div class="ccsdk-asset-icon">⛏</div>
-          <div class="ccsdk-asset-body">
-            <div class="ccsdk-asset-name">Block KC</div>
-            <div class="ccsdk-asset-value ccsdk-kc-value">{{ fmt(wallet.diamond_blocks) }}</div>
-            <div class="ccsdk-asset-sub">khối đã đào</div>
+        <div class="ov-stats-grid">
+          <div v-for="s in assetStats" :key="s.key" class="ov-stat-card">
+            <div class="ov-stat-top">
+              <span class="ov-stat-icon" :style="{ background: s.tint }">
+                <span class="mat-icon" :style="{ color: s.dot, fontSize: '15px' }">{{ s.icon }}</span>
+              </span>
+              <span class="ov-stat-label">{{ s.label }}</span>
+            </div>
+            <div class="ov-stat-val">{{ s.value }}</div>
+            <div class="ov-stat-unit" :style="{ color: s.dot }">{{ s.unit }}</div>
           </div>
         </div>
       </div>
 
-      <!-- Live feed ticker -->
+      <!-- Live feed -->
       <LiveFeedTicker />
 
-      <!-- Daily missions -->
+      <!-- Missions -->
       <MissionsCard />
 
-      <!-- Compact utility grid -->
+      <!-- Tiện ích -->
       <CompactUtilityGrid :active-panel="activePanel" @toggle-panel="togglePanel" />
 
       <!-- Expandable panels -->
-      <transition name="ccsdk-panel-slide">
+      <transition name="ov-slide">
         <GiftcodeCard v-if="activePanel === 'giftcode'" />
       </transition>
-      <transition name="ccsdk-panel-slide">
-        <DonatePanel v-if="activePanel === 'shop'" :items="pshopItems" :items-loading="pshopLoading" :items-error="pshopError" :buy="buyWithTom" :compact="true" :supplies-url="suppliesUrl" :support-tiers="supportTiers" />
+      <transition name="ov-slide">
+        <DonatePanel
+          v-if="activePanel === 'shop'"
+          :items="pshopItems"
+          :items-loading="pshopLoading"
+          :items-error="pshopError"
+          :buy="buyWithTom"
+          :compact="true"
+          :supplies-url="suppliesUrl"
+          :support-tiers="supportTiers"
+        />
       </transition>
-      <transition name="ccsdk-panel-slide">
+      <transition name="ov-slide">
         <SpinCard v-if="activePanel === 'spin'" />
       </transition>
-      <transition name="ccsdk-panel-slide">
+      <transition name="ov-slide">
         <MiningCard v-if="activePanel === 'mining'" />
       </transition>
+    </div>
+
+    <!-- ─── RIGHT COL: thông báo mới (desktop only) ─── -->
+    <div class="ov-col ov-col--right">
+      <div class="ov-card">
+        <div class="ov-card-hdr">
+          <span class="ov-lbl">THÔNG BÁO MỚI</span>
+          <button class="ov-text-btn" @click="$emit('switch-tab', 'notifications')">Xem tất cả</button>
+        </div>
+        <div class="ov-news-list">
+          <div v-if="!newsItems.length" class="ov-news-empty">
+            <span class="mat-icon">notifications_off</span>
+            <span>Chưa có thông báo</span>
+          </div>
+          <div v-for="n in newsItems" :key="n.id" class="ov-news-item">
+            <span class="ov-news-icon" :style="{ background: n.tint }">
+              <span class="mat-icon" :style="{ color: n.color, fontSize: '18px' }">{{ n.icon }}</span>
+            </span>
+            <div class="ov-news-body">
+              <div class="ov-news-meta">
+                <span class="ov-news-type" :style="{ color: n.color, background: n.tint }">{{ n.typeLabel }}</span>
+                <span class="ov-news-date">{{ n.dateStr }}</span>
+              </div>
+              <div class="ov-news-title">{{ n.title }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import LiveFeedTicker from './LiveFeedTicker.vue'
 import MissionsCard from './MissionsCard.vue'
 import CompactUtilityGrid from './CompactUtilityGrid.vue'
 import GiftcodeCard from './GiftcodeCard.vue'
 import CheckinCard from './CheckinCard.vue'
 import DonatePanel from './DonatePane.vue'
-
-// EAGER import (KHÔNG defineAsyncComponent): async component bọc trong <transition>+v-if gây
-// "Cannot read properties of null (reading 'nextSibling')" -> crash cả SDK khi mở tile spin/mining.
-// GiftcodeCard/DonatePanel (eager) dùng cùng transition này chạy ổn -> eager là pattern đúng.
+// eager import: async component trong <transition>+v-if gây crash "Cannot read nextSibling"
 import SpinCard from './SpinCard.vue'
 import MiningCard from './MiningCard.vue'
 import { useSdkState } from '../composables/useSdkState.js'
 
 const props = defineProps({
-  player: { type: Object, default: () => ({ id: 0, name: '', level: 0, vip: 0, rs: 0 }) },
-  wallet: { type: Object, default: () => ({ coin: 0, points: 0, diamond_blocks: 0, tom: null }) },
-  features: { type: Array, default: () => [] },
-  checkin: { type: Object, default: () => ({ checked_today: false, streak: 0, week: [] }) },
-  refreshing: { type: Boolean, default: false },
+  player:    { type: Object,  default: () => ({ id: 0, name: '', level: 0, vip: 0, rs: 0 }) },
+  wallet:    { type: Object,  default: () => ({ coin: 0, points: 0, diamond_blocks: 0, tom: null }) },
+  features:  { type: Array,   default: () => [] },
+  checkin:   { type: Object,  default: () => ({ checked_today: false, streak: 0, week: [] }) },
+  refreshing:{ type: Boolean, default: false },
 })
 
-const emit = defineEmits(['checkin', 'refresh'])
+const emit = defineEmits(['checkin', 'refresh', 'switch-tab'])
 
 const { state, loadPshopItems, buyWithTom } = useSdkState()
 
-const pshopItems = computed(() => state.pshopItems)
+const pshopItems   = computed(() => state.pshopItems)
 const pshopLoading = computed(() => state.pshopLoading)
-const pshopError = computed(() => state.pshopError)
-const suppliesUrl = computed(() => state.suppliesUrl)
+const pshopError   = computed(() => state.pshopError)
+const suppliesUrl  = computed(() => state.suppliesUrl)
 const supportTiers = computed(() => state.supportTiers)
 
 const activePanel = ref(null)
 
 function togglePanel(key) {
-  if (activePanel.value === key) {
-    activePanel.value = null
-    return
-  }
-  activePanel.value = key
-  if (key === 'shop' && !state.pshopLoaded) {
-    loadPshopItems()
-  }
+  activePanel.value = activePanel.value === key ? null : key
+  if (key === 'shop' && activePanel.value === key && !state.pshopLoaded) loadPshopItems()
 }
 
-const avatarText = computed(() => {
-  const name = props.player.name || '?'
-  return name.slice(0, 2).toUpperCase()
-})
+const avatarText = computed(() => (props.player.name || '?').slice(0, 2).toUpperCase())
 
 const checkinWeek = computed(() => {
-  if (!props.checkin.week || !props.checkin.week.length) return []
+  if (!props.checkin.week?.length) return []
   const todayIdx = (new Date().getDay() + 6) % 7
-  return props.checkin.week.map((d, i) => ({
-    ...d,
-    today: i === todayIdx && !d.done,
-  }))
+  return props.checkin.week.map((d, i) => ({ ...d, today: i === todayIdx && !d.done }))
 })
 
-function onCheckin() {
-  emit('checkin')
+function onCheckin() { emit('checkin') }
+
+function fmt(n) { return (n || 0).toLocaleString() }
+
+const assetStats = computed(() => [
+  {
+    key: 'tom',
+    icon: 'monetization_on',
+    label: 'Tôm',
+    value: fmt(props.wallet.tom),
+    unit: 'số dư khả dụng',
+    dot: '#ffd54f',
+    tint: 'rgba(255,213,79,.12)',
+  },
+  {
+    key: 'kc',
+    icon: 'construction',
+    label: 'Block KC',
+    value: fmt(props.wallet.diamond_blocks),
+    unit: 'khối đã đào',
+    dot: '#2ec4b6',
+    tint: 'rgba(46,196,182,.12)',
+  },
+  {
+    key: 'points',
+    icon: 'stars',
+    label: 'Point',
+    value: fmt(props.wallet.points),
+    unit: 'điểm tích lũy',
+    dot: '#60a5fa',
+    tint: 'rgba(96,165,250,.12)',
+  },
+  {
+    key: 'rs',
+    icon: 'autorenew',
+    label: 'Trùng Sinh',
+    value: props.player.rs,
+    unit: 'lần reset',
+    dot: '#a78bfa',
+    tint: 'rgba(167,139,250,.12)',
+  },
+])
+
+const TYPE_MAP = {
+  event:       { icon: 'celebration',   color: '#c9a94e', tint: 'rgba(201,169,78,.12)',  label: 'SỰ KIỆN' },
+  maintenance: { icon: 'build',         color: '#f87171', tint: 'rgba(248,113,113,.12)', label: 'BẢO TRÌ' },
+  update:      { icon: 'update',        color: '#60a5fa', tint: 'rgba(96,165,250,.12)',  label: 'CẬP NHẬT' },
+  giftcode:    { icon: 'redeem',        color: '#34d399', tint: 'rgba(52,211,153,.12)',  label: 'GIFTCODE' },
 }
 
-function fmt(n) {
-  return (n || 0).toLocaleString()
-}
+const newsItems = computed(() =>
+  state.changelog.slice(0, 3).map(e => {
+    const t = TYPE_MAP[e.type] || { icon: 'notifications', color: '#8c877b', tint: 'rgba(140,135,123,.12)', label: 'TIN TỨC' }
+    const raw = e.date || e.created_at || ''
+    const dateStr = raw ? new Date(raw).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }) : ''
+    return { ...e, ...t, typeLabel: t.label, dateStr }
+  })
+)
 </script>
 
 <style scoped>
-.ccsdk-pane {
-  padding: 14px;
+/* ── Layout ── */
+.ov-pane {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
-.ccsdk-col { display: flex; flex-direction: column; min-width: 0; }
 
-/* PC: 2 cot dashboard */
 @media (min-width: 768px) {
-  .ccsdk-pane {
+  .ov-pane {
     display: grid;
-    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
-    gap: 18px;
-    align-items: start;
-    padding: 16px 18px;
+    grid-template-columns: 240px 1fr;
+    grid-template-areas: "left mid";
+    gap: 14px;
+    padding: 18px;
   }
+  .ov-col--left  { grid-area: left; }
+  .ov-col--mid   { grid-area: mid; }
+  .ov-col--right { display: none; }
 }
 
-/* ── Player row ── */
-.ccsdk-player {
+@media (min-width: 1280px) {
+  .ov-pane {
+    grid-template-columns: 256px 1fr 280px;
+    grid-template-areas: "left mid right";
+    gap: 16px;
+  }
+  .ov-col--right { display: flex; }
+}
+
+.ov-col {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.ccsdk-player-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #c9a94e, #a3812d);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 700;
-  color: #0d0d14;
-  flex-shrink: 0;
-}
-
-.ccsdk-player-info {
-  flex: 1;
+  flex-direction: column;
+  gap: 14px;
   min-width: 0;
 }
 
-.ccsdk-player-name {
+/* ── Card ── */
+.ov-card {
+  background: #10101a;
+  border: 1px solid rgba(201,169,78,.14);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.ov-card-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.ov-lbl {
+  font-family: 'Outfit', sans-serif;
   font-size: 13px;
   font-weight: 700;
-  color: #e8e8f0;
+  color: #c9a94e;
+  letter-spacing: .03em;
+}
+
+.ov-text-btn {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #8c877b;
+  padding: 0;
+  transition: color .15s;
+}
+.ov-text-btn:hover { color: #c9a94e; }
+
+/* ── Player card ── */
+.ov-player {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.ov-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: linear-gradient(150deg, #2a2a38, #15151f);
+  border: 1px solid rgba(201,169,78,.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #c9a94e;
+  flex-shrink: 0;
+}
+
+.ov-player-info { flex: 1; min-width: 0; }
+
+.ov-player-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #f4f1e9;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.ccsdk-player-level {
-  font-size: 10px;
-  color: #8888aa;
-  margin-top: 1px;
-}
-
-.ccsdk-vip-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: rgba(240, 192, 96, 0.15);
-  border: 1px solid #f0c060;
-  color: #f0c060;
-  font-size: 10px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.ccsdk-refresh-btn {
-  background: none;
-  border: none;
-  color: #5a5a7a;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 2px 4px;
-  line-height: 1;
-  transition: color 0.15s;
-  flex-shrink: 0;
-}
-.ccsdk-refresh-btn:hover { color: #c9a94e; }
-.ccsdk-refresh-btn:disabled { cursor: not-allowed; opacity: 0.5; }
-.ccsdk-refresh-btn--spin { animation: ccsdk-spin 0.8s linear infinite; }
-@keyframes ccsdk-spin { to { transform: rotate(360deg); } }
-
-/* ── Section header shared ── */
-.ccsdk-section-header {
+.ov-player-badges {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-.ccsdk-section-label {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #5a5a7a;
-}
-
-/* ── Wallet compact section ── */
-.ccsdk-wallet-section {
-  background: #12121d;
-  border: 1px solid #1e1e32;
-  border-radius: 10px;
-  padding: 10px 12px;
-  margin-bottom: 12px;
-}
-
-.ccsdk-detail-btn {
-  background: none;
-  border: none;
-  color: #5a5a7a;
-  font-size: 10px;
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.15s;
-}
-.ccsdk-detail-btn:hover { color: #c9a94e; }
-
-.ccsdk-wallet-rows {
-  display: flex;
-  flex-direction: column;
   gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
 }
 
-.ccsdk-wallet-row {
+.ov-badge {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.ov-badge--lv  { color: #dfe4ee; background: rgba(91,141,239,.16); border: 1px solid rgba(91,141,239,.35); }
+.ov-badge--vip { color: #07070a; background: #c9a94e; }
+
+.ov-icon-btn {
+  background: none;
+  border: none;
+  color: #8c877b;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  font-size: 18px;
 }
+.ov-icon-btn:hover { color: #c9a94e; background: rgba(201,169,78,.08); }
+.ov-icon-btn:disabled { opacity: .45; cursor: not-allowed; }
+.ov-icon-btn--spin { animation: ov-spin .8s linear infinite; }
+@keyframes ov-spin { to { transform: rotate(360deg); } }
 
-.ccsdk-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.ccsdk-dot--tom   { background: #ffd54f; box-shadow: 0 0 5px rgba(255,213,79,0.6); }
-.ccsdk-dot--point { background: #5b8af7; box-shadow: 0 0 5px rgba(91,138,247,0.5); }
-
-.ccsdk-wallet-row-label {
-  flex: 1;
-  color: #8888aa;
-}
-
-.ccsdk-wallet-row-val {
-  color: #e2e2f0;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.ccsdk-tom-hl { color: #ffd54f; }
-
-.ccsdk-wallet-detail {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #1e1e32;
+/* ── Wallet ── */
+.ov-wallet-rows {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 11px;
 }
 
-.ccsdk-wi-row {
+.ov-wr {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-size: 11px;
-  color: #8888aa;
+  justify-content: space-between;
 }
-.ccsdk-wi-row strong {
-  color: #e2e2f0;
+
+.ov-wdot {
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.ov-wlabel {
+  flex: 1;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #b8b2a4;
+}
+
+.ov-wval {
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #f4f1e9;
   font-variant-numeric: tabular-nums;
 }
 
-/* ── TÀI SẢN hero ── */
-.ccsdk-assets {
-  background: #12121d;
-  border: 1px solid #1e1e32;
-  border-radius: 10px;
-  padding: 10px 14px 12px;
-  margin-bottom: 10px;
-}
-
-.ccsdk-asset-item {
+.ov-wallet-extra {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,.06);
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
 }
-.ccsdk-asset-item:last-child { border-bottom: none; padding-bottom: 0; }
-.ccsdk-asset-item:first-of-type { padding-top: 8px; }
 
-.ccsdk-asset-icon {
-  font-size: 20px;
-  line-height: 1;
+/* ── Streak ── */
+.ov-streak {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #e8d49a;
+  background: rgba(201,169,78,.14);
+  border: 1px solid rgba(201,169,78,.3);
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+
+/* override CheckinCard card-wrapper khi nhúng trong ov-card */
+:deep(.ccsdk-checkin) {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+/* ── TÀI SẢN grid ── */
+.ov-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+}
+
+.ov-stat-card {
+  background: #0c0c14;
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.ov-stat-top {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 9px;
+}
+
+.ov-stat-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+}
+
+.ov-stat-label {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #b8b2a4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ov-stat-val {
+  font-family: 'Outfit', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #f4f1e9;
+  letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.ov-stat-unit {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
   margin-top: 2px;
 }
 
-.ccsdk-asset-body {
+/* ── News (right col) ── */
+.ov-news-list {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  min-width: 0;
+  gap: 12px;
 }
 
-.ccsdk-asset-name {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #8888aa;
-}
-
-.ccsdk-asset-value {
-  font-size: 22px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-  position: relative;
-  overflow: hidden;
-}
-
-.ccsdk-tom-value {
-  color: #ffd54f;
-  text-shadow: 0 0 12px rgba(255,190,40,0.7), 0 0 24px rgba(255,160,20,0.35);
-  animation: ccsdk-tom-pulse 2.8s ease-in-out infinite;
-}
-
-.ccsdk-kc-value {
-  color: #2ec4b6;
-  text-shadow: 0 0 10px rgba(46,196,182,0.4);
-}
-
-.ccsdk-asset-sub {
-  font-size: 10px;
+.ov-news-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 0;
+  font-size: 12px;
   color: #5a5a7a;
-  margin-top: 1px;
+}
+.ov-news-empty .mat-icon { font-size: 28px; opacity: .5; }
+
+.ov-news-item {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
 }
 
-/* shimmer on TÔM value */
-.ccsdk-tom-shimmer {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    105deg,
-    transparent 35%,
-    rgba(255,220,100,0.22) 50%,
-    transparent 65%
-  );
-  background-size: 200% 100%;
-  animation: ccsdk-tom-shimmer 2.4s linear infinite;
-  pointer-events: none;
+.ov-news-icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-@keyframes ccsdk-tom-pulse {
-  0%, 100% { text-shadow: 0 0 12px rgba(255,190,40,0.7), 0 0 24px rgba(255,160,20,0.35); }
-  50%       { text-shadow: 0 0 18px rgba(255,200,40,1.0), 0 0 36px rgba(255,160,20,0.55); }
+.ov-news-body { min-width: 0; }
+
+.ov-news-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
 }
-@keyframes ccsdk-tom-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+
+.ov-news-type {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.ov-news-date {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #6f6b61;
+}
+
+.ov-news-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #e7e3d9;
+  line-height: 1.35;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 /* ── Panel slide transition ── */
-.ccsdk-panel-slide-enter-active { animation: ccsdk-slide-in 0.2s ease; }
-.ccsdk-panel-slide-leave-active { animation: ccsdk-slide-out 0.15s ease; }
-@keyframes ccsdk-slide-in {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes ccsdk-slide-out {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
+.ov-slide-enter-active { animation: ov-slide-in .2s ease; }
+.ov-slide-leave-active { animation: ov-slide-out .15s ease; }
+@keyframes ov-slide-in  { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+@keyframes ov-slide-out { from { opacity:1; } to { opacity:0; } }
 </style>

@@ -1,6 +1,11 @@
 /* ccgame-sdk.css — Vue 3 Vite build */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
 #ccgame-sdk-root,
-#ccgame-sdk-root * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
+#ccgame-sdk-root * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+
+.mat-icon { font-family: 'Material Symbols Rounded'; font-weight: 400; font-style: normal; font-size: inherit; line-height: 1; letter-spacing: normal; text-transform: none; display: inline-block; white-space: nowrap; word-wrap: normal; direction: ltr; -webkit-font-smoothing: antialiased; }
 
 .ccgame-sdk-fab {
   position: fixed; bottom: 20px; right: 16px; z-index: 9000;
@@ -31,7 +36,7 @@
   .ccgame-sdk-panel { width: 700px; max-height: 86vh; bottom: 88px; right: 24px; }
 }
 @media (min-width: 1280px) {
-  .ccgame-sdk-panel { width: 760px; }
+  .ccgame-sdk-panel { width: 960px; }
 }
 
 .ccgame-sdk-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 10px; border-bottom: 1px solid #1e1e2e; flex-shrink: 0; }

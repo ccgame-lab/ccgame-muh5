@@ -22,7 +22,7 @@
     </div>
 
     <div class="ccgame-sdk-body" v-show="state.loaded">
-      <OverviewPane v-show="activeTab==='overview'" :player="state.player" :wallet="state.wallet" :features="state.features" :checkin="state.checkin" :refreshing="state.refreshing" @checkin="doCheckin" @refresh="refreshWallet" />
+      <OverviewPane v-show="activeTab==='overview'" :player="state.player" :wallet="state.wallet" :features="state.features" :checkin="state.checkin" :refreshing="state.refreshing" @checkin="doCheckin" @refresh="refreshWallet" @switch-tab="switchTab" />
       <TransactionsPane v-show="activeTab==='transactions'" />
       <RankingPane v-show="activeTab==='ranking'" :types="state.rankingTypes" :items="state.rankingItems" :active="state.rankingActive" :loading="state.rankingLoading" :error="state.rankingError" @update:active="setRankingActive" />
       <NotificationsPane v-show="activeTab==='notifications'" />
