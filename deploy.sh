@@ -66,7 +66,13 @@ rsync -aHAX --exclude='.git' \
 cd /www/wwwroot/ccgame/ccgame-muh5
 
 echo "Installing composer dependencies..."
-composer install --no-dev --optimize-autoloader
+# Prod PHP (8.1) chua dat yeu cau composer.lock (can 8.4) -> composer install LUON fail.
+# Cho non-fatal de KHONG nuot cac buoc sau (optimize:clear/chown/smoke). Giu vendor hien tai
+# (da chay tot tren FPM) thay vi --ignore-platform-req (nguy hiem: cai package 8.4 len 8.1).
+# Khi nang prod len 8.4 thi composer se thanh cong va nhanh chong cap nhat vendor.
+if ! composer install --no-dev --optimize-autoloader; then
+    echo "WARN: composer install failed (PHP platform mismatch) - giu vendor hien tai, tiep tuc deploy."
+fi
 
 echo "Clearing caches..."
 php artisan optimize:clear
