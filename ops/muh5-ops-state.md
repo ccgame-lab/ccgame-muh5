@@ -6,7 +6,7 @@
 | Kênh | Vai trò | Link | Trạng thái |
 |---|---|---|---|
 | **Game** | Sản phẩm | https://muh5.ccgame.org | Live (landing dopamine, OG, 3 class) |
-| **FB Page** | Brand/announcement | **facebook.com/ccgameprivate** ("CCGame - Game Private", vanity đã đặt) | Live, bài ghim, **QC 99k đang chạy** |
+| **FB Page** | Brand/announcement | **facebook.com/ccgameprivate** ("CCGame - Game Private", vanity đã đặt) | Live, bài ghim, **QC traffic 88k đang xét duyệt** (xem QC bên dưới) |
 | **FB Group** | Acquisition/cộng đồng | facebook.com/groups/gcenter.vn ("Chia Sẻ Game Lậu Cày Cuốc Miễn Phí", admin owner, 622+) | Live, tái dùng nhóm cũ |
 | **Zalo Group** | Support/giftcode chat | https://zalo.me/g/naa2cur0bgwtessdzhon ("CCGame - MU Archangel H5") | Live, tin chào ghim |
 | **Telegram** | Announcement/giftcode | https://t.me/ccgameorg ("CCGame - ccgame.org", + Lobby group discussion) | Live, post ghim |
@@ -32,7 +32,9 @@ Tất cả 4 kênh social ĐÃ wire vào landing section "Cộng đồng" (`fbUr
 ## FANPAGE CCGame - ĐÃ LIVE
 - **Page "CCGame - Game Private"** đã tạo + brand xong: `facebook.com/profile.php?id=61591520487111`. Cover banner CCGAME + profile CC emblem (render canvas) + category "Trò chơi điện tử" (KHÔNG Gaming Creator) + CTA "Chơi game" -> muh5.ccgame.org.
 - **Bài ra mắt #1 đã đăng + ghim** (đúng 3 class, sạch p2w).
-- **QC ĐÃ DUYỆT + ĐANG CHẠY** (2026-06-27): boost bài ghim ra mắt, đối tượng Game (VN 18-44 MMORPG), **1 ngày** (hết 28/6), **90k + 9k VAT = 99k**. Page status "không có vấn đề nào". Mai xem kết quả ở Trung tâm quảng cáo (impression/click vào muh5.ccgame.org). Đây là TEST 1 ngày từ quỹ 117k - đo CPC/CTR rồi quyết scale hay đổi creative.
+- **QC v1 (engagement) ĐÃ DỪNG** (2026-06-27): boost "Tăng tương tác" 90k/ngày×1 - mục tiêu SAI (FB tối ưu like/comment, KHÔNG kéo click về web). Chạy chỉ tiêu **353₫**, reach **2-3**, 0 tương tác → owner duyệt dừng. Tạm dừng ở Ads Manager ("Chiến dịch: Tắt"). Bài học: boost-post mặc định = engagement, phải đổi goal sang traffic.
+- **QC v2 (traffic) ĐÃ ĐĂNG - ĐANG XÉT DUYỆT** (2026-06-27): tạo lại boost trên CÙNG bài ra mắt, mục tiêu **"Tăng khách truy cập trang web"** (GET_WEBSITE_VISITORS - tối ưu click vào URL). Đích **https://muh5.ccgame.org/** (check xanh). Đối tượng = saved audience **"Game"** (VN 18-44, interest Game/MMORPG/game online/nhập vai - đúng dân chơi). Ngân sách **40k/ngày × 2 ngày = 80k + VAT 8k = 88k** (quỹ còn 116.784₫). Pixel chưa kết nối muh5 (không sao với traffic). Status "Đang xét duyệt" - ≤24h Meta duyệt xong sẽ chạy. Mai xem CPC/lượt-click-web + có khách vào game không.
+- **Draft rác cần dọn**: Ads Manager còn 1 ad "Quảng cáo Lưu lượng truy cập mới" (OFF) gắn bài đã xóa + text "nuôi tép" lạc đề - junk, xóa lúc rảnh.
 - **Nhóm FB acquisition = TÁI DÙNG nhóm cũ** `facebook.com/groups/gcenter.vn` ("Chia Sẻ Game Lậu Cày Cuốc Miễn Phí", admin owner, **công khai 622+**, KHÔNG dính Facebook Gaming nên không bị ẩn). Reach yếu (bài cũ ~11) nhưng hơn start-0 + tên generic SEO tốt. Đã wire link vào landing (`fbUrl`) + bài #9/#10/#12 (`facebook.com/groups/gcenter.vn`). `fanpageUrl` = page CCGame `profile.php?id=61591520487111`.
 - **Wiring group-link ĐÃ DEPLOY LIVE** (commit 53a7e7d, verify HTML có `groups/gcenter.vn` + `profile.php?id=61591520487111`). Landing giờ có CTA nhóm/fanpage hoạt động thật.
 - **Nhóm Zalo support ĐÃ TẠO + init** (2026-06-27): "CCGame - MU Archangel H5" (avatar CC, 3 thành viên seed). Tin chào + OG card đã đăng + ghim. **Link tham gia: https://zalo.me/g/naa2cur0bgwtessdzhon** (công khai, không cần duyệt). Kênh secondary: giftcode/support. CHƯA wire vào landing/content.
