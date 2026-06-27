@@ -93,31 +93,8 @@
       <!-- Missions -->
       <MissionsCard />
 
-      <!-- Tiện ích -->
-      <CompactUtilityGrid :active-panel="activePanel" @toggle-panel="togglePanel" />
-
-      <!-- Expandable panels -->
-      <transition name="ov-slide">
-        <GiftcodeCard v-if="activePanel === 'giftcode'" />
-      </transition>
-      <transition name="ov-slide">
-        <DonatePanel
-          v-if="activePanel === 'shop'"
-          :items="pshopItems"
-          :items-loading="pshopLoading"
-          :items-error="pshopError"
-          :buy="buyWithTom"
-          :compact="true"
-          :supplies-url="suppliesUrl"
-          :support-tiers="supportTiers"
-        />
-      </transition>
-      <transition name="ov-slide">
-        <SpinCard v-if="activePanel === 'spin'" />
-      </transition>
-      <transition name="ov-slide">
-        <MiningCard v-if="activePanel === 'mining'" />
-      </transition>
+      <!-- Tiện ích: lối tắt sang các tab tính năng -->
+      <CompactUtilityGrid @navigate="$emit('switch-tab', $event)" />
     </div>
 
     <!-- ─── RIGHT COL: thông báo mới (desktop only) ─── -->
@@ -155,12 +132,7 @@ import { ref, computed } from 'vue'
 import LiveFeedTicker from './LiveFeedTicker.vue'
 import MissionsCard from './MissionsCard.vue'
 import CompactUtilityGrid from './CompactUtilityGrid.vue'
-import GiftcodeCard from './GiftcodeCard.vue'
 import CheckinCard from './CheckinCard.vue'
-import DonatePanel from './DonatePane.vue'
-// eager import: async component trong <transition>+v-if gây crash "Cannot read nextSibling"
-import SpinCard from './SpinCard.vue'
-import MiningCard from './MiningCard.vue'
 import { useSdkState } from '../composables/useSdkState.js'
 
 const props = defineProps({
@@ -173,19 +145,13 @@ const props = defineProps({
 
 const emit = defineEmits(['checkin', 'refresh', 'switch-tab'])
 
-const { state, loadPshopItems, buyWithTom } = useSdkState()
+const { state } = useSdkState()
 
-const pshopItems   = computed(() => state.pshopItems)
-const pshopLoading = computed(() => state.pshopLoading)
-const pshopError   = computed(() => state.pshopError)
-const suppliesUrl  = computed(() => state.suppliesUrl)
-const supportTiers = computed(() => state.supportTiers)
-
+// activePanel chỉ còn dùng cho toggle "Chi tiết" của thẻ Ví.
 const activePanel = ref(null)
 
 function togglePanel(key) {
   activePanel.value = activePanel.value === key ? null : key
-  if (key === 'shop' && activePanel.value === key && !state.pshopLoaded) loadPshopItems()
 }
 
 const avatarText = computed(() => (props.player.name || '?').slice(0, 2).toUpperCase())

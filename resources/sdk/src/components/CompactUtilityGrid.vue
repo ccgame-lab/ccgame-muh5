@@ -5,14 +5,11 @@
         v-for="tile in tiles"
         :key="tile.key"
         class="cug-tile"
-        :class="[
-          `cug-tile--${tile.state}`,
-          { 'cug-tile--active': activePanel === tile.key }
-        ]"
+        :class="`cug-tile--${tile.state}`"
         :disabled="tile.state === 'maintenance'"
         @click="onTile(tile)"
       >
-        <span class="cug-tile-icon">{{ tile.icon }}</span>
+        <span class="cug-tile-icon mat-icon">{{ tile.icon }}</span>
         <span class="cug-tile-label">{{ tile.label }}</span>
         <span v-if="tile.stat" class="cug-tile-stat">{{ tile.stat }}</span>
         <span v-if="tile.state === 'maintenance'" class="cug-tile-badge">BT</span>
@@ -26,11 +23,7 @@
 import { computed } from 'vue'
 import { useSdkState } from '../composables/useSdkState.js'
 
-const props = defineProps({
-  activePanel: { type: String, default: null },
-})
-
-const emit = defineEmits(['toggle-panel'])
+const emit = defineEmits(['navigate'])
 
 const { state } = useSdkState()
 
@@ -38,55 +31,54 @@ function fmt(n) {
   return (n || 0).toLocaleString()
 }
 
+// Tile = lối tắt sang tab tương ứng (đồng bộ với tab bar Material icon, không còn panel inline).
 const tiles = computed(() => {
   const spinRemaining = state.spinStatus?.spins_remaining ?? 0
-  const effPct = state.spinStatus ? null : null // unused
-  const miningEff = 0 // could read from quote if stored in state
 
   return [
     {
-      key: 'wallet',
-      icon: '💰',
-      label: 'Ví',
-      stat: `${fmt(state.wallet.points)} PT`,
-      state: 'active',
-      action: 'panel',
-    },
-    {
-      key: 'giftcode',
-      icon: '🎁',
-      label: 'Giftcode',
+      key: 'topup',
+      icon: 'payments',
+      label: 'Nạp Tôm',
       stat: null,
       state: 'active',
-      action: 'panel',
+      action: 'navigate',
     },
     {
       key: 'shop',
-      icon: '🛒',
+      icon: 'storefront',
       label: 'Cửa hàng',
-      stat: state.wallet.tom != null ? `${fmt(state.wallet.tom)} 🦐` : null,
+      stat: state.wallet.tom != null ? `${fmt(state.wallet.tom)} Tôm` : null,
       state: 'active',
-      action: 'panel',
+      action: 'navigate',
     },
     {
       key: 'spin',
-      icon: '🎰',
+      icon: 'cyclone',
       label: 'Vòng quay',
       stat: spinRemaining > 0 ? `${spinRemaining} lượt` : null,
       state: 'active',
-      action: 'panel',
+      action: 'navigate',
     },
     {
       key: 'mining',
-      icon: '⛏️',
+      icon: 'construction',
       label: 'Đào KC',
       stat: null,
       state: 'active',
-      action: 'panel',
+      action: 'navigate',
+    },
+    {
+      key: 'giftcode',
+      icon: 'redeem',
+      label: 'Giftcode',
+      stat: null,
+      state: 'active',
+      action: 'navigate',
     },
     {
       key: 'support',
-      icon: '💬',
+      icon: 'chat',
       label: 'Hỗ trợ',
       stat: null,
       state: 'active',
@@ -101,7 +93,7 @@ function onTile(tile) {
     window.open('https://fb.com/muonhan5.online', '_blank', 'noopener')
     return
   }
-  emit('toggle-panel', tile.key)
+  emit('navigate', tile.key)
 }
 </script>
 
@@ -134,13 +126,8 @@ function onTile(tile) {
 
 .cug-tile:hover:not(:disabled) {
   background: #181828;
-  border-color: rgba(120,100,255,0.3);
-}
-
-.cug-tile--active {
-  background: #1a1a30;
-  border-color: rgba(120,100,255,0.55);
-  box-shadow: 0 0 0 1px rgba(120,100,255,0.2);
+  border-color: rgba(201,169,78,0.35);
+  transform: translateY(-1px);
 }
 
 .cug-tile:disabled {
@@ -149,8 +136,9 @@ function onTile(tile) {
 }
 
 .cug-tile-icon {
-  font-size: 18px;
+  font-size: 21px;
   line-height: 1;
+  color: #c9a94e;
 }
 
 .cug-tile-label {
