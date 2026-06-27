@@ -109,7 +109,7 @@
                     <span style="color:#ece8df">Cày là ra ngọc.</span>
                 </h1>
                 <p style="font-size:clamp(16px,1.5vw,19px);line-height:1.62;color:#b6b0a2;max-width:540px;margin-bottom:30px">
-                    Free wing, ngọc và full set tân thủ ngay khi vào game. Không pay-to-win, cày là có. Đăng nhập qua cổng CCGame, chơi thẳng trên trình duyệt, không cần tải.
+                    Free wing, ngọc và full set tân thủ ngay khi vào game. Đồ mạnh từ boss, cày là có. Đăng nhập qua cổng CCGame, chơi thẳng trên trình duyệt, không cần tải.
                 </p>
                 <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:34px">
                     <span style="display:flex;align-items:center;gap:8px;border:1px solid rgba(201,169,78,.3);color:#d8cfb6;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px"><span style="color:#c9a94e;font-size:10px">◆</span>Free đồ + ngọc + wing</span>
@@ -177,14 +177,14 @@
                     </div>
                     <h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:clamp(30px,3.6vw,48px);line-height:1.08;color:#ece8df;max-width:620px">Vì sao dân cày ở lại</h2>
                 </div>
-                <p style="font-size:15px;line-height:1.65;color:#9a9488;max-width:380px">Một sân chơi công bằng cho cả người free lẫn người nạp. Mọi sức mạnh đều đi ra từ thời gian cày, không khoá sau ví tiền.</p>
+                <p style="font-size:15px;line-height:1.65;color:#9a9488;max-width:380px">Đồ mạnh nhất đi ra từ boss và sự kiện, không khoá sau ví tiền. Tân thủ cày là có đồ, bắt nhịp nhanh ngay từ phút đầu.</p>
             </div>
 
             <div style="border-top:1px solid rgba(201,169,78,.3);padding-top:30px;margin-top:46px;display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
                 <div style="flex:0 0 auto;font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(44px,5.5vw,72px);color:#c9a94e;line-height:.85;min-width:88px">00</div>
                 <div style="flex:1 1 340px">
-                    <h3 style="font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(22px,2.4vw,30px);color:#ece8df;margin-bottom:12px">Không pay-to-win</h3>
-                    <p style="font-size:16px;line-height:1.62;color:#a8a296;max-width:680px">Cày là có, train là ra đồ. Mọi món mạnh nhất đều rơi từ boss và sự kiện, không bị khoá sau webshop. Người chơi free và người nạp đứng chung một sân, hơn nhau ở công cày.</p>
+                    <h3 style="font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(22px,2.4vw,30px);color:#ece8df;margin-bottom:12px">Đồ xịn từ boss, không từ shop</h3>
+                    <p style="font-size:16px;line-height:1.62;color:#a8a296;max-width:680px">Cày là có, train là ra đồ. Mọi món mạnh nhất đều rơi từ boss và sự kiện, không bị khoá sau webshop. Càng chăm săn càng giàu, công cày được trả công xứng đáng.</p>
                 </div>
             </div>
 
