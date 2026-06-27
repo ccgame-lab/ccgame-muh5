@@ -18,11 +18,26 @@
         class="ccgame-sdk-tab"
         :class="{ 'ccgame-sdk-tab--active': activeTab === tab.key }"
         @click="switchTab(tab.key)"
-      >{{ tab.label }}</button>
+      ><span v-if="tab.icon" class="mat-icon ccgame-sdk-tab-icon">{{ tab.icon }}</span>{{ tab.label }}</button>
     </div>
 
     <div class="ccgame-sdk-body" v-show="state.loaded">
       <OverviewPane v-show="activeTab==='overview'" :player="state.player" :wallet="state.wallet" :features="state.features" :checkin="state.checkin" :refreshing="state.refreshing" @checkin="doCheckin" @refresh="refreshWallet" @switch-tab="switchTab" />
+      <TopupPane v-show="activeTab==='topup'" />
+      <div v-if="activeTab==='shop'" class="ccgame-sdk-feature-pane">
+        <DonatePane
+          :items="pshopItems"
+          :items-loading="pshopLoading"
+          :items-error="pshopError"
+          :buy="buyWithTom"
+          :supplies-url="state.suppliesUrl"
+          :support-tiers="state.supportTiers"
+          :show-supplies="false"
+        />
+      </div>
+      <div v-if="activeTab==='spin'" class="ccgame-sdk-feature-pane"><SpinCard /></div>
+      <div v-if="activeTab==='mining'" class="ccgame-sdk-feature-pane"><MiningCard /></div>
+      <div v-if="activeTab==='giftcode'" class="ccgame-sdk-feature-pane"><GiftcodeCard /></div>
       <TransactionsPane v-show="activeTab==='transactions'" />
       <RankingPane v-show="activeTab==='ranking'" :types="state.rankingTypes" :items="state.rankingItems" :active="state.rankingActive" :loading="state.rankingLoading" :error="state.rankingError" @update:active="setRankingActive" />
       <NotificationsPane v-show="activeTab==='notifications'" />
@@ -61,15 +76,24 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useSdkState } from './composables/useSdkState.js'
 import OverviewPane from './components/OverviewPane.vue'
 import RankingPane from './components/RankingPane.vue'
 import NotificationsPane from './components/NotificationsPane.vue'
 import TransactionsPane from './components/TransactionsPane.vue'
+import TopupPane from './components/TopupPane.vue'
+import DonatePane from './components/DonatePane.vue'
+import SpinCard from './components/SpinCard.vue'
+import MiningCard from './components/MiningCard.vue'
+import GiftcodeCard from './components/GiftcodeCard.vue'
 import RankingPopup from './components/RankingPopup.vue'
 
-const { state, loadBootstrap, loadRanking, loadDonateRanking, setRankingActive, doCheckin, refreshWallet, loadTransactions } = useSdkState()
+const { state, loadBootstrap, loadRanking, loadDonateRanking, setRankingActive, doCheckin, refreshWallet, loadTransactions, loadPshopItems, buyWithTom } = useSdkState()
+
+const pshopItems   = computed(() => state.pshopItems)
+const pshopLoading = computed(() => state.pshopLoading)
+const pshopError   = computed(() => state.pshopError)
 const open = ref(false)
 const activeTab = ref('overview')
 const booted = ref(false)
@@ -91,6 +115,9 @@ function switchTab(key) {
   }
   if (key === 'transactions' && !state.transactionsLoaded) {
     loadTransactions()
+  }
+  if (key === 'shop' && !state.pshopLoaded) {
+    loadPshopItems()
   }
 }
 

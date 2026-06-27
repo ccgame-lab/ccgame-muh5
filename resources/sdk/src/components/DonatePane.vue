@@ -2,7 +2,7 @@
   <div class="ccgame-sdk-pane">
 
     <!-- Section: Tiếp tế GreenJade (lối có thêm Tôm, SDK chỉ điều hướng, không xử lý ví) -->
-    <div class="ccgame-sdk-priv-section">
+    <div v-if="showSupplies" class="ccgame-sdk-priv-section">
       <div class="ccgame-sdk-priv-section-title">Tiếp tế GreenJade</div>
       <div class="ccgame-sdk-priv-note">
         Góp chi phí duy trì máy chủ và công cụ vận hành. Tiếp tế quy đổi thành Tôm (1.000đ = 1 Tôm) trong ví GreenJade, dùng để đổi đặc quyền bên dưới.
@@ -140,6 +140,8 @@ const props = defineProps({
   // Mức tiếp tế lấy từ bootstrap (config/economy.php support_tiers). Nguồn sự thật phía muh5,
   // SDK chỉ hiển thị + điều hướng sang ví GreenJade, không xử lý tiền.
   supportTiers: { type: Array, default: () => [] },
+  // Ẩn section "Tiếp tế GreenJade" khi dùng làm tab Cửa Hàng (Nạp Tôm là tab riêng).
+  showSupplies: { type: Boolean, default: true },
 })
 
 // Link tiếp tế của từng gói: gắn ?amount để trang GreenJade điền sẵn số tiền gói đã chọn.

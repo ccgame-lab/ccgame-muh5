@@ -5,6 +5,7 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [vue()],
   root: resolve(__dirname),
+  base: '/assets/sdk/',
   build: {
     outDir: resolve(__dirname, '../../public/assets/sdk'),
     emptyOutDir: true,
