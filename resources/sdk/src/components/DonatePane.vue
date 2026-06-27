@@ -48,24 +48,30 @@
         <span class="ccgame-sdk-priv-empty-text">Chưa có vật phẩm đổi Tôm</span>
       </div>
 
-      <div v-else v-for="it in items" :key="it.id" class="ccgame-sdk-priv-feature-card">
-        <div class="ccgame-sdk-priv-feature-card-body">
-          <div class="ccgame-sdk-tom-head">
-            <span class="ccgame-sdk-priv-feature-card-title">{{ it.name }}</span>
-            <span v-if="it.badge" class="ccgame-sdk-tom-badge">{{ it.badge }}</span>
+      <div v-else class="ccsdk-shop-grid">
+        <div
+          v-for="it in items"
+          :key="it.id"
+          class="ccsdk-shop-card"
+          :class="{ 'ccsdk-shop-card--hot': it.badge, 'ccsdk-shop-card--sold': it.sold_out }"
+        >
+          <span v-if="it.badge" class="ccsdk-shop-badge">{{ it.badge }}</span>
+          <div class="ccsdk-shop-name">{{ it.name }}</div>
+          <div v-if="it.description" class="ccsdk-shop-desc">{{ it.description }}</div>
+          <div v-if="it.tags && it.tags.length" class="ccsdk-shop-tags">
+            <span v-for="(t, i) in it.tags" :key="i" class="ccsdk-shop-tag">{{ t }}</span>
           </div>
-          <div v-if="it.description" class="ccgame-sdk-priv-feature-card-desc">{{ it.description }}</div>
-          <div v-if="it.tags && it.tags.length" class="ccgame-sdk-tom-tags">
-            <span v-for="(t, i) in it.tags" :key="i" class="ccgame-sdk-tom-tag">{{ t }}</span>
+          <div class="ccsdk-shop-foot">
+            <div class="ccsdk-shop-price">
+              <span class="ccsdk-shop-price-num">{{ it.price_tom }}</span>
+              <span class="ccsdk-shop-price-unit">🦐 Tôm</span>
+            </div>
+            <button
+              class="ccsdk-shop-buy"
+              :disabled="it.sold_out || buyingId === it.id"
+              @click="onBuy(it)"
+            >{{ buttonLabel(it) }}</button>
           </div>
-        </div>
-        <div class="ccgame-sdk-tom-action">
-          <div class="ccgame-sdk-tom-price">{{ it.price_tom }} Tôm</div>
-          <button
-            class="ccgame-sdk-priv-feature-card-btn"
-            :disabled="it.sold_out || buyingId === it.id"
-            @click="onBuy(it)"
-          >{{ buttonLabel(it) }}</button>
         </div>
       </div>
 
@@ -228,6 +234,125 @@ async function onBuy(it) {
   background: rgba(244, 104, 94, 0.1);
   border: 1px solid rgba(244, 104, 94, 0.3);
 }
+
+/* ── Cửa hàng Tôm: card grid dopamine ── */
+.ccsdk-shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.ccsdk-shop-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 13px 12px 11px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #16141f 0%, #100f18 100%);
+  border: 1px solid rgba(201, 169, 78, 0.22);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+  overflow: hidden;
+}
+.ccsdk-shop-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(201, 169, 78, 0.7), transparent);
+  opacity: 0.5;
+}
+.ccsdk-shop-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(201, 169, 78, 0.5);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), 0 0 18px rgba(201, 169, 78, 0.14);
+}
+.ccsdk-shop-card--hot {
+  border-color: rgba(240, 168, 32, 0.55);
+  animation: ccsdk-shop-glow 2.6s ease-in-out infinite;
+}
+@keyframes ccsdk-shop-glow {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(240, 168, 32, 0.22), 0 0 14px rgba(240, 168, 32, 0.10); }
+  50%      { box-shadow: 0 0 0 1px rgba(240, 168, 32, 0.55), 0 0 22px rgba(240, 168, 32, 0.28); }
+}
+.ccsdk-shop-card--sold { opacity: 0.55; }
+.ccsdk-shop-badge {
+  position: absolute;
+  top: 9px; right: 9px;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #2a1c04;
+  background: linear-gradient(135deg, #ffd54f, #f0a820);
+  border-radius: 5px;
+  padding: 2px 6px;
+  box-shadow: 0 2px 6px rgba(240, 168, 32, 0.4);
+}
+.ccsdk-shop-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #f3e9d0;
+  line-height: 1.2;
+  padding-right: 42px;
+}
+.ccsdk-shop-desc {
+  font-size: 10px;
+  color: #8f8fa8;
+  line-height: 1.45;
+  flex: 1;
+}
+.ccsdk-shop-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.ccsdk-shop-tag {
+  font-size: 8.5px;
+  font-weight: 600;
+  color: #c9a94e;
+  background: rgba(201, 169, 78, 0.1);
+  border: 1px solid rgba(201, 169, 78, 0.2);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+.ccsdk-shop-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(201, 169, 78, 0.12);
+}
+.ccsdk-shop-price { display: flex; flex-direction: column; line-height: 1.05; }
+.ccsdk-shop-price-num {
+  font-size: 19px;
+  font-weight: 900;
+  color: #ffd54f;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 12px rgba(255, 190, 40, 0.5);
+}
+.ccsdk-shop-price-unit {
+  font-size: 8px;
+  color: #c9892a;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-top: 1px;
+}
+.ccsdk-shop-buy {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffd95e 0%, #e0a820 55%, #c98a1e 100%);
+  color: #2a1c04;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(240, 168, 32, 0.3);
+  transition: filter 0.15s, transform 0.12s;
+}
+.ccsdk-shop-buy:hover:not(:disabled) { filter: brightness(1.08); transform: scale(1.04); }
+.ccsdk-shop-buy:disabled { background: #2a2a3a; color: #6a6a80; box-shadow: none; cursor: not-allowed; }
 
 /* ── Tiếp tế GreenJade (3 gói ủng hộ) ── */
 .ccgame-sdk-support-tiers {
