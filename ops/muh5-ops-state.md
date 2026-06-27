@@ -11,7 +11,9 @@
 ## FANPAGE CCGame - ĐÃ LIVE
 - **Page "CCGame - Game Private"** đã tạo + brand xong: `facebook.com/profile.php?id=61591520487111`. Cover banner CCGAME + profile CC emblem (render canvas) + category "Trò chơi điện tử" (KHÔNG Gaming Creator) + CTA "Chơi game" -> muh5.ccgame.org.
 - **Bài ra mắt #1 đã đăng + ghim** (đúng 3 class, sạch p2w).
-- **Còn:** đặt username page; bro tạo nhóm FB + Zalo -> wire link + đặt lịch 12 bài còn lại qua Business Suite (bài #9/#10/#12 chờ [LINK NHÓM]).
+- **QC ĐÃ DUYỆT + ĐANG CHẠY** (2026-06-27): boost bài ghim ra mắt, đối tượng Game (VN 18-44 MMORPG), **1 ngày** (hết 28/6), **90k + 9k VAT = 99k**. Page status "không có vấn đề nào". Mai xem kết quả ở Trung tâm quảng cáo (impression/click vào muh5.ccgame.org). Đây là TEST 1 ngày từ quỹ 117k - đo CPC/CTR rồi quyết scale hay đổi creative.
+- **Nhóm FB acquisition = TÁI DÙNG nhóm cũ** `facebook.com/groups/gcenter.vn` ("Chia Sẻ Game Lậu Cày Cuốc Miễn Phí", admin owner, **công khai 622+**, KHÔNG dính Facebook Gaming nên không bị ẩn). Reach yếu (bài cũ ~11) nhưng hơn start-0 + tên generic SEO tốt. Đã wire link vào landing (`fbUrl`) + bài #9/#10/#12 (`facebook.com/groups/gcenter.vn`). `fanpageUrl` = page CCGame `profile.php?id=61591520487111`.
+- **Còn:** đặt username page (đổi landing `fanpageUrl` sang vanity sau); tạo nhóm Zalo support; đặt lịch 12 bài còn lại qua Business Suite. **Wiring group-link CHƯA deploy** (commit local, chờ push+deploy).
 
 ## 2 LỖI ĐÃ SỬA (owner bắt) - đã redeploy landing live
 - **Class:** muh5 CHỈ 3 class = **MG Đấu Sĩ / DK Chiến Binh / ELF Tiên Nữ** (KHÔNG DW/DL/SUM). Sửa landing class-selector + headline "Ba class" + 13 bài content (bỏ 3 bài class không tồn tại).

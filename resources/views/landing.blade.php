@@ -3,8 +3,8 @@
     // Thiết kế qua claude.ai/design -> port. Theme dark #07070a + gold #c9a94e.
     $portalUrl   = config('portal.url') ?: 'https://ccgame.org';
     $playUrl     = $playUrl     ?? $portalUrl;                  // CTA "Chơi Ngay" -> cổng CCGame (auth + launch)
-    $fbUrl       = $fbUrl       ?? 'https://www.facebook.com';  // TODO owner: thay bằng link NHÓM Facebook thật
-    $fanpageUrl  = $fanpageUrl  ?? 'https://www.facebook.com';  // TODO owner: thay bằng link FANPAGE thật
+    $fbUrl       = $fbUrl       ?? 'https://www.facebook.com/groups/gcenter.vn';                 // Nhóm FB acquisition (admin: owner, công khai 622+)
+    $fanpageUrl  = $fanpageUrl  ?? 'https://www.facebook.com/profile.php?id=61591520487111';     // Fanpage CCGame (đổi sang vanity khi set username)
     $ogImage     = url('/assets/landing/og-image.jpg');
     $canonical   = url('/');
     // muh5 chỉ có 3 class: MG (Đấu Sĩ), DK (Chiến Binh), ELF (Tiên Nữ)
