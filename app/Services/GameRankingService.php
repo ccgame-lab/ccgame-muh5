@@ -19,6 +19,12 @@ class GameRankingService
      */
     public const INACTIVE_DAYS = 14;
 
+    /**
+     * Actor GM/admin (acc test chu game) - loai khoi BXH. Recharge/power cua acc nay khong
+     * phan anh player that nen khong cho len ranking. Them ten vao day neu co them acc gm.
+     */
+    public const EXCLUDED_ACTORS = ['gm'];
+
     /** Map ten field normalize (output) -> cot that trong bang actors, de day orderBy xuong DB. */
     private const COLUMN_MAP = [
         'name' => 'actorname',
@@ -64,7 +70,8 @@ class GameRankingService
                     ->where('level', '>', 1)
                     // Loai actor offline >= INACTIVE_DAYS. NOW() chay tren clock DB game ->
                     // ne lech timezone PHP<->DB. INACTIVE_DAYS la int const (khong phai input) -> inline an toan.
-                    ->whereRaw('updatetime > NOW() - INTERVAL '.self::INACTIVE_DAYS.' DAY');
+                    ->whereRaw('updatetime > NOW() - INTERVAL '.self::INACTIVE_DAYS.' DAY')
+                    ->whereNotIn('actorname', self::EXCLUDED_ACTORS);
 
                 // Day sort + limit xuong DB khi sort key map duoc cot that, tranh keo
                 // toan bo bang actors vao PHP. Khong map duoc thi giu hanh vi cu (lay het).
