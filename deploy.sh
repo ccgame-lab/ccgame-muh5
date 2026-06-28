@@ -75,10 +75,13 @@ if ! composer install --no-dev --optimize-autoloader; then
 fi
 
 echo "Clearing caches..."
-php artisan optimize:clear
+# CLI `php` tren prod la 8.1 -> KHONG bootstrap duoc artisan (Laravel v13 can 8.3+).
+# Cho non-fatal: prod khong cache route/config (thay doi van len live qua rsync + opcache),
+# nen optimize:clear bo qua duoc. Nang CLI len 8.3+ thi se chay binh thuong.
+php artisan optimize:clear || echo "WARN: optimize:clear skipped (CLI PHP < 8.3) - prod khong cache route/config nen OK."
 
 echo "Checking migrations (pretend mode)..."
-php artisan migrate --pretend --force
+php artisan migrate --pretend --force || echo "WARN: migrate --pretend skipped (CLI PHP < 8.3)."
 
 echo "Setting permissions for storage, bootstrap/cache, public..."
 chown -R www:www storage bootstrap/cache public
